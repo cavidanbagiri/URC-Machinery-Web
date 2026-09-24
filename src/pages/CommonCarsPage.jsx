@@ -13,6 +13,8 @@ import MachineFormModal from '../components/machines/MachineFormModal';
 import MachineDetailModal from '../components/machines/MachineDetailModal';
 // import MachineStatusModal from '../components/machines/MachineStatusModal';
 import MachineStatusModal, { MOCK_STATUSES } from '../components/machines/MachineStatusModal';
+import ExportButton from '../components/machines/ExportButton';
+
 
 
 
@@ -121,12 +123,14 @@ export default function CommonCarsPage() {
       <Toaster position="top-right" />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Bütün Maşınlar</h1>
-          <p className="mt-1 text-sm text-gray-500">Cəmi: {total} maşın</p>
-        </div>
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Bütün Maşınlar</h1>
+        <p className="mt-1 text-sm text-gray-500">Cəmi: {total} maşın</p>
+      </div>
 
+      <div className="flex items-center gap-2">
+        <ExportButton />
         <button
           onClick={handleCreate}
           className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -134,6 +138,7 @@ export default function CommonCarsPage() {
           + Yeni maşın
         </button>
       </div>
+    </div>
 
       {/* Filterlər */}
       <MachineFilters />
