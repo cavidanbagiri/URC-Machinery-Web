@@ -11,6 +11,9 @@ import MachineTable from '../components/machines/MachineTable';
 import MachinePagination from '../components/machines/MachinePagination';
 import MachineFormModal from '../components/machines/MachineFormModal';
 import MachineDetailModal from '../components/machines/MachineDetailModal';
+// import MachineStatusModal from '../components/machines/MachineStatusModal';
+import MachineStatusModal, { MOCK_STATUSES } from '../components/machines/MachineStatusModal';
+
 
 
 const LOOKUPS_NEEDED = [
@@ -36,6 +39,12 @@ export default function CommonCarsPage() {
   // Form modal
   const [formOpen, setFormOpen] = useState(false);
   const [editingMachine, setEditingMachine] = useState(null);
+
+  // Status modal
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [statusMachine, setStatusMachine] = useState(null);
+
+  
 
   const hasActiveFilters = Object.values(filters).some(
     (v) => v !== '' && v !== null && v !== undefined
@@ -92,7 +101,19 @@ export default function CommonCarsPage() {
   };
 
   const handleChangeStatus = (machine) => {
-    toast.success(`Change Status: ${machine.identification_no}`);
+    setStatusMachine(machine);
+    setStatusOpen(true);
+  };
+
+  const handleStatusSubmit = (statusId) => {
+    // Mock — yalnız toast, backend hazır olanda API çağırışı əlavə olunacaq
+    const status = MOCK_STATUSES.find((s) => s.id === statusId);
+    toast.success(`Status "${status.name}" olaraq dəyişdirildi (mock)`);
+    setStatusOpen(false);
+    setStatusMachine(null);
+
+    // Gələcəkdə:
+    // await dispatch(updateMachineStatus({ id: statusMachine.id, status_id: statusId })).unwrap();
   };
 
   return (
@@ -147,6 +168,17 @@ export default function CommonCarsPage() {
           setDetailMachine(null);
         }}
         machine={detailMachine}
+      />
+      {/* Status Modal — YENİ */}
+      <MachineStatusModal
+        open={statusOpen}
+        onClose={() => {
+          setStatusOpen(false);
+          setStatusMachine(null);
+        }}
+        machine={statusMachine}
+        currentStatusId={1}   // mock default (backend hazır olanda statusMachine.status_id)
+        onSubmit={handleStatusSubmit}
       />
     </div>
   );
