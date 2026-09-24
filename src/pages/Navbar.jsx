@@ -3,13 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout, reset } from '../stores/user_slice';
 
 import { RxDashboard } from "react-icons/rx";
-import { FiTruck } from "react-icons/fi";
 import { BsTruck } from "react-icons/bs";
-
-
-import { Layers, LayoutDashboard, HardDrive, Database, DraftingCompass } from 'lucide-react';
-
-
+import { IoSettingsOutline } from "react-icons/io5";
 
 
 import { IoIosLogOut } from "react-icons/io";
@@ -83,12 +78,31 @@ const Navbar = () => {
 
                 <li className='flex w-full'>
                   <NavLink
+                    to="/settings"
+                    className={({ isActive }) =>
+                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
+                    }
+                  >
+                    <IoSettingsOutline className='text-2xl' />
+
+                    {/* Компонент Тултипа */}
+                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
+                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
+                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
+                     whitespace-nowrap border border-gray-700">
+                      Settings
+                    </span>
+                  </NavLink>
+                </li>
+
+                <li className='flex w-full'>
+                  <NavLink
                     to="/common_cars"
                     className={({ isActive }) =>
                       `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
                     }
                   >
-                    <BsTruck   className='text-2xl' />
+                    <BsTruck className='text-2xl' />
 
                     {/* Компонент Тултипа */}
                     <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none

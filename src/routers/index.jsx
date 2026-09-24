@@ -7,6 +7,7 @@ import PublicRoute from '../components/auth/PublicRoute';
 import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
 import CommonCarsPage from '../pages/CommonCarsPage'
+import Settings from '../pages/Settings'
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings',
+        element: (
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         ),
       },
