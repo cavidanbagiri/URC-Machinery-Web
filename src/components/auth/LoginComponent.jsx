@@ -203,10 +203,10 @@ const LoginComponent = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
           <h2 className="text-3xl font-bold text-white text-center">
-            Welcome Back
+            Hos geldiniz
           </h2>
           <p className="text-blue-100 text-center mt-2 text-sm">
-            Sign in to continue to your account
+            Devam etmek icin giris yapiniz
           </p>
         </div>
         
@@ -253,7 +253,7 @@ const LoginComponent = () => {
               </button>
             </div>
             
-            <div className="flex items-center justify-between mb-4">
+            {/* <div className="flex items-center justify-between mb-4">
               <label className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -270,7 +270,7 @@ const LoginComponent = () => {
               >
                 Forgot password?
               </Link>
-            </div>
+            </div> */}
             
             <button
               type="submit"
@@ -290,7 +290,7 @@ const LoginComponent = () => {
             </button>
           </form>
           
-          <p className="text-center text-gray-600">
+          {/* <p className="text-center text-gray-600">
             Don't have an account?{' '}
             <Link 
               to="/auth?mode=register" 
@@ -298,7 +298,7 @@ const LoginComponent = () => {
             >
               Create an account
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
       
