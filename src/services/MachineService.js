@@ -39,6 +39,7 @@ class MachineService {
     const res = await $api.delete(`/machines/delete_machine/${id}`);
     return res.data;
   }
+  
 }
 
 export default new MachineService();

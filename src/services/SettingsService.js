@@ -54,6 +54,15 @@ export const LOOKUP_CONFIG = {
     updatePath: (id) => `/update_company/${id}`,
     deletePath: (id) => `/delete_company/${id}`,
   },
+  // YENİ
+  car_status: {
+    label: 'Car Status',
+    endpoint: '/machines',
+    createPath: '/create_car_status',
+    fetchPath: '/fetch_car_statuses',
+    updatePath: (id) => `/update_car_status/${id}`,
+    deletePath: (id) => `/delete_car_status/${id}`,
+  },
 };
 
 

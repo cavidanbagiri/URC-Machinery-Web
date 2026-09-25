@@ -17,6 +17,8 @@ const initialFilters = {
   company_id: '',
   created_by_id: '',
   production_year: '',
+  status_id: '',
+
 };
 
 const initialState = {
@@ -86,6 +88,47 @@ export const deleteMachine = createAsyncThunk(
     }
   }
 );
+
+// src/store/slices/machine_slice.js
+
+export const updateMachineStatus = createAsyncThunk(
+  'machine/updateMachineStatus',
+  async ({ id, status_id }, { rejectWithValue }) => {
+    try {
+      const current = await MachineService.fetchMachineById(id);
+      // console.log('DEBUG — current machine:', current);
+
+      const payload = {
+        identification_no: current.identification_no,
+        vin_no: current.vin_no,
+        technical_character: current.technical_character,
+        production_year: current.production_year,
+        weight: current.weight,
+        dimension: current.dimension,
+        engine_power: current.engine_power,
+        engine_mark_model: current.engine_mark_model,
+        engine_identity: current.engine_identity,
+        territory_id: current.territory_id,
+        type_id: current.type_id,
+        subtype_id: current.subtype_id,
+        car_mark_id: current.car_mark_id,
+        car_model_id: current.car_model_id,
+        company_id: current.company_id,
+        status_id: status_id,
+      };
+      // console.log('DEBUG — payload:', payload);
+
+      const data = await MachineService.updateMachine(id, payload);
+      // console.log('DEBUG — response:', data);
+      return data;
+    } catch (err) {
+      // console.error('DEBUG — error:', err);
+      // console.error('DEBUG — err.response:', err.response);
+      return rejectWithValue(err.response?.data?.detail || 'Xəta');
+    }
+  }
+);
+
 
 // =========================================================
 // SLICE
@@ -183,6 +226,16 @@ const machineSlice = createSlice({
       .addCase(deleteMachine.rejected, (state, action) => {
         state.error = action.payload;
       });
+      // ---------- UPDATE STATUS ----------
+    builder
+      .addCase(updateMachineStatus.fulfilled, (state, action) => {
+        const idx = state.items.findIndex((m) => m.id === action.payload.id);
+        if (idx !== -1) state.items[idx] = action.payload;
+      })
+      .addCase(updateMachineStatus.rejected, (state, action) => {
+        state.error = action.payload;
+      });
+      
   },
 });
 

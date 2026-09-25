@@ -3,19 +3,17 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import StatusBadge from './StatusBadge';
 
-// Mock statuslar (backend hazır olana qədər)
-const MOCK_STATUSES = [
-  { id: 1, name: 'Active', color: 'green' },
-  { id: 2, name: 'Tamirde', color: 'yellow' },
-  { id: 3, name: 'Bakimda', color: 'blue' },
-  { id: 4, name: 'Hurda', color: 'red' },
-];
 
-export default function MachineDetailModal({ open, onClose, machine }) {
+
+
+export default function MachineDetailModal({ open, onClose, machine, onSubmit, loading = false }) {
+
   const lookups = useSelector((s) => s.lookup.data);
 
   if (!machine) return null;
+
 
   // Lookup ID → ad
   const lookupName = (key, id) => {
@@ -50,9 +48,12 @@ export default function MachineDetailModal({ open, onClose, machine }) {
     }
   };
 
-  // Mock status — hazırda həmişə "Active" (backend hazır olanda dəyişərik)
-  const mockStatus = MOCK_STATUSES[0];
+  // Status-u tap
+  const machineStatus = lookups.car_status?.find(
+    (s) => s.id === machine.status_id
+  );
 
+  
   return (
     <Transition show={open} as={Fragment}>
       <Dialog onClose={onClose} className="relative z-50">
@@ -86,7 +87,7 @@ export default function MachineDetailModal({ open, onClose, machine }) {
                     <Dialog.Title className="text-lg font-semibold text-gray-900">
                       {machine.identification_no || `Maşın #${machine.id}`}
                     </Dialog.Title>
-                    <StatusBadge status={mockStatus} />
+                    {machineStatus && <StatusBadge status={machineStatus} />}
                   </div>
                   {machine.vin_no && (
                     <p className="mt-0.5 text-xs text-gray-500">
@@ -139,6 +140,7 @@ export default function MachineDetailModal({ open, onClose, machine }) {
                   {/* LOOKUPS */}
                   <Section title="Təsnifat">
                     <Grid>
+                      <InfoItem label="Status" value={machineStatus?.name || '—'} />
                       <InfoItem
                         label="Territory"
                         value={lookupName('territory', machine.territory_id)}
@@ -200,6 +202,7 @@ export default function MachineDetailModal({ open, onClose, machine }) {
   );
 }
 
+
 // =========================================================
 // KÖMƏKÇI KOMPONENTLƏR
 // =========================================================
@@ -235,22 +238,5 @@ function InfoItem({ label, value, mono, fullWidth }) {
         {display}
       </dd>
     </div>
-  );
-}
-
-function StatusBadge({ status }) {
-  const colors = {
-    green: 'bg-green-100 text-green-700 ring-green-200',
-    yellow: 'bg-yellow-100 text-yellow-700 ring-yellow-200',
-    blue: 'bg-blue-100 text-blue-700 ring-blue-200',
-    red: 'bg-red-100 text-red-700 ring-red-200',
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${colors[status.color]}`}
-    >
-      {status.name}
-    </span>
   );
 }

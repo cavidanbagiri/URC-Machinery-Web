@@ -70,6 +70,16 @@ export default function MachineFilters() {
           {/* Body */}
           <Disclosure.Panel className="border-t border-gray-200 px-6 py-5">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+
+              <FilterSelect
+                label="Status"
+                value={filters.status_id}
+                onChange={(v) => handleChange('status_id', v)}
+                options={lookups.car_status || []}
+              />
+
+
               {/* Identification No */}
               <FilterInput
                 label="Identification No"
@@ -86,6 +96,7 @@ export default function MachineFilters() {
                 placeholder="WDB963..."
               />
 
+              
               {/* Territory */}
               <FilterSelect
                 label="Territory"

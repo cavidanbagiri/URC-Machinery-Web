@@ -62,16 +62,20 @@ export default function MachineStatusModal({
   open,
   onClose,
   machine,
-  currentStatusId = 1,   // mock default
+  // currentStatusId = 1,   // mock default
   onSubmit,
   loading = false,
 }) {
+
+  const currentStatusId = machine?.status_id ?? 1;
+
   const [selected, setSelected] = useState(currentStatusId);
 
-  // Modal açıldıqda seçimi sıfırla
   useEffect(() => {
-    if (open) setSelected(currentStatusId);
-  }, [open, currentStatusId]);
+    if (open && machine) {
+      setSelected(machine.status_id ?? 1);
+    }
+  }, [open, machine?.id, machine?.status_id]);
 
   if (!machine) return null;
 
@@ -133,11 +137,10 @@ export default function MachineStatusModal({
                     <button
                       key={status.id}
                       onClick={() => setSelected(status.id)}
-                      className={`flex w-full items-start gap-3 rounded-lg border-2 p-3 text-left transition ${
-                        isSelected
+                      className={`flex w-full items-start gap-3 rounded-lg border-2 p-3 text-left transition ${isSelected
                           ? c.selected
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">

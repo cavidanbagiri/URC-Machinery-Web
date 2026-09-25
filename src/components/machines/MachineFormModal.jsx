@@ -27,6 +27,8 @@ const emptyForm = {
   car_mark_id: '',
   car_model_id: '',
   company_id: '',
+  status_id: 1,                  // ← YENİ (default Active)
+
 };
 
 export default function MachineFormModal({ open, onClose, editingMachine }) {
@@ -62,6 +64,8 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
         car_mark_id: editingMachine.car_mark_id ?? '',
         car_model_id: editingMachine.car_model_id ?? '',
         company_id: editingMachine.company_id ?? '',
+        status_id: editingMachine.status_id ?? 1,   // ← YENİ
+
       });
     } else {
       setForm({ ...emptyForm });
@@ -108,7 +112,22 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
 
     // Payload hazırla — boş sahələri çıxar
     const payload = {};
-    Object.entries(form).forEach(([key, value]) => {
+    // Object.entries(form).forEach(([key, value]) => {
+    //   if (value === '' || value === null || value === undefined) return;
+
+    //   if (key === 'production_year') {
+    //     payload[key] = `${value}-01-01T00:00:00Z`;
+    //   } else if (key === 'weight') {
+    //     payload[key] = Number(value);
+    //   } else if (
+    //     ['territory_id', 'type_id', 'subtype_id', 'car_mark_id', 'car_model_id', 'company_id'].includes(key)
+    //   ) {
+    //     payload[key] = Number(value);
+    //   } else {
+    //     payload[key] = value;
+    //   }
+    // });
+     Object.entries(form).forEach(([key, value]) => {
       if (value === '' || value === null || value === undefined) return;
 
       if (key === 'production_year') {
@@ -116,9 +135,9 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
       } else if (key === 'weight') {
         payload[key] = Number(value);
       } else if (
-        ['territory_id', 'type_id', 'subtype_id', 'car_mark_id', 'car_model_id', 'company_id'].includes(key)
+        ['territory_id', 'type_id', 'subtype_id', 'car_mark_id', 'car_model_id', 'company_id', 'status_id'].includes(key)
       ) {
-        payload[key] = Number(value);
+        payload[key] = Number(value);        // ← status_id əlavə olundu
       } else {
         payload[key] = value;
       }
@@ -267,6 +286,14 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   {/* LOOKUPS */}
                   <Section title="Təsnifat">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {/* YENİ — Status */}
+                      <SelectField
+                        label="Status"
+                        value={form.status_id}
+                        onChange={(v) => handleChange('status_id', v)}
+                        options={lookups.car_status || []}
+                        error={errors.status_id}
+                      />
                       <SelectField
                         label="Territory"
                         value={form.territory_id}

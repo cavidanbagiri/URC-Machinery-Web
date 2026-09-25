@@ -14,6 +14,7 @@ import MachineDetailModal from '../components/machines/MachineDetailModal';
 // import MachineStatusModal from '../components/machines/MachineStatusModal';
 import MachineStatusModal, { MOCK_STATUSES } from '../components/machines/MachineStatusModal';
 import ExportButton from '../components/machines/ExportButton';
+import { updateMachineStatus } from '../stores/machine_slice';
 
 
 
@@ -25,11 +26,13 @@ const LOOKUPS_NEEDED = [
   'car_mark',
   'car_model',
   'company',
+  'car_status'
 ];
 
 export default function CommonCarsPage() {
   const dispatch = useDispatch();
   const { filters, total, offset, limit } = useSelector((s) => s.machine);
+  const lookups = useSelector((s) => s.lookup.data);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -107,16 +110,36 @@ export default function CommonCarsPage() {
     setStatusOpen(true);
   };
 
-  const handleStatusSubmit = (statusId) => {
-    // Mock — yalnız toast, backend hazır olanda API çağırışı əlavə olunacaq
-    const status = MOCK_STATUSES.find((s) => s.id === statusId);
-    toast.success(`Status "${status.name}" olaraq dəyişdirildi (mock)`);
+  
+
+// src/pages/CommonCarsPage.jsx
+
+const handleStatusSubmit = async (statusId) => {
+  const machineId = statusMachine?.id;
+  if (!machineId) return;
+
+  try {
+    await dispatch(
+      updateMachineStatus({ id: machineId, status_id: statusId })
+    ).unwrap();
+
+    const status = lookups.car_status?.find((s) => s.id === statusId);
+    toast.success(`Status "${status?.name || statusId}" olaraq dəyişdirildi`);
+  } catch (err) {
+    const message =
+      typeof err === 'string'
+        ? err
+        : err?.message || err?.detail || 'Status dəyişdirilə bilmədi';
+    toast.error(message);
+  } finally {
+    // HƏMİŞƏ bağla
     setStatusOpen(false);
     setStatusMachine(null);
+  }
+};
 
-    // Gələcəkdə:
-    // await dispatch(updateMachineStatus({ id: statusMachine.id, status_id: statusId })).unwrap();
-  };
+
+
 
   return (
     <div className="space-y-6 p-6">
@@ -182,7 +205,6 @@ export default function CommonCarsPage() {
           setStatusMachine(null);
         }}
         machine={statusMachine}
-        currentStatusId={1}   // mock default (backend hazır olanda statusMachine.status_id)
         onSubmit={handleStatusSubmit}
       />
     </div>

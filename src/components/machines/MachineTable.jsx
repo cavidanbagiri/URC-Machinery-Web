@@ -2,6 +2,10 @@
 import { useSelector } from 'react-redux';
 import MachineSkeleton from './MachineSkeleton';
 import MachineRowMenu from './MachineRowMenu';
+import StatusBadge from './StatusBadge';
+
+
+
 
 export default function MachineTable({
   onUpdate,
@@ -39,6 +43,11 @@ export default function MachineTable({
       </div>
     );
   }
+
+  // Status tap
+  const getStatus = (statusId) => {
+    return lookups.car_status?.find((s) => s.id === statusId);
+  };
 
   // Boş nəticə
   if (!loading && items.length === 0) {
@@ -79,6 +88,7 @@ export default function MachineTable({
         <table className="w-full">
           <thead className="bg-gray-50 text-xs uppercase text-gray-500">
             <tr>
+              <th className="px-6 py-3 text-left font-medium">Status</th>
               <th className="px-6 py-3 text-left font-medium">Identification No</th>
               <th className="px-6 py-3 text-left font-medium">Company</th>
               <th className="px-6 py-3 text-left font-medium">Territory</th>
@@ -92,6 +102,10 @@ export default function MachineTable({
           <tbody className="divide-y divide-gray-100">
             {items.map((machine) => (
               <tr key={machine.id} className="hover:bg-gray-50">
+                {/* YENİ — Status */}
+                <td className="whitespace-nowrap px-6 py-3">
+                  <StatusBadge status={getStatus(machine.status_id)} />
+                </td>
                 <td className="whitespace-nowrap px-6 py-3 text-sm font-medium text-gray-900">
                   {machine.identification_no || '—'}
                 </td>
