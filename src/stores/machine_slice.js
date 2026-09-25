@@ -77,6 +77,7 @@ export const updateMachine = createAsyncThunk(
   }
 );
 
+
 export const deleteMachine = createAsyncThunk(
   'machine/deleteMachine',
   async (id, { rejectWithValue }) => {
@@ -84,10 +85,24 @@ export const deleteMachine = createAsyncThunk(
       await MachineService.deleteMachine(id);
       return id;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Delete xətası');
+      return rejectWithValue(
+        String(err.response?.data?.detail || err.message || 'Delete xətası')
+      );
     }
   }
 );
+
+// export const deleteMachine = createAsyncThunk(
+//   'machine/deleteMachine',
+//   async (id, { rejectWithValue }) => {
+//     try {
+//       await MachineService.deleteMachine(id);
+//       return id;
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.detail || 'Delete xətası');
+//     }
+//   }
+// );
 
 // src/store/slices/machine_slice.js
 

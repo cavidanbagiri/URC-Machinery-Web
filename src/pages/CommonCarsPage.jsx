@@ -11,10 +11,12 @@ import MachineTable from '../components/machines/MachineTable';
 import MachinePagination from '../components/machines/MachinePagination';
 import MachineFormModal from '../components/machines/MachineFormModal';
 import MachineDetailModal from '../components/machines/MachineDetailModal';
-// import MachineStatusModal from '../components/machines/MachineStatusModal';
 import MachineStatusModal, { MOCK_STATUSES } from '../components/machines/MachineStatusModal';
 import ExportButton from '../components/machines/ExportButton';
+import ConfirmDialog from '../components/settings/ConfirmDialog'
 import { updateMachineStatus } from '../stores/machine_slice';
+import { deleteMachine } from '../stores/machine_slice';
+
 
 
 
@@ -48,6 +50,12 @@ export default function CommonCarsPage() {
   // Status modal
   const [statusOpen, setStatusOpen] = useState(false);
   const [statusMachine, setStatusMachine] = useState(null);
+
+  // YENİ — Delete state
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingMachine, setDeletingMachine] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
 
   
 
@@ -96,8 +104,31 @@ export default function CommonCarsPage() {
     setFormOpen(true);
   };
 
+  // Delete düyməsinə bas
   const handleDelete = (machine) => {
-    toast.success(`Delete: ${machine.identification_no}`);
+    setDeletingMachine(machine);
+    setDeleteOpen(true);
+  };
+
+  // Təsdiq et
+  const handleDeleteConfirm = async () => {
+    if (!deletingMachine) return;
+
+    setDeleting(true);
+    try {
+      await dispatch(deleteMachine(deletingMachine.id)).unwrap();
+      toast.success(`"${deletingMachine.identification_no}" silindi`);
+      setDeleteOpen(false);
+      setDeletingMachine(null);
+    } catch (err) {
+      const message =
+        typeof err === 'string'
+          ? err
+          : err?.message || err?.detail || 'Silinmə xətası';
+      toast.error(message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleDetail = (machine) => {
@@ -165,6 +196,23 @@ const handleStatusSubmit = async (statusId) => {
 
       {/* Filterlər */}
       <MachineFilters />
+
+      {/* Delete Confirm — YENİ */}
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => {
+          setDeleteOpen(false);
+          setDeletingMachine(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Maşını silmək istəyirsiniz?"
+        message={
+          deletingMachine
+            ? `"${deletingMachine.identification_no || `#${deletingMachine.id}`}" silinəcək. Bu əməliyyat geri qaytarıla bilməz.`
+            : ''
+        }
+        loading={deleting}
+      />
 
       {/* Cədvəl */}
       <MachineTable
