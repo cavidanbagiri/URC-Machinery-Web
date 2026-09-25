@@ -9,6 +9,7 @@ import MachineService from '../services/MachineService';
 const initialFilters = {
   identification_no: '',
   vin_no: '',
+  plate_no: '',                   // ← YENİ
   territory_id: '',
   type_id: '',
   subtype_id: '',

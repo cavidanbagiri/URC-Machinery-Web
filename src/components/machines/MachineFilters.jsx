@@ -87,6 +87,13 @@ export default function MachineFilters() {
                 onChange={(v) => handleChange('identification_no', v)}
                 placeholder="TRK-001..."
               />
+              
+              <FilterInput
+                label="Plate No"
+                value={filters.plate_no}
+                onChange={(v) => handleChange('plate_no', v)}
+                placeholder="90 AB 123"
+              />
 
               {/* VIN No */}
               <FilterInput

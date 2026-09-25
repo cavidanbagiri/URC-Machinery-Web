@@ -55,6 +55,7 @@ export function exportMachinesToExcel(
     'ID': m.id,
     'Identification No': m.identification_no || '',
     'VIN No': m.vin_no || '',
+    'Plate No': m.plate_no || '',                 // ← YENİ
     'Technical Character': m.technical_character || '',
     'Production Year': extractYear(m.production_year),
     'Weight (kg)': m.weight ?? '',

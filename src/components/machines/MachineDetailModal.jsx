@@ -111,6 +111,7 @@ export default function MachineDetailModal({ open, onClose, machine, onSubmit, l
                     <Grid>
                       <InfoItem label="Identification No" value={machine.identification_no} />
                       <InfoItem label="VIN No" value={machine.vin_no} mono />
+                      <InfoItem label="Plate No" value={machine.plate_no} mono />       {/* ← YENİ */}
                       <InfoItem
                         label="Technical Character"
                         value={machine.technical_character}

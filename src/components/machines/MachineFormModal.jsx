@@ -14,6 +14,7 @@ import {
 const emptyForm = {
   identification_no: '',
   vin_no: '',
+  plate_no: '',                    // ← YENİ
   technical_character: '',
   production_year: '',
   weight: '',
@@ -49,6 +50,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
       setForm({
         identification_no: editingMachine.identification_no || '',
         vin_no: editingMachine.vin_no || '',
+        plate_no: editingMachine.plate_no || '',         // ← YEN
         technical_character: editingMachine.technical_character || '',
         production_year: editingMachine.production_year
           ? new Date(editingMachine.production_year).getFullYear()
@@ -87,6 +89,9 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
 
     if (form.vin_no && form.vin_no.length > 100) {
       newErrors.vin_no = 'VIN 100 simvoldan çox ola bilməz';
+    }
+    if (form.plate_no && form.plate_no.length > 50) {
+      newErrors.plate_no = 'Plate 50 simvoldan çox ola bilməz';
     }
     if (form.identification_no && form.identification_no.length > 100) {
       newErrors.identification_no = 'Max 100 simvol';
@@ -221,6 +226,14 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                         onChange={(v) => handleChange('vin_no', v)}
                         error={errors.vin_no}
                         placeholder="WDB9634031L123456"
+                      />
+                      {/* YENİ */}
+                      <Field
+                        label="Plate No"
+                        value={form.plate_no}
+                        onChange={(v) => handleChange('plate_no', v)}
+                        error={errors.plate_no}
+                        placeholder="90 AB 123"
                       />
                       <Field
                         label="Technical Character"
