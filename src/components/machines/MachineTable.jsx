@@ -76,19 +76,19 @@ export default function MachineTable({
   return (
     <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+      {/* <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
         <div>
           <h2 className="text-base font-semibold text-gray-900">Siyahı</h2>
           <p className="text-xs text-gray-500">Cəmi: {total} maşın</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50 text-xs uppercase text-gray-500">
             <tr>
-              <th className="px-6 py-2 text-right font-medium">Extra</th>
+              <th className="px-6 py-2 text-right font-medium py-3">Extra</th>
               <th className="px-6 py-2 text-left font-medium">Status</th>
               <th className="px-6 py-2 text-left font-medium">Id No</th>
               <th className="px-6 py-2 text-left font-medium">Plate No</th>       {/* ← YENİ */}

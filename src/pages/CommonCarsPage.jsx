@@ -173,7 +173,7 @@ const handleStatusSubmit = async (statusId) => {
 
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-2 p-6">
       <Toaster position="top-right" />
 
       {/* Header */}
