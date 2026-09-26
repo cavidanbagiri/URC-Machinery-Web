@@ -6,6 +6,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import { fetchMachines } from '../stores/machine_slice';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 
+import { FunnelIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+
 import MachineFilters from '../components/machines/MachineFilters';
 import MachineTable from '../components/machines/MachineTable';
 import MachinePagination from '../components/machines/MachinePagination';
@@ -36,7 +38,15 @@ export default function CommonCarsPage() {
   const { filters, total, offset, limit } = useSelector((s) => s.machine);
   const lookups = useSelector((s) => s.lookup.data);
 
+  // const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Filter panel state
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Aktiv filter sayı
+  const activeFilterCount = Object.values(filters).filter(
+    (v) => v !== '' && v !== null && v !== undefined
+  ).length;
 
   // Detail modal
   const [detailOpen, setDetailOpen] = useState(false);
@@ -183,7 +193,7 @@ const handleStatusSubmit = async (statusId) => {
         <p className="mt-1 text-sm text-gray-500">Cəmi: {total} maşın</p>
       </div>
 
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <ExportButton />
         <button
           onClick={handleCreate}
@@ -191,11 +201,51 @@ const handleStatusSubmit = async (statusId) => {
         >
           + Yeni maşın
         </button>
-      </div>
+      </div> */}
     </div>
 
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2">
+
+        
+        <button
+          onClick={handleCreate}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          + Yeni maşın
+        
+        </button>
+        <ExportButton />
+
+      </div>
       {/* Filterlər */}
-      <MachineFilters />
+      {/* <MachineFilters /> */}
+      {/* Filter button (sağda, ayrı sıra) — Variant B */}
+        <button
+          onClick={() => setFiltersOpen((v) => !v)}
+          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+            filtersOpen || activeFilterCount > 0
+              ? 'border-blue-300 bg-blue-50 text-blue-700'
+              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          <FunnelIcon className="h-4 w-4" />
+          Filterlər
+          {activeFilterCount > 0 && (
+            <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
+              {activeFilterCount}
+            </span>
+          )}
+          <ChevronDownIcon
+            className={`h-4 w-4 transition-transform ${
+              filtersOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Filter panel */}
+      <MachineFilters open={filtersOpen} onClose={() => setFiltersOpen(false)} />
 
       {/* Delete Confirm — YENİ */}
       <ConfirmDialog
