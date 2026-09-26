@@ -69,33 +69,8 @@ export default function MachinePagination() {
   const toItem = Math.min(offset + limit, total);
 
   return (
-    <div className="flex flex-col items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-6 py-4 shadow-sm md:flex-row">
-      {/* Sol — məlumat + limit */}
-      <div className="flex items-center gap-4 text-sm text-gray-600">
-        <span>
-          <span className="font-medium text-gray-900">{fromItem}</span>
-          {' – '}
-          <span className="font-medium text-gray-900">{toItem}</span>
-          {' / '}
-          <span className="font-medium text-gray-900">{total}</span>
-        </span>
-
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500">Səhifə ölçüsü:</label>
-          <select
-            value={limit}
-            onChange={handleLimitChange}
-            disabled={loading}
-            className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
-          >
-            {[10, 20, 50, 100].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+    <div className="flex flex-col items-center justify-start gap-4  px-2 py-4  md:flex-row">
+      
 
       {/* Sağ — səhifə nömrələri */}
       <div className="flex items-center gap-1">
@@ -139,6 +114,34 @@ export default function MachinePagination() {
           <ChevronRightIcon className="h-4 w-4" />
         </button>
       </div>
+
+        {/* Sol — məlumat + limit */}
+      <div className="flex items-center gap-4 text-sm text-gray-600">
+        <span>
+          <span className="font-medium text-gray-900">{fromItem}</span>
+          {' – '}
+          <span className="font-medium text-gray-900">{toItem}</span>
+          {' / '}
+          <span className="font-medium text-gray-900">{total}</span>
+        </span>
+
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500">Sayfa boyutu:</label>
+          <select
+            value={limit}
+            onChange={handleLimitChange}
+            disabled={loading}
+            className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
+          >
+            {[10, 20, 50, 100].map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
     </div>
   );
 }

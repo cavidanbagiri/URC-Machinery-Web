@@ -1,13 +1,4 @@
-// src/components/machines/MachineFilters.jsx
-// import { useState } from 'react';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { Disclosure } from '@headlessui/react';
-// import {
-//   FunnelIcon,
-//   ChevronDownIcon,
-//   XMarkIcon,
-// } from '@heroicons/react/24/outline';
-// import { setFilter, resetFilters } from '../../stores/machine_slice';
+
 
 import { useDispatch, useSelector } from 'react-redux';
 import { Transition } from '@headlessui/react';
@@ -17,22 +8,7 @@ import { setFilter, resetFilters } from '../../stores/machine_slice';
 
 
 export default function MachineFilters({ open, onClose }) {
-  // const dispatch = useDispatch();
-  // const filters = useSelector((s) => s.machine.filters);
-  // const lookups = useSelector((s) => s.lookup.data);
 
-  // // Aktiv filterlərin sayı (badge üçün)
-  // const activeCount = Object.values(filters).filter(
-  //   (v) => v !== '' && v !== null && v !== undefined
-  // ).length;
-
-  // const handleChange = (key, value) => {
-  //   dispatch(setFilter({ key, value }));
-  // };
-
-  // const handleReset = () => {
-  //   dispatch(resetFilters());
-  // };
 
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.machine.filters);
@@ -60,13 +36,13 @@ export default function MachineFilters({ open, onClose }) {
       leaveFrom="opacity-100 translate-y-0"
       leaveTo="opacity-0 -translate-y-2"
     >
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className=" border border-gray-200 bg-white p-6 rounded-xl mt-1">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-900">Filterlər</h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className=" p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
             <XMarkIcon className="h-4 w-4" />
           </button>
@@ -169,49 +145,6 @@ export default function MachineFilters({ open, onClose }) {
     </Transition>
   );
 }
-
-// =========================================================
-// KÖMƏKÇI KOMPONENTLƏR
-// =========================================================
-
-// function FilterInput({ label, value, onChange, placeholder, type = 'text' }) {
-//   return (
-//     <div>
-//       <label className="mb-1 block text-xs font-medium text-gray-600">
-//         {label}
-//       </label>
-//       <input
-//         type={type}
-//         value={value || ''}
-//         onChange={(e) => onChange(e.target.value)}
-//         placeholder={placeholder}
-//         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-//       />
-//     </div>
-//   );
-// }
-
-// function FilterSelect({ label, value, onChange, options }) {
-//   return (
-//     <div>
-//       <label className="mb-1 block text-xs font-medium text-gray-600">
-//         {label}
-//       </label>
-//       <select
-//         value={value || ''}
-//         onChange={(e) => onChange(e.target.value)}
-//         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-//       >
-//         <option value="">Hamısı</option>
-//         {options.map((opt) => (
-//           <option key={opt.id} value={opt.id}>
-//             {opt.name}
-//           </option>
-//         ))}
-//       </select>
-//     </div>
-//   );
-// }
 
 function FilterInput({ label, value, onChange, placeholder, type = 'text' }) {
   return (

@@ -74,7 +74,7 @@ export default function MachineTable({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className=" bg-white">
       {/* Header */}
       {/* <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
         <div>
@@ -85,10 +85,10 @@ export default function MachineTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+        <table className="w-full" style={{'fontFamily':'Inter'}}>
+          <thead className="bg-gray-50 text-[11px] uppercase text-gray-500">
             <tr>
-              <th className="px-6 py-2 text-right font-medium py-3">Extra</th>
+              <th className="px-6 py-3 text-left font-medium">Extra</th>
               <th className="px-6 py-2 text-left font-medium">Status</th>
               <th className="px-6 py-2 text-left font-medium">Id No</th>
               <th className="px-6 py-2 text-left font-medium">Plate No</th>       {/* ← YENİ */}
@@ -103,7 +103,7 @@ export default function MachineTable({
           <tbody className="divide-y divide-gray-100">
             {items.map((machine) => (
               <tr key={machine.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-2 text-right">
+                <td className="whitespace-nowrap px-6 py-1 text-right">
                   <MachineRowMenu
                     machine={machine}
                     onUpdate={onUpdate}
@@ -116,28 +116,28 @@ export default function MachineTable({
                 <td className="whitespace-nowrap px-6 py-2">
                   <StatusBadge status={getStatus(machine.status_id)} />
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm font-medium text-gray-900">
+                <td className="whitespace-nowrap px-6 py-2 text-[11px] font-medium text-gray-900">
                   {machine.identification_no || '—'}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm font-mono text-gray-700">
+                <td className="whitespace-nowrap px-6 py-2 text-[11px] font-mono text-gray-700">
                   {machine.plate_no || '—'}                                       {/* ← YENİ */}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm text-gray-700">
+                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {lookupName('company', machine.company_id)}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm text-gray-700">
+                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {lookupName('territory', machine.territory_id)}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm text-gray-700">
+                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {lookupName('car_mark', machine.car_mark_id)}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm text-gray-700">
+                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {lookupName('car_model', machine.car_model_id)}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm text-gray-700">
+                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {machine.vin_no || '—'}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-sm text-gray-700">
+                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {extractYear(machine.production_year)}
                 </td>
                 

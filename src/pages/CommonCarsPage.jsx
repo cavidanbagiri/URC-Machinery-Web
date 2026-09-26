@@ -67,7 +67,7 @@ export default function CommonCarsPage() {
   const [deleting, setDeleting] = useState(false);
 
 
-  
+
 
   const hasActiveFilters = Object.values(filters).some(
     (v) => v !== '' && v !== null && v !== undefined
@@ -151,97 +151,85 @@ export default function CommonCarsPage() {
     setStatusOpen(true);
   };
 
-  
 
-// src/pages/CommonCarsPage.jsx
 
-const handleStatusSubmit = async (statusId) => {
-  const machineId = statusMachine?.id;
-  if (!machineId) return;
+  // src/pages/CommonCarsPage.jsx
 
-  try {
-    await dispatch(
-      updateMachineStatus({ id: machineId, status_id: statusId })
-    ).unwrap();
+  const handleStatusSubmit = async (statusId) => {
+    const machineId = statusMachine?.id;
+    if (!machineId) return;
 
-    const status = lookups.car_status?.find((s) => s.id === statusId);
-    toast.success(`Status "${status?.name || statusId}" olaraq dəyişdirildi`);
-  } catch (err) {
-    const message =
-      typeof err === 'string'
-        ? err
-        : err?.message || err?.detail || 'Status dəyişdirilə bilmədi';
-    toast.error(message);
-  } finally {
-    // HƏMİŞƏ bağla
-    setStatusOpen(false);
-    setStatusMachine(null);
-  }
-};
+    try {
+      await dispatch(
+        updateMachineStatus({ id: machineId, status_id: statusId })
+      ).unwrap();
+
+      const status = lookups.car_status?.find((s) => s.id === statusId);
+      toast.success(`Status "${status?.name || statusId}" olaraq dəyişdirildi`);
+    } catch (err) {
+      const message =
+        typeof err === 'string'
+          ? err
+          : err?.message || err?.detail || 'Status dəyişdirilə bilmədi';
+      toast.error(message);
+    } finally {
+      // HƏMİŞƏ bağla
+      setStatusOpen(false);
+      setStatusMachine(null);
+    }
+  };
 
 
 
 
   return (
-    <div className="space-y-2 p-6">
+    <div className="space-y-0 p-3">
       <Toaster position="top-right" />
 
       {/* Header */}
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Bütün Maşınlar</h1>
-        <p className="mt-1 text-sm text-gray-500">Cəmi: {total} maşın</p>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Tum Araclar</h1>
+          <p className="mt-1 text-sm text-gray-500">Toplam: {total} arac</p>
+        </div>
       </div>
 
-      {/* <div className="flex items-center gap-2">
-        <ExportButton />
-        <button
-          onClick={handleCreate}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          + Yeni maşın
-        </button>
-      </div> */}
-    </div>
+      <div className='flex flex-row justify-between'>
 
-      <div className="flex justify-end">
-        <div className="flex items-center gap-2">
+        <MachinePagination />
 
-        
-        <button
-          onClick={handleCreate}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          + Yeni maşın
-        
-        </button>
-        <ExportButton />
+        <div className="flex justify-end">
+          <div className="flex items-center gap-2">
+            <ExportButton />
+            <button
+              onClick={handleCreate}
+              className="border-b border-b-gray-200 px-4 py-1 mr-4 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100 rounded-xs"
+            >
+              + Yeni Arac
+            </button>
 
-      </div>
-      {/* Filterlər */}
-      {/* <MachineFilters /> */}
-      {/* Filter button (sağda, ayrı sıra) — Variant B */}
-        <button
-          onClick={() => setFiltersOpen((v) => !v)}
-          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-            filtersOpen || activeFilterCount > 0
+          </div>
+          {/* <MachineFilters /> */}
+          <button
+            onClick={() => setFiltersOpen((v) => !v)}
+            className={`flex items-center gap-2 rounded-xs border-b border-b-gray-200 cursor-pointer hover:bg-gray-100 px-3 py-1 text-sm font-medium transition ${filtersOpen || activeFilterCount > 0
               ? 'border-blue-300 bg-blue-50 text-blue-700'
-              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          <FunnelIcon className="h-4 w-4" />
-          Filterlər
-          {activeFilterCount > 0 && (
-            <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
-              {activeFilterCount}
-            </span>
-          )}
-          <ChevronDownIcon
-            className={`h-4 w-4 transition-transform ${
-              filtersOpen ? 'rotate-180' : ''
-            }`}
-          />
-        </button>
+              : 'border-gray-300  text-gray-700 hover:bg-gray-50'
+              }`}
+          >
+            <FunnelIcon className="h-4 w-4" />
+            Filterlər
+            {activeFilterCount > 0 && (
+              <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDownIcon
+              className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''
+                }`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Filter panel */}
