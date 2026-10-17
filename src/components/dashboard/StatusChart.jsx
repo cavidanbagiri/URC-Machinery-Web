@@ -99,7 +99,8 @@ export default function StatusChart() {
   }
 
   return (
-    <div className="flex h-[480px] w-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div style={{ fontFamily: 'Inter' }}
+    className="flex h-[480px] w-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-2 flex items-start justify-between">
         <div>
           <h2 className="text-base font-semibold text-gray-900">Status bölgüsü</h2>

@@ -39,7 +39,8 @@ export default function PivotTable() {
   }
 
   return (
-    <div className="flex h-[480px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+    <div style={{ fontFamily: 'Inter' }}
+    className="flex h-[480px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5">
         <div>

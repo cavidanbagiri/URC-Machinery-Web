@@ -100,16 +100,16 @@ function KpiCard({ label, value, suffix, icon: Icon, color = 'gray', percent, on
       </div>
 
       {/* Middle: label + value */}
-      <div className="relative mt-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">
-          {label}
-        </p>
+      <div className="relative mt-4 flex justify-between items-center">
         <div className="mt-1 flex items-baseline gap-1.5">
           <span className={`text-3xl font-bold leading-none tracking-tight ${isTotal ? 'text-gray-900' : c.value}`}>
             {value}
           </span>
           {suffix && <span className="text-xs font-medium text-gray-500">{suffix}</span>}
         </div>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">
+          {label}
+        </p>
       </div>
 
       {/* Bottom: percent or progress bar */}
@@ -131,7 +131,7 @@ function KpiCard({ label, value, suffix, icon: Icon, color = 'gray', percent, on
       {isTotal && (
         <div className="relative mt-3 flex items-center gap-1 text-[11px] font-medium text-gray-600">
           <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-          bütün maşınlar
+          Tum arabalar
         </div>
       )}
     </button>
@@ -157,11 +157,12 @@ export default function KpiCards() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+    <div style={{ fontFamily: 'Inter' }}
+    className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
       <KpiCard
-        label="Ümumi"
+        label="Genel"
         value={total}
-        suffix="maşın"
+        suffix=""
         icon={Car}
         color="blue"
         isTotal
