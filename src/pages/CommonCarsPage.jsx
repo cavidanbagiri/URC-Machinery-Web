@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
+import { useSearchParams } from 'react-router-dom';
 
 import { fetchMachines } from '../stores/machine_slice';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
@@ -16,7 +17,7 @@ import MachineDetailModal from '../components/machines/MachineDetailModal';
 import MachineStatusModal, { MOCK_STATUSES } from '../components/machines/MachineStatusModal';
 import ExportButton from '../components/machines/ExportButton';
 import ConfirmDialog from '../components/settings/ConfirmDialog'
-import { updateMachineStatus } from '../stores/machine_slice';
+import { updateMachineStatus, setFilter } from '../stores/machine_slice';
 import { deleteMachine } from '../stores/machine_slice';
 
 
@@ -178,6 +179,17 @@ export default function CommonCarsPage() {
       setStatusMachine(null);
     }
   };
+
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusIdFromUrl = searchParams.get('status_id');
+
+  // URL-dən status_id gəlibsə → filter tətbiq et
+  useEffect(() => {
+    if (statusIdFromUrl) {
+      dispatch(setFilter({ key: 'status_id', value: statusIdFromUrl }));
+    }
+  }, [statusIdFromUrl, dispatch]);
 
 
 
