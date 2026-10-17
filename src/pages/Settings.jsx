@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import { Tab } from '@headlessui/react';
+import { Settings2, Plus } from 'lucide-react';
 
 import {
   fetchLookup,
@@ -11,7 +12,6 @@ import {
   deleteLookup,
   setActiveTab,
 } from '../stores/setting_slice';
-
 import { LOOKUP_CONFIG } from '../services/SettingsService';
 
 import LookupTable from '../components/settings/LookupTable';
@@ -31,46 +31,35 @@ export default function Settings() {
     label: cfg.label,
   }));
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Confirm dialog state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Aktiv tab dəyişdikdə fetch et
   useEffect(() => {
     dispatch(fetchLookup(activeTab));
   }, [activeTab, dispatch]);
 
-  // ---------- CREATE ----------
   const handleCreate = () => {
     setEditingItem(null);
     setModalOpen(true);
   };
-
-  // ---------- EDIT ----------
   const handleEdit = (item) => {
     setEditingItem(item);
     setModalOpen(true);
   };
 
-  // ---------- SUBMIT (create və ya update) ----------
   const handleSubmit = async (payload) => {
     setSubmitting(true);
     try {
       if (editingItem) {
-        await dispatch(
-          updateLookup({ key: activeTab, id: editingItem.id, payload })
-        ).unwrap();
+        await dispatch(updateLookup({ key: activeTab, id: editingItem.id, payload })).unwrap();
         toast.success('Uğurla yeniləndi');
       } else {
-        await dispatch(
-          createLookup({ key: activeTab, payload })
-        ).unwrap();
+        await dispatch(createLookup({ key: activeTab, payload })).unwrap();
         toast.success('Uğurla yaradıldı');
       }
       setModalOpen(false);
@@ -82,7 +71,6 @@ export default function Settings() {
     }
   };
 
-  // ---------- DELETE ----------
   const handleDeleteClick = (item) => {
     setDeletingItem(item);
     setConfirmOpen(true);
@@ -92,9 +80,7 @@ export default function Settings() {
     if (!deletingItem) return;
     setDeleting(true);
     try {
-      await dispatch(
-        deleteLookup({ key: activeTab, id: deletingItem.id })
-      ).unwrap();
+      await dispatch(deleteLookup({ key: activeTab, id: deletingItem.id })).unwrap();
       toast.success('Uğurla silindi');
       setConfirmOpen(false);
       setDeletingItem(null);
@@ -109,53 +95,72 @@ export default function Settings() {
   const currentItems = data[activeTab] || [];
 
   return (
-    <div className="p-6">
-      {/* Toast container */}
-      <Toaster position="top-right" />
-
-      {/* Header */}
-      <div style={{ fontFamily: 'Inter' }} className="mb-6">
-        <h1 
-        className="text-3xl font-semibold tracking-tight text-gray-900">Duzenleme</h1>
-        <p className="mt-1 text-sm font-light text-gray-500">
-          Listeleri yönetin — oluştur, düzenle, sil
-        </p>
-      </div>
-
-      {/* Tabs */}
-      <Tab.Group
-        selectedIndex={tabs.findIndex((t) => t.key === activeTab)}
-        onChange={(idx) => dispatch(setActiveTab(tabs[idx].key))}
-      >
-        <Tab.List className="mb-6 flex flex-wrap gap-1 border-b border-gray-200">
-          {tabs.map((tab) => (
-            <Tab
-              key={tab.key}
-              className={({ selected }) =>
-                classNames(
-                  'rounded-t-lg px-4 py-2.5 text-sm font-medium outline-none transition',
-                  selected
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                )
-              }
-            >
-              {tab.label}
-            </Tab>
-          ))}
-        </Tab.List>
-      </Tab.Group>
-
-      {/* Table */}
-      <LookupTable
-        items={currentItems}
-        loading={loading}
-        onCreate={handleCreate}
-        onEdit={handleEdit}
-        onDelete={handleDeleteClick}
+    <div className="space-y-6 p-6">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: '!rounded-xl !border !border-gray-200 !bg-white !text-sm !text-gray-800 !shadow-lg',
+          success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+        }}
       />
 
-      {/* Create / Update Modal */}
+      {/* Header — Dashboard ilə eyni */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <Settings2 className="h-4 w-4" strokeWidth={2.2} />
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+              Tənzimləmələr
+            </h1>
+          </div>
+          <p className="mt-1.5 text-sm text-gray-500">
+            Siyahıları idarə edin — yarat, redaktə et, sil
+          </p>
+        </div>
+      </div>
+
+      {/* Card: Tabs + Table bir kart içində */}
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <Tab.Group
+          selectedIndex={tabs.findIndex((t) => t.key === activeTab)}
+          onChange={(idx) => dispatch(setActiveTab(tabs[idx].key))}
+        >
+          {/* Tab bar — pill style */}
+          <div className="border-b border-gray-200 px-4 pt-4">
+            <Tab.List className="flex flex-wrap gap-1 mb-4">
+              {tabs.map((tab) => (
+                <Tab
+                  key={tab.key}
+                  className={({ selected }) =>
+                    classNames(
+                      'relative rounded-lg px-3.5 py-2 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500',
+                      selected
+                        ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-100'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    )
+                  }
+                >
+                  {tab.label}
+                </Tab>
+              ))}
+            </Tab.List>
+          </div>
+        </Tab.Group>
+
+        {/* Table komponenti artıq kart deyil — daxildə table */}
+        <LookupTable
+          items={currentItems}
+          loading={loading}
+          onCreate={handleCreate}
+          onEdit={handleEdit}
+          onDelete={handleDeleteClick}
+          configLabel={currentConfig.label}
+        />
+      </div>
+
       <LookupModal
         open={modalOpen}
         onClose={() => {
@@ -165,14 +170,13 @@ export default function Settings() {
         onSubmit={handleSubmit}
         title={
           editingItem
-            ? `${currentConfig.label} — Redaktə et`
+            ? `${currentConfig.label} — Redaktə`
             : `${currentConfig.label} — Yeni əlavə et`
         }
         initialValue={editingItem?.name || ''}
         loading={submitting}
       />
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={confirmOpen}
         onClose={() => {
