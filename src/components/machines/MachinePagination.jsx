@@ -95,7 +95,7 @@ export default function MachinePagination() {
               key={page}
               onClick={() => goToPage(page)}
               disabled={loading}
-              className={`min-w-[36px] rounded-lg border px-2 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`min-w-[36px] rounded-full border px-2 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 page === currentPage
                   ? 'border-blue-600 bg-blue-600 text-white'
                   : 'border-gray-300 text-gray-700 hover:bg-gray-50'

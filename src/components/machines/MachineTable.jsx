@@ -85,19 +85,19 @@ export default function MachineTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full" style={{'fontFamily':'Inter'}}>
-          <thead className="bg-gray-50 text-[11px] uppercase text-gray-500">
+        <table className="w-full rounded-lg" style={{'fontFamily':'Inter'}}>
+          <thead className="bg-gray-100 text-[11px] uppercase text-gray-700 rounded-lg">
             <tr>
-              <th className="px-6 py-3 text-left font-medium">Extra</th>
+              <th className="px-6 py-2 text-left font-medium"></th>
               <th className="px-6 py-2 text-left font-medium">Status</th>
               <th className="px-6 py-2 text-left font-medium">Id No</th>
               <th className="px-6 py-2 text-left font-medium">Plate No</th>       {/* ← YENİ */}
-              <th className="px-6 py-2 text-left font-medium">Company</th>
               <th className="px-6 py-2 text-left font-medium">Territory</th>
               <th className="px-6 py-2 text-left font-medium">Mark</th>
               <th className="px-6 py-2 text-left font-medium">Model</th>
               <th className="px-6 py-2 text-left font-medium">VIN No</th>
               <th className="px-6 py-2 text-left font-medium">Year</th>
+              <th className="px-6 py-2 text-left font-medium">Company</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -123,9 +123,6 @@ export default function MachineTable({
                   {machine.plate_no || '—'}                                       {/* ← YENİ */}
                 </td>
                 <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  {lookupName('company', machine.company_id)}
-                </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {lookupName('territory', machine.territory_id)}
                 </td>
                 <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
@@ -139,6 +136,9 @@ export default function MachineTable({
                 </td>
                 <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {extractYear(machine.production_year)}
+                </td>
+                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                  {lookupName('company', machine.company_id)}
                 </td>
                 
               </tr>

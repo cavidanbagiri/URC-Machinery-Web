@@ -194,7 +194,7 @@ export default function CommonCarsPage() {
         </div>
       </div>
 
-      <div className='flex flex-row justify-between'>
+      <div className='flex flex-row justify-between items-center bg-gray-100 rounded-t-lg'>
 
         <MachinePagination />
 
@@ -210,25 +210,27 @@ export default function CommonCarsPage() {
 
           </div>
           {/* <MachineFilters /> */}
-          <button
+          <div className='flex items-center justify-center h-7'>
+            <button
             onClick={() => setFiltersOpen((v) => !v)}
-            className={`flex items-center gap-2 rounded-xs border-b border-b-gray-200 cursor-pointer hover:bg-gray-100 px-3 py-1 text-sm font-medium transition ${filtersOpen || activeFilterCount > 0
-              ? 'border-blue-300 bg-blue-50 text-blue-700'
+            className={`flex items-center gap-2  rounded-xs border-b border-b-gray-200 cursor-pointer hover:bg-gray-100 px-3 py-1 text-sm font-medium transition ${filtersOpen || activeFilterCount > 0
+              ? 'border-blue-300 bg-gray-100 text-blue-700'
               : 'border-gray-300  text-gray-700 hover:bg-gray-50'
               }`}
-          >
-            <FunnelIcon className="h-4 w-4" />
-            Filterlər
-            {activeFilterCount > 0 && (
-              <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-            <ChevronDownIcon
-              className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''
-                }`}
-            />
-          </button>
+            >
+              <FunnelIcon className="h-4 w-4" />
+              Filterlər
+              {activeFilterCount > 0 && (
+                <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+              <ChevronDownIcon
+                className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''
+                  }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 
