@@ -199,10 +199,13 @@ export default function CommonCarsPage() {
       <Toaster position="top-right" />
 
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tum Araclar</h1>
-          <p className="mt-1 text-sm text-gray-500">Toplam: {total} arac</p>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-2 py-4 px-1">
+        <div style={{ fontFamily: 'Inter' }}>
+          <h1 
+        className="text-3xl font-semibold tracking-tight text-gray-900">Tum Araclar</h1>
+          <p className="mt-1 text-sm text-gray-500 font-light tracking-tight">
+            Toplam: {total} arac
+          </p>
         </div>
       </div>
 
