@@ -7,7 +7,8 @@
 import axios from 'axios';
 import authService from '../services/AuthService';
 
-const BASE_URL = 'http://localhost:8000/api';
+// const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'https://urc-machinery-server.onrender.com/api';
 
 const $api = axios.create({
   baseURL: BASE_URL,
