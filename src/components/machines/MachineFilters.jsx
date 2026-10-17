@@ -174,7 +174,7 @@ function FilterSelect({ label, value, onChange, options }) {
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       >
-        <option value="">Hamısı</option>
+        <option value="">Hepsi</option>
         {options.map((opt) => (
           <option key={opt.id} value={opt.id}>
             {opt.name}

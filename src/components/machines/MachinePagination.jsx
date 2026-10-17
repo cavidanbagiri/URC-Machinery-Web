@@ -133,7 +133,7 @@ export default function MachinePagination() {
             disabled={loading}
             className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
           >
-            {[10, 20, 50, 100].map((n) => (
+            {[20, 50, 100].map((n) => (
               <option key={n} value={n}>
                 {n}
               </option>

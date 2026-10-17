@@ -40,37 +40,6 @@ export default function MachineRowMenu({
     setOpen((v) => !v);
   };
 
-  // Xaricə klik → bağla
-//   useEffect(() => {
-//     if (!open) return;
-
-//     const handleClickOutside = (e) => {
-//       if (
-//         menuRef.current &&
-//         !menuRef.current.contains(e.target) &&
-//         buttonRef.current &&
-//         !buttonRef.current.contains(e.target)
-//       ) {
-//         setOpen(false);
-//       }
-//     };
-
-//     const handleScroll = () => setOpen(false);
-//     const handleResize = () => setOpen(false);
-//     const handleEsc = (e) => e.key === 'Escape' && setOpen(false);
-
-//     document.addEventListener('mousedown', handleClickOutside);
-//     window.addEventListener('scroll', handleScroll, true);
-//     window.addEventListener('resize', handleResize);
-//     document.addEventListener('keydown', handleEsc);
-
-//     return () => {
-//       document.removeEventListener('mousedown', handleClickOutside);
-//       window.removeEventListener('scroll', handleScroll, true);
-//       window.removeEventListener('resize', handleResize);
-//       document.removeEventListener('keydown', handleEsc);
-//     };
-//   }, [open]);
 
 useEffect(() => {
   if (!open) return;
@@ -127,26 +96,26 @@ useEffect(() => {
           >
             <MenuItem
               icon={<PencilSquareIcon className="h-4 w-4" />}
-              label="Update"
+              label="Güncelle"
               onClick={() => handleAction(onUpdate)}
               color="blue"
             />
             <MenuItem
               icon={<ArrowPathIcon className="h-4 w-4" />}
-              label="Change Status"
+              label="Durum Değiştir"
               onClick={() => handleAction(onChangeStatus)}
               color="yellow"
             />
             <MenuItem
               icon={<EyeIcon className="h-4 w-4" />}
-              label="Detail"
+              label="Detaylar"
               onClick={() => handleAction(onDetail)}
               color="gray"
             />
             <div className="my-1 border-t border-gray-100" />
             <MenuItem
               icon={<TrashIcon className="h-4 w-4" />}
-              label="Delete"
+              label="Sil"
               onClick={() => handleAction(onDelete)}
               color="red"
             />
@@ -172,7 +141,7 @@ function MenuItem({ icon, label, onClick, color = 'gray' }) {
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 transition ${colors[color]}`}
+      className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 cursor-pointer transition ${colors[color]}`}
     >
       {icon}
       {label}

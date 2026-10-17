@@ -193,7 +193,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                 <Dialog.Title className="text-lg font-semibold text-gray-900">
-                  {isEdit ? 'Maşını redaktə et' : 'Yeni maşın əlavə et'}
+                  {isEdit ? 'Aracı Düzenle' : 'Yeni Araç Ekle'}
                 </Dialog.Title>
                 <button
                   onClick={onClose}
@@ -211,7 +211,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
               >
                 <div className="space-y-8">
                   {/* BASIC INFO */}
-                  <Section title="Əsas məlumat">
+                  <Section title="Temel Bilgiler">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <Field
                         label="Identification No"
@@ -247,7 +247,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   </Section>
 
                   {/* TECHNICAL SPECS */}
-                  <Section title="Texniki göstəricilər">
+                  <Section title="Teknik Özellikler ">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <Field
                         label="Production Year"
@@ -297,7 +297,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   </Section>
 
                   {/* LOOKUPS */}
-                  <Section title="Təsnifat">
+                  <Section title="Kategorizasyon">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       {/* YENİ — Status */}
                       <SelectField
@@ -362,7 +362,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   disabled={formSubmitting}
                   className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >
-                  Ləğv et
+                  Iptal et
                 </button>
                 <button
                   type="submit"
@@ -371,10 +371,10 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {formSubmitting
-                    ? 'Yadda saxlanılır...'
+                    ? 'Kaydediliyor...'
                     : isEdit
-                    ? 'Yenilə'
-                    : 'Yarat'}
+                    ? 'Güncelle'
+                    : 'Oluştur'}
                 </button>
               </div>
             </Dialog.Panel>
