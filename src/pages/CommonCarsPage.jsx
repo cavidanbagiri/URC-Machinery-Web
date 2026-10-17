@@ -14,7 +14,7 @@ import MachineTable from '../components/machines/MachineTable';
 import MachinePagination from '../components/machines/MachinePagination';
 import MachineFormModal from '../components/machines/MachineFormModal';
 import MachineDetailModal from '../components/machines/MachineDetailModal';
-import MachineStatusModal, { MOCK_STATUSES } from '../components/machines/MachineStatusModal';
+import MachineStatusModal from '../components/machines/MachineStatusModal';
 import ExportButton from '../components/machines/ExportButton';
 import ConfirmDialog from '../components/settings/ConfirmDialog'
 import { updateMachineStatus, setFilter } from '../stores/machine_slice';
@@ -181,7 +181,7 @@ export default function CommonCarsPage() {
   };
 
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const statusIdFromUrl = searchParams.get('status_id');
 
   // URL-dən status_id gəlibsə → filter tətbiq et
@@ -302,12 +302,14 @@ export default function CommonCarsPage() {
       />
       {/* Status Modal — YENİ */}
       <MachineStatusModal
+        key={`${statusMachine?.id ?? 'none'}-${statusMachine?.status_id ?? 'none'}`}
         open={statusOpen}
         onClose={() => {
           setStatusOpen(false);
           setStatusMachine(null);
         }}
         machine={statusMachine}
+        statuses={lookups.car_status || []}
         onSubmit={handleStatusSubmit}
       />
     </div>

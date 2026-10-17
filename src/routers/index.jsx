@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Layout from '../layouts/Layout';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -48,7 +48,8 @@ const router = createBrowserRouter([
       },
       {
         index: true,
-        element: <Dashboard />, // or redirect logic
+        // The dashboard is protected; always route through the guarded path.
+        element: <Navigate to="/dashboard" replace />,
       },
     ],
   },

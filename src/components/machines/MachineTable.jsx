@@ -15,7 +15,7 @@ export default function MachineTable({
   onOpenFilters,
   hasActiveFilters,
 }) {
-  const { items, loading, total } = useSelector((s) => s.machine);
+  const { items, loading } = useSelector((s) => s.machine);
   const lookups = useSelector((s) => s.lookup.data);
 
   // Lookup ID → ad
@@ -100,7 +100,7 @@ export default function MachineTable({
               <th className="px-6 py-2 text-left font-medium">Company</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100" >
             {items.map((machine) => (
               <tr key={machine.id} className="hover:bg-gray-50">
                 <td className="whitespace-nowrap px-6 py-1 text-right">
@@ -119,13 +119,13 @@ export default function MachineTable({
                 <td className="whitespace-nowrap px-6 py-2 text-[11px] font-medium text-gray-900">
                   {machine.identification_no || '—'}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[11px] font-mono text-gray-700">
+                <td style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[11px] font-mono text-gray-700">
                   {machine.plate_no || '—'}                                       {/* ← YENİ */}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                <td style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {lookupName('territory', machine.territory_id)}
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                <td style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
                   {lookupName('car_mark', machine.car_mark_id)}
                 </td>
                 <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">

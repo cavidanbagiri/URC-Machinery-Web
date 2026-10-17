@@ -1,10 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../services/AuthService';
 
-// Get user from localStorage
-const storedUser = localStorage.getItem('user');
+// Get user from localStorage (tolerate corrupted/legacy values)
+function readStoredUser() {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
+}
+
 const initialState = {
-  user: storedUser ? JSON.parse(storedUser) : null,
+  user: readStoredUser(),
   accessToken: localStorage.getItem('access_token') || null,
   isLoading: false,
   isError: false,
@@ -24,7 +33,7 @@ export const checkSession = createAsyncThunk(
         return response.data;
       }
       return null;
-    } catch (error) {
+    } catch {
       // Session expired
       localStorage.removeItem('access_token');
       localStorage.removeItem('user');
@@ -38,7 +47,6 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData, thunkAPI) => {
     try {
-      console.log(userData)
       const response = await authService.register(userData);
       return response;
     } catch (error) {
@@ -100,8 +108,6 @@ const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        console.log('action payload 1', action)
-        console.log('action payload 2', action.payload)
         state.user = action.payload.user;
         state.accessToken = action.payload.access_token;
         localStorage.setItem('user', JSON.stringify(action.payload.user));

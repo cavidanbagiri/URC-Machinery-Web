@@ -69,6 +69,7 @@ export function exportMachinesToExcel(
     'Mark': lookupName('car_mark', m.car_mark_id),
     'Model': lookupName('car_model', m.car_model_id),
     'Company': lookupName('company', m.company_id),
+    'Status': lookupName('car_status', m.status_id),
     'Yaradılma tarixi': formatDate(m.created_at),
     'Yaradan (ID)': m.created_by_id ? `#${m.created_by_id}` : '',
   }));

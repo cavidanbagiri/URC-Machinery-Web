@@ -8,7 +8,6 @@ import { IoSettingsOutline } from "react-icons/io5";
 
 
 import { IoIosLogOut } from "react-icons/io";
-import { div } from 'framer-motion/client';
 
 const Navbar = () => {
   const dispatch = useDispatch();

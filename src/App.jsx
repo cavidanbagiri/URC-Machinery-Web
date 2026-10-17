@@ -14,7 +14,7 @@ function App() {
     if (token) {
       dispatch(checkSession());
     }
-  }, []);
+  }, [dispatch]);
 
   return <RouterProvider router={router} />;
 }

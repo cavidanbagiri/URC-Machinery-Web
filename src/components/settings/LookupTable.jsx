@@ -2,6 +2,16 @@
 import { PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { Inbox } from 'lucide-react';
 
+const COLOR_DOT = {
+  gray: 'bg-gray-400',
+  green: 'bg-green-500',
+  yellow: 'bg-yellow-500',
+  blue: 'bg-blue-500',
+  red: 'bg-red-500',
+  orange: 'bg-orange-500',
+  purple: 'bg-purple-500',
+};
+
 function SkeletonRow() {
   return (
     <tr>
@@ -24,6 +34,7 @@ export default function LookupTable({
   onEdit,
   onDelete,
   configLabel,
+  showColor = false,
 }) {
   return (
     <div>
@@ -98,6 +109,12 @@ export default function LookupTable({
                     #{item.id}
                   </td>
                   <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                    {showColor && (
+                      <span
+                        className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${COLOR_DOT[item.color] || COLOR_DOT.gray}`}
+                        aria-label={`Rəng: ${item.color || 'gray'}`}
+                      />
+                    )}
                     {item.name}
                   </td>
                   <td className="px-6 py-3">

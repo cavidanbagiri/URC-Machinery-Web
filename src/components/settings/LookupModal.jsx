@@ -1,25 +1,38 @@
 // src/components/settings/LookupModal.jsx
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-export default function LookupModal({ open, onClose, onSubmit, title, initialValue = '', loading = false }) {
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
+const COLOR_OPTIONS = ['gray', 'green', 'yellow', 'blue', 'red', 'orange', 'purple'];
 
-  useEffect(() => {
-    if (open) {
-      setName(initialValue);
-      setError('');
-    }
-  }, [open, initialValue]);
+export default function LookupModal({
+  open,
+  onClose,
+  onSubmit,
+  title,
+  initialValue = '',
+  initialColor = 'gray',
+  initialDescription = '',
+  showColor = false,
+  showDescription = false,
+  loading = false,
+}) {
+  // Settings remounts this modal via key whenever it opens/changes item.
+  const [name, setName] = useState(initialValue);
+  const [color, setColor] = useState(initialColor);
+  const [description, setDescription] = useState(initialDescription);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return setError('Ad boş ola bilməz');
     if (trimmed.length > 255) return setError('Ad 255 simvoldan çox ola bilməz');
-    onSubmit({ name: trimmed });
+
+    const payload = { name: trimmed };
+    if (showColor) payload.color = color;
+    if (showDescription) payload.description = description.trim() || null;
+    onSubmit(payload);
   };
 
   return (
@@ -73,6 +86,43 @@ export default function LookupModal({ open, onClose, onSubmit, title, initialVal
                       }`}
                   />
                   {error && <p className="mt-1.5 text-xs font-medium text-red-600">{error}</p>}
+
+                  {showColor && (
+                    <div className="mt-4">
+                      <label htmlFor="lookup-color" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        Rəng
+                      </label>
+                      <select
+                        id="lookup-color"
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      >
+                        {COLOR_OPTIONS.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {showDescription && (
+                    <div className="mt-4">
+                      <label htmlFor="lookup-description" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        Təsvir
+                      </label>
+                      <textarea
+                        id="lookup-description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={3}
+                        maxLength={255}
+                        placeholder="Qısa təsvir..."
+                        className="w-full resize-none rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-end gap-2 border-t border-gray-100 bg-gray-50/60 px-6 py-4">

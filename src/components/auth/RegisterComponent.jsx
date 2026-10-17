@@ -9,7 +9,6 @@ const RegisterComponent = () => {
     lastname: '',
     email: '',
     password: '',
-    status_id: 4,
   });
 
   const dispatch = useDispatch();
@@ -34,7 +33,6 @@ const RegisterComponent = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("form data : ", formData)
     dispatch(register(formData));
   };
 
@@ -107,7 +105,8 @@ const RegisterComponent = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="Create a password"
+              minLength={8}
+              placeholder="Create a password (min. 8 characters)"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

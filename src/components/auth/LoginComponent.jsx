@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { login, reset } from '../../stores/user_slice';
 
 // Custom hook for form validation
-const useFormValidation = (initialState) => {
+const useFormValidation = () => {
   const [errors, setErrors] = useState({});
   
   const validateEmail = (email) => {
@@ -121,7 +121,7 @@ const LoginComponent = () => {
     (state) => state.auth
   );
   
-  const { errors, setErrors, validateField, validateForm } = useFormValidation(formData);
+  const { errors, setErrors, validateField, validateForm } = useFormValidation();
 
   // Load saved email if remember me was checked
   useEffect(() => {
@@ -186,9 +186,8 @@ const LoginComponent = () => {
     if (validateForm(formData)) {
       try {
         await dispatch(login(formData)).unwrap();
-      } catch (error) {
+      } catch {
         // Error is handled by Redux state
-        console.error('Login failed:', error);
       }
     }
   };

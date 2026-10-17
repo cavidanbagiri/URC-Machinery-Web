@@ -8,7 +8,7 @@ import StatusBadge from './StatusBadge';
 
 
 
-export default function MachineDetailModal({ open, onClose, machine, onSubmit, loading = false }) {
+export default function MachineDetailModal({ open, onClose, machine }) {
 
   const lookups = useSelector((s) => s.lookup.data);
 

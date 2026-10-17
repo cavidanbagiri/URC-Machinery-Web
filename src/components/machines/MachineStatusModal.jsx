@@ -1,37 +1,15 @@
 // src/components/machines/MachineStatusModal.jsx
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
-// Mock statuslar
-export const MOCK_STATUSES = [
-  {
-    id: 1,
-    name: 'Active',
-    color: 'green',
-    description: 'Maşın aktiv istifadədədir',
-  },
-  {
-    id: 2,
-    name: 'Tamirde',
-    color: 'yellow',
-    description: 'Maşın təmirdədir',
-  },
-  {
-    id: 3,
-    name: 'Bakimda',
-    color: 'blue',
-    description: 'Planlı texniki baxışdadır',
-  },
-  {
-    id: 4,
-    name: 'Hurda',
-    color: 'red',
-    description: 'İstifadədən çıxarılıb',
-  },
-];
-
 const colorClasses = {
+  gray: {
+    bg: 'bg-gray-100',
+    text: 'text-gray-700',
+    ring: 'ring-gray-200',
+    selected: 'border-gray-500 bg-gray-50',
+  },
   green: {
     bg: 'bg-green-100',
     text: 'text-green-700',
@@ -56,30 +34,41 @@ const colorClasses = {
     ring: 'ring-red-200',
     selected: 'border-red-500 bg-red-50',
   },
+  orange: {
+    bg: 'bg-orange-100',
+    text: 'text-orange-700',
+    ring: 'ring-orange-200',
+    selected: 'border-orange-500 bg-orange-50',
+  },
+  purple: {
+    bg: 'bg-purple-100',
+    text: 'text-purple-700',
+    ring: 'ring-purple-200',
+    selected: 'border-purple-500 bg-purple-50',
+  },
 };
 
 export default function MachineStatusModal({
   open,
   onClose,
   machine,
-  // currentStatusId = 1,   // mock default
+  statuses = [],
   onSubmit,
   loading = false,
 }) {
 
-  const currentStatusId = machine?.status_id ?? 1;
+  const currentStatusId = machine?.status_id ?? null;
 
-  const [selected, setSelected] = useState(currentStatusId);
-
-  useEffect(() => {
-    if (open && machine) {
-      setSelected(machine.status_id ?? 1);
-    }
-  }, [open, machine?.id, machine?.status_id]);
+  // The parent remounts this modal per machine/status (key), so no sync effect
+  // is needed. See CommonCarsPage.
+  const [selected, setSelected] = useState(
+    machine?.status_id ?? statuses[0]?.id ?? null
+  );
 
   if (!machine) return null;
 
   const handleSubmit = () => {
+    if (selected == null) return;
     onSubmit(selected);
   };
 
@@ -113,7 +102,7 @@ export default function MachineStatusModal({
               <div className="flex items-start justify-between border-b border-gray-200 px-6 py-4">
                 <div>
                   <Dialog.Title className="text-lg font-semibold text-gray-900">
-                    Statusu dəyişdir
+                    Durumu Değiştir
                   </Dialog.Title>
                   <p className="mt-0.5 text-xs text-gray-500">
                     {machine.identification_no || `Maşın #${machine.id}`}
@@ -129,15 +118,20 @@ export default function MachineStatusModal({
 
               {/* Body */}
               <div className="space-y-2 px-6 py-5">
-                {MOCK_STATUSES.map((status) => {
-                  const c = colorClasses[status.color];
+                {statuses.length === 0 && (
+                  <p className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-6 text-center text-sm text-gray-500">
+                    Status siyahısı boşdur. Tənzimləmələrdən status əlavə edin.
+                  </p>
+                )}
+                {statuses.map((status) => {
+                  const c = colorClasses[status.color] || colorClasses.gray;
                   const isSelected = selected === status.id;
 
                   return (
                     <button
                       key={status.id}
                       onClick={() => setSelected(status.id)}
-                      className={`flex w-full items-start gap-3 rounded-lg border-2 p-3 text-left transition ${isSelected
+                      className={`cursor-pointer flex w-full items-start gap-3 rounded-lg border-2 p-3 text-left transition ${isSelected
                           ? c.selected
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                         }`}
@@ -150,9 +144,11 @@ export default function MachineStatusModal({
                             {status.name}
                           </span>
                         </div>
-                        <p className="mt-1 text-xs text-gray-600">
-                          {status.description}
-                        </p>
+                        {status.description && (
+                          <p className="mt-1 text-xs text-gray-600">
+                            {status.description}
+                          </p>
+                        )}
                       </div>
 
                       {isSelected && (
@@ -170,14 +166,14 @@ export default function MachineStatusModal({
                   disabled={loading}
                   className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >
-                  Ləğv et
+                  Iptal et
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={loading || selected === currentStatusId}
+                  disabled={loading || selected == null || selected === currentStatusId}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? 'Yenilənir...' : 'Təsdiqlə'}
+                  {loading ? 'Yenileniyor...' : 'Onayla'}
                 </button>
               </div>
             </Dialog.Panel>

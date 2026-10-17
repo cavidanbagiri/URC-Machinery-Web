@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import { Tab } from '@headlessui/react';
-import { Settings2, Plus } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 
 import {
   fetchLookup,
@@ -12,6 +12,7 @@ import {
   deleteLookup,
   setActiveTab,
 } from '../stores/setting_slice';
+import { invalidateLookup } from '../stores/lookup_slice';
 import { LOOKUP_CONFIG } from '../services/SettingsService';
 
 import LookupTable from '../components/settings/LookupTable';
@@ -62,6 +63,8 @@ export default function Settings() {
         await dispatch(createLookup({ key: activeTab, payload })).unwrap();
         toast.success('Uğurla yaradıldı');
       }
+      // Force dependent pages (filters, modals, export) to reload this lookup.
+      dispatch(invalidateLookup(activeTab));
       setModalOpen(false);
       setEditingItem(null);
     } catch (err) {
@@ -81,6 +84,7 @@ export default function Settings() {
     setDeleting(true);
     try {
       await dispatch(deleteLookup({ key: activeTab, id: deletingItem.id })).unwrap();
+      dispatch(invalidateLookup(activeTab));
       toast.success('Uğurla silindi');
       setConfirmOpen(false);
       setDeletingItem(null);
@@ -158,10 +162,12 @@ export default function Settings() {
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           configLabel={currentConfig.label}
+          showColor={activeTab === 'car_status'}
         />
       </div>
 
       <LookupModal
+        key={`${activeTab}-${editingItem?.id ?? 'new'}-${modalOpen}`}
         open={modalOpen}
         onClose={() => {
           setModalOpen(false);
@@ -174,6 +180,10 @@ export default function Settings() {
             : `${currentConfig.label} — Yeni əlavə et`
         }
         initialValue={editingItem?.name || ''}
+        initialColor={editingItem?.color || 'gray'}
+        initialDescription={editingItem?.description || ''}
+        showColor={activeTab === 'car_status'}
+        showDescription={activeTab === 'car_status'}
         loading={submitting}
       />
 

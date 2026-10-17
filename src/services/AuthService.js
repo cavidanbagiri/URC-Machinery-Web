@@ -1,4 +1,4 @@
-import $api from '../http/api';
+import $api, { refreshAccessToken } from '../http/api';
 
 // Register user
 const register = async (userData) => {
@@ -17,8 +17,8 @@ const logout = async () => {
   try {
     // Call backend logout endpoint
     await $api.post('/auth/logout');
-  } catch (error) {
-    console.error('Logout API error:', error);
+  } catch {
+    // Ignore network/auth errors: local logout must always succeed.
   } finally {
     // Always clear local storage even if API call fails
     localStorage.removeItem('access_token');
@@ -28,9 +28,10 @@ const logout = async () => {
 
 
 
-// Refresh token - Just call endpoint, cookie is automatic
+// Refresh token - Just call endpoint, cookie is automatic.
+// Uses refreshApi (no response interceptor) to avoid refresh recursion.
 const refreshToken = async () => {
-  const response = await $api.post('/auth/refresh');
+  const response = await refreshAccessToken();
   // Backend returns new access_token and sets new refresh_token cookie if needed
   if (response.data.access_token) {
     localStorage.setItem('access_token', response.data.access_token);
