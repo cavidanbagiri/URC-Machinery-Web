@@ -44,7 +44,7 @@ const LOOKUPS_NEEDED = [
 ];
 
 const ACTION_BUTTON_CLASS =
-  'flex items-center gap-1.5 rounded-xs border-b border-b-gray-200 px-3 py-1 text-sm font-medium text-gray-700 transition cursor-pointer hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40';
+  'flex items-center gap-1.5 rounded-xs border-b border-b-gray-200 px-3 py-1 text-sm font-thin text-gray-700 transition cursor-pointer hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40';
 
 export default function CommonCarsPage() {
   const dispatch = useDispatch();
