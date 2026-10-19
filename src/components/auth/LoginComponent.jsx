@@ -9,14 +9,14 @@ const useFormValidation = () => {
   
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) return 'Email is required';
-    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    if (!email) return 'E-posta zorunludur';
+    if (!emailRegex.test(email)) return 'Lütfen geçerli bir e-posta adresi girin';
     return '';
   };
   
   const validatePassword = (password) => {
-    if (!password) return 'Password is required';
-    if (password.length < 6) return 'Password must be at least 6 characters';
+    if (!password) return 'Şifre zorunludur';
+    if (password.length < 6) return 'Şifre en az 6 karakter olmalıdır';
     return '';
   };
   
@@ -202,10 +202,10 @@ const LoginComponent = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
           <h2 className="text-3xl font-bold text-white text-center">
-            Hos geldiniz
+            Hoş geldiniz
           </h2>
           <p className="text-blue-100 text-center mt-2 text-sm">
-            Devam etmek icin giris yapiniz
+            Devam etmek için giriş yapın
           </p>
         </div>
         
@@ -222,7 +222,7 @@ const LoginComponent = () => {
           
           <form onSubmit={handleSubmit} className="space-y-3">
             <InputField
-              label="Email Address"
+              label="E-posta Adresi"
               type="email"
               name="email"
               value={formData.email}
@@ -234,14 +234,14 @@ const LoginComponent = () => {
             
             <div className="relative">
               <InputField
-                label="Password"
+                label="Şifre"
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={errors.password}
-                placeholder="Enter your password"
+                placeholder="Şifrenizi girin"
               />
               <button
                 type="button"
@@ -281,10 +281,10 @@ const LoginComponent = () => {
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <LoadingSpinner />
-                  <span>Signing in...</span>
+                  <span>Giriş yapılıyor...</span>
                 </div>
               ) : (
-                'Sign In'
+                'Giriş Yap'
               )}
             </button>
           </form>

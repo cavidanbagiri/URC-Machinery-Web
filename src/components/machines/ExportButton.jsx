@@ -14,7 +14,7 @@ export default function ExportButton() {
 
   const handleExport = async () => {
     if (total === 0) {
-      toast.error('Export üçün heç bir maşın yoxdur');
+      toast.error('Dışa aktarılacak makine yok');
       return;
     }
 
@@ -37,9 +37,9 @@ export default function ExportButton() {
       }
 
       exportMachinesToExcel(allMachines, lookups);
-      toast.success(`${allMachines.length} maşın export olundu`);
+      toast.success(`${allMachines.length} makine dışa aktarıldı`);
     } catch (err) {
-      toast.error(err.message || 'Export xətası');
+      toast.error(err.message || 'Dışa aktarma hatası');
     } finally {
       setExporting(false);
     }
@@ -52,7 +52,7 @@ export default function ExportButton() {
       className="flex items-center gap-2 border-b text-green-600 border-b-gray-200 px-4 py-1 mr-3 text-sm font-medium transition cursor-pointer hover:bg-gray-100 rounded-xs disabled:cursor-not-allowed disabled:opacity-50"
     >
       <ArrowDownTrayIcon className="h-4 w-4" />
-      {exporting ? 'Export edilir...' : 'Excel'}
+      {exporting ? 'Dışa aktarılıyor...' : 'Excel'}
     </button>
   );
 }

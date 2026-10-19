@@ -29,10 +29,10 @@ export default function ConfirmDialog({ open, onClose, onConfirm, title, message
                   </div>
                   <div className="flex-1 pt-0.5">
                     <Dialog.Title className="text-base font-semibold text-gray-900">
-                      {title || 'Təsdiq'}
+                      {title || 'Onay'}
                     </Dialog.Title>
                     <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-                      {message || 'Bu əməliyyat geri qaytarıla bilməz.'}
+                      {message || 'Bu işlem geri alınamaz.'}
                     </p>
                   </div>
                 </div>
@@ -44,14 +44,14 @@ export default function ConfirmDialog({ open, onClose, onConfirm, title, message
                   disabled={loading}
                   className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 disabled:opacity-50"
                 >
-                  Ləğv et
+                  İptal
                 </button>
                 <button
                   onClick={onConfirm}
                   disabled={loading}
                   className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-50"
                 >
-                  {loading ? 'Silinir...' : 'Sil'}
+                  {loading ? 'Siliniyor...' : 'Sil'}
                 </button>
               </div>
             </Dialog.Panel>

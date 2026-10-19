@@ -29,9 +29,9 @@ export default function PivotTable() {
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
             <Table2 className="h-5 w-5" />
           </div>
-          <p className="mt-3 text-sm font-medium text-gray-600">Hələ heç bir maşın yoxdur</p>
+          <p className="mt-3 text-sm font-medium text-gray-600">Henüz hiçbir makine yok</p>
           <p className="mt-1 text-xs text-gray-400">
-            Maşın əlavə etdikdə burada bölgü görünəcək
+            Makine eklediğinizde dağılım burada görünecek
           </p>
         </div>
       </div>
@@ -47,10 +47,10 @@ export default function PivotTable() {
           <h2 className="text-base font-semibold text-gray-900">
             Ekipman Kod Tanımları
           </h2>
-          <p className="mt-0.5 text-xs text-gray-500">Territory üzrə bölgü</p>
+          <p className="mt-0.5 text-xs text-gray-500">Bölgeye göre dağılım</p>
         </div>
         <div className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">
-          Cəmi: {grand_total}
+          Toplam: {grand_total}
         </div>
       </div>
 

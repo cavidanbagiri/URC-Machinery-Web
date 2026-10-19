@@ -10,7 +10,7 @@ export default function WarehouseStock() {
             <BsBoxSeam className="h-4 w-4" />
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-            Ambar Stoku
+            Depo Stoku
           </h1>
         </div>
         <p className="mt-1.5 text-sm text-gray-500">

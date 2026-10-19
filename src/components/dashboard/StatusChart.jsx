@@ -22,7 +22,7 @@ function CustomTooltip({ active, payload }) {
         <span className="text-xs font-medium text-gray-700">{d.name}</span>
       </div>
       <p className="mt-1 text-sm font-bold text-gray-900">
-        {d.count} <span className="text-xs font-normal text-gray-500">maşın</span>
+        {d.count} <span className="text-xs font-normal text-gray-500">makine</span>
       </p>
     </div>
   );
@@ -64,7 +64,7 @@ export default function StatusChart() {
     .map((s) => ({ ...s, fill: COLORS[s.color] || COLORS.gray }));
 
   const handleClick = (entry) => {
-    if (entry?.id) navigate(`/common-cars?status_id=${entry.id}`);
+    if (entry?.id) navigate(`/common_cars?status_id=${entry.id}`);
   };
 
   if (loading) {
@@ -84,14 +84,14 @@ export default function StatusChart() {
   if (total === 0) {
     return (
       <div className="flex h-full w-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-gray-900">Status bölgüsü</h2>
+        <h2 className="text-base font-semibold text-gray-900">Durum Dağılımı</h2>
         <div className="mt-4 flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/60 py-14">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
             <PieIcon className="h-5 w-5" />
           </div>
-          <p className="mt-3 text-sm font-medium text-gray-600">Hələ heç bir maşın yoxdur</p>
+          <p className="mt-3 text-sm font-medium text-gray-600">Henüz hiçbir makine yok</p>
           <p className="mt-1 text-xs text-gray-400">
-            Maşın əlavə etdikdə burada status bölgüsü görünəcək
+            Makine eklediğinizde durum dağılımı burada görünecek
           </p>
         </div>
       </div>
@@ -103,14 +103,14 @@ export default function StatusChart() {
     className="flex h-[480px] w-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-2 flex items-start justify-between">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Status bölgüsü</h2>
-          <p className="mt-0.5 text-xs text-gray-500">Chart-a klik → filter</p>
+          <h2 className="text-base font-semibold text-gray-900">Durum Dağılımı</h2>
+          <p className="mt-0.5 text-xs text-gray-500">Grafiğe tıklayın → filtre</p>
         </div>
         <button
-          onClick={() => navigate('/common-cars')}
+          onClick={() => navigate('/common_cars')}
           className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium text-gray-500 transition hover:bg-gray-50 hover:text-gray-800"
         >
-          Hamısı <ExternalLink className="h-3 w-3" />
+          Tümü <ExternalLink className="h-3 w-3" />
         </button>
       </div>
 
@@ -142,7 +142,7 @@ export default function StatusChart() {
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold tracking-tight text-gray-900">{total}</span>
           <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
-            maşın
+            makine
           </span>
         </div>
       </div>

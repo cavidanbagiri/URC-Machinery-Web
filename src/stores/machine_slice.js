@@ -51,7 +51,7 @@ export const fetchMachines = createAsyncThunk(
       });
       return data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Fetch xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Veriler yüklenemedi');
     }
   }
 );
@@ -62,7 +62,7 @@ export const createMachine = createAsyncThunk(
     try {
       return await MachineService.createMachine(payload);
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Create xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Kayıt oluşturulamadı');
     }
   }
 );
@@ -73,7 +73,7 @@ export const updateMachine = createAsyncThunk(
     try {
       return await MachineService.updateMachine(id, payload);
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Update xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Kayıt güncellenemedi');
     }
   }
 );
@@ -87,7 +87,7 @@ export const deleteMachine = createAsyncThunk(
       return id;
     } catch (err) {
       return rejectWithValue(
-        String(err.response?.data?.detail || err.message || 'Delete xətası')
+        String(err.response?.data?.detail || err.message || 'Kayıt silinemedi')
       );
     }
   }
@@ -140,7 +140,7 @@ export const updateMachineStatus = createAsyncThunk(
     } catch (err) {
       // console.error('DEBUG — error:', err);
       // console.error('DEBUG — err.response:', err.response);
-      return rejectWithValue(err.response?.data?.detail || 'Xəta');
+      return rejectWithValue(err.response?.data?.detail || 'Bir hata oluştu');
     }
   }
 );

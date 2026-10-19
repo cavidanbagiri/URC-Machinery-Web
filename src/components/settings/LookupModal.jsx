@@ -5,6 +5,16 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const COLOR_OPTIONS = ['gray', 'green', 'yellow', 'blue', 'red', 'orange', 'purple'];
 
+const COLOR_LABELS = {
+  gray: 'Gri',
+  green: 'Yeşil',
+  yellow: 'Sarı',
+  blue: 'Mavi',
+  red: 'Kırmızı',
+  orange: 'Turuncu',
+  purple: 'Mor',
+};
+
 export default function LookupModal({
   open,
   onClose,
@@ -26,8 +36,8 @@ export default function LookupModal({
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed) return setError('Ad boş ola bilməz');
-    if (trimmed.length > 255) return setError('Ad 255 simvoldan çox ola bilməz');
+    if (!trimmed) return setError('Ad boş olamaz');
+    if (trimmed.length > 255) return setError('Ad 255 karakterden fazla olamaz');
 
     const payload = { name: trimmed };
     if (showColor) payload.color = color;
@@ -60,7 +70,7 @@ export default function LookupModal({
                 </Dialog.Title>
                 <button
                   onClick={onClose}
-                  aria-label="Bağla"
+                  aria-label="Kapat"
                   className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   <XMarkIcon className="h-4.5 w-4.5" />
@@ -78,7 +88,7 @@ export default function LookupModal({
                     value={name}
                     onChange={(e) => { setName(e.target.value); if (error) setError(''); }}
                     autoFocus
-                    placeholder="Ad daxil edin..."
+                    placeholder="Ad girin..."
                     className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400
                       ${error
                         ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100'
@@ -90,7 +100,7 @@ export default function LookupModal({
                   {showColor && (
                     <div className="mt-4">
                       <label htmlFor="lookup-color" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Rəng
+                        Renk
                       </label>
                       <select
                         id="lookup-color"
@@ -100,7 +110,7 @@ export default function LookupModal({
                       >
                         {COLOR_OPTIONS.map((option) => (
                           <option key={option} value={option}>
-                            {option}
+                            {COLOR_LABELS[option] || option}
                           </option>
                         ))}
                       </select>
@@ -110,7 +120,7 @@ export default function LookupModal({
                   {showDescription && (
                     <div className="mt-4">
                       <label htmlFor="lookup-description" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Təsvir
+                        Açıklama
                       </label>
                       <textarea
                         id="lookup-description"
@@ -118,7 +128,7 @@ export default function LookupModal({
                         onChange={(e) => setDescription(e.target.value)}
                         rows={3}
                         maxLength={255}
-                        placeholder="Qısa təsvir..."
+                        placeholder="Kısa açıklama..."
                         className="w-full resize-none rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                       />
                     </div>
@@ -132,14 +142,14 @@ export default function LookupModal({
                     disabled={loading}
                     className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 disabled:opacity-50"
                   >
-                    Ləğv et
+                    İptal
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
                     className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
                   >
-                    {loading ? 'Yadda saxlanılır...' : 'Yadda saxla'}
+                    {loading ? 'Kaydediliyor...' : 'Kaydet'}
                   </button>
                 </div>
               </form>

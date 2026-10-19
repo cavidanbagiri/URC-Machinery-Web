@@ -2,19 +2,19 @@
 import * as XLSX from 'xlsx';
 
 /**
- * Maşın siyahısını Excel-ə export edir.
+ * Makine listesini Excel'e aktarır.
  *
- * @param {Array} machines — machine obyektləri
- * @param {Object} lookups — { territory: [...], company: [...] } və s.
- * @param {string} filename — fayl adı (default: "machines.xlsx")
+ * @param {Array} machines — makine nesneleri
+ * @param {Object} lookups — { territory: [...], company: [...] } vb.
+ * @param {string} filename — dosya adı (varsayılan: "makineler.xlsx")
  */
 export function exportMachinesToExcel(
   machines,
   lookups = {},
-  filename = 'machines.xlsx'
+  filename = 'makineler.xlsx'
 ) {
   if (!machines || machines.length === 0) {
-    throw new Error('Export üçün heç bir maşın yoxdur');
+    throw new Error('Dışa aktarılacak makine yok');
   }
 
   // Lookup ID → ad
@@ -38,7 +38,7 @@ export function exportMachinesToExcel(
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     try {
-      return new Date(dateStr).toLocaleString('az-AZ', {
+      return new Date(dateStr).toLocaleString('tr-TR', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -53,25 +53,25 @@ export function exportMachinesToExcel(
   // Sətirləri hazırla (TƏRCÜMƏ BAŞLIQLARI İLƏ)
   const rows = machines.map((m) => ({
     'ID': m.id,
-    'Identification No': m.identification_no || '',
+    'Kimlik No': m.identification_no || '',
     'VIN No': m.vin_no || '',
-    'Plate No': m.plate_no || '',                 // ← YENİ
-    'Technical Character': m.technical_character || '',
-    'Production Year': extractYear(m.production_year),
-    'Weight (kg)': m.weight ?? '',
-    'Dimension': m.dimension || '',
-    'Engine Power': m.engine_power || '',
-    'Engine Mark Model': m.engine_mark_model || '',
-    'Engine Identity': m.engine_identity || '',
-    'Territory': lookupName('territory', m.territory_id),
-    'Type Transport': lookupName('type_transport', m.type_id),
-    'SubType Transport': lookupName('sub_type_transport', m.subtype_id),
-    'Mark': lookupName('car_mark', m.car_mark_id),
+    'Plaka No': m.plate_no || '',                 // ← YENİ
+    'Teknik Özellikler': m.technical_character || '',
+    'Üretim Yılı': extractYear(m.production_year),
+    'Ağırlık (kg)': m.weight ?? '',
+    'Boyutlar': m.dimension || '',
+    'Motor Gücü': m.engine_power || '',
+    'Motor Marka Modeli': m.engine_mark_model || '',
+    'Motor Kimliği': m.engine_identity || '',
+    'Bölge': lookupName('territory', m.territory_id),
+    'Taşıma Tipi': lookupName('type_transport', m.type_id),
+    'Alt Taşıma Tipi': lookupName('sub_type_transport', m.subtype_id),
+    'Marka': lookupName('car_mark', m.car_mark_id),
     'Model': lookupName('car_model', m.car_model_id),
-    'Company': lookupName('company', m.company_id),
-    'Status': lookupName('car_status', m.status_id),
-    'Yaradılma tarixi': formatDate(m.created_at),
-    'Yaradan (ID)': m.created_by_id ? `#${m.created_by_id}` : '',
+    'Şirket': lookupName('company', m.company_id),
+    'Durum': lookupName('car_status', m.status_id),
+    'Oluşturulma Tarihi': formatDate(m.created_at),
+    'Oluşturan (ID)': m.created_by_id ? `#${m.created_by_id}` : '',
   }));
 
   // Worksheet yarat
@@ -89,7 +89,7 @@ export function exportMachinesToExcel(
 
   // Workbook yarat
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Machines');
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Makineler');
 
   // Fayl adına tarix əlavə et
   const dateStr = new Date().toISOString().slice(0, 10);   // 2026-09-24

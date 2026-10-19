@@ -39,7 +39,7 @@ const RegisterComponent = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Kayıt Ol</h2>
         
         {isError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -51,7 +51,7 @@ const RegisterComponent = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2">
-                First Name
+                Ad
               </label>
               <input
                 type="text"
@@ -59,14 +59,14 @@ const RegisterComponent = () => {
                 value={formData.firstname}
                 onChange={handleChange}
                 required
-                placeholder="First name"
+                placeholder="Adınız"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2">
-                Last Name
+                Soyad
               </label>
               <input
                 type="text"
@@ -74,7 +74,7 @@ const RegisterComponent = () => {
                 value={formData.lastname}
                 onChange={handleChange}
                 required
-                placeholder="Last name"
+                placeholder="Soyadınız"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -82,7 +82,7 @@ const RegisterComponent = () => {
 
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">
-              Email
+              E-posta
             </label>
             <input
               type="email"
@@ -90,14 +90,14 @@ const RegisterComponent = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Enter your email"
+              placeholder="E-posta adresinizi girin"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">
-              Password
+              Şifre
             </label>
             <input
               type="password"
@@ -106,7 +106,7 @@ const RegisterComponent = () => {
               onChange={handleChange}
               required
               minLength={8}
-              placeholder="Create a password (min. 8 characters)"
+              placeholder="Bir şifre oluşturun (en az 8 karakter)"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -116,14 +116,14 @@ const RegisterComponent = () => {
             disabled={isLoading}
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition duration-300"
           >
-            {isLoading ? 'Loading...' : 'Register'}
+            {isLoading ? 'Yükleniyor...' : 'Kayıt Ol'}
           </button>
         </form>
 
         <p className="text-center text-gray-600 mt-4">
-          Already have an account?{' '}
+          Zaten bir hesabınız var mı?{' '}
           <Link to="/auth?mode=login" className="text-blue-500 hover:text-blue-700 font-semibold">
-            Login here
+            Buradan giriş yapın
           </Link>
         </p>
       </div>

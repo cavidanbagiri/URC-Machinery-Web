@@ -30,7 +30,7 @@ export const fetchLookup = createAsyncThunk(
       const data = await SettingService.fetchAll(key);
       return { key, data };
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Fetch xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Veriler yüklenemedi');
     }
   }
 );
@@ -42,7 +42,7 @@ export const createLookup = createAsyncThunk(
       const data = await SettingService.create(key, payload);
       return { key, data };
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Create xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Kayıt oluşturulamadı');
     }
   }
 );
@@ -54,7 +54,7 @@ export const updateLookup = createAsyncThunk(
       const data = await SettingService.update(key, id, payload);
       return { key, data };
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Update xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Kayıt güncellenemedi');
     }
   }
 );
@@ -66,7 +66,7 @@ export const deleteLookup = createAsyncThunk(
       await SettingService.delete(key, id);
       return { key, id };
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Delete xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Kayıt silinemedi');
     }
   }
 );

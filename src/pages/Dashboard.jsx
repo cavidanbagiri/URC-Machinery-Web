@@ -38,7 +38,7 @@ export default function DashboardPage() {
           </h1>
         </div>
         <p className="mt-1 text-sm text-gray-500 font-light tracking-tight">
-          Araçların Durumu ve Dağılımına İlişkin Genel Görünüm
+          Makinelerin Durumu ve Dağılımına İlişkin Genel Görünüm
         </p>
       </div>
 

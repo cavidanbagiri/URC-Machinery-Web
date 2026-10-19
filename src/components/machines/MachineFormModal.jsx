@@ -88,22 +88,22 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
     const newErrors = {};
 
     if (form.vin_no && form.vin_no.length > 100) {
-      newErrors.vin_no = 'VIN 100 simvoldan çox ola bilməz';
+      newErrors.vin_no = 'VIN 100 karakterden fazla olamaz';
     }
     if (form.plate_no && form.plate_no.length > 50) {
-      newErrors.plate_no = 'Plate 50 simvoldan çox ola bilməz';
+      newErrors.plate_no = 'Plaka 50 karakterden fazla olamaz';
     }
     if (form.identification_no && form.identification_no.length > 100) {
-      newErrors.identification_no = 'Max 100 simvol';
+      newErrors.identification_no = 'En fazla 100 karakter';
     }
     if (form.production_year) {
       const year = Number(form.production_year);
       if (year < 1900 || year > 2100) {
-        newErrors.production_year = 'İl 1900-2100 arasında olmalıdır';
+        newErrors.production_year = 'Yıl 1900-2100 arasında olmalıdır';
       }
     }
     if (form.weight !== '' && isNaN(Number(form.weight))) {
-      newErrors.weight = 'Rəqəm olmalıdır';
+      newErrors.weight = 'Sayı olmalıdır';
     }
 
     setErrors(newErrors);
@@ -153,14 +153,14 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
         await dispatch(
           updateMachine({ id: editingMachine.id, payload })
         ).unwrap();
-        toast.success('Uğurla yeniləndi');
+        toast.success('Başarıyla güncellendi');
       } else {
         await dispatch(createMachine(payload)).unwrap();
-        toast.success('Uğurla yaradıldı');
+        toast.success('Başarıyla oluşturuldu');
       }
       onClose();
     } catch (err) {
-      toast.error(err || 'Xəta baş verdi');
+      toast.error(err || 'Bir hata oluştu');
     }
   };
 
@@ -193,7 +193,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                 <Dialog.Title className="text-lg font-semibold text-gray-900">
-                  {isEdit ? 'Aracı Düzenle' : 'Yeni Araç Ekle'}
+                  {isEdit ? 'Makineyi Düzenle' : 'Yeni Makine Ekle'}
                 </Dialog.Title>
                 <button
                   onClick={onClose}
@@ -214,7 +214,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   <Section title="Temel Bilgiler">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <Field
-                        label="Identification No"
+                        label="Kimlik No"
                         value={form.identification_no}
                         onChange={(v) => handleChange('identification_no', v)}
                         error={errors.identification_no}
@@ -229,18 +229,18 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                       />
                       {/* YENİ */}
                       <Field
-                        label="Plate No"
+                        label="Plaka No"
                         value={form.plate_no}
                         onChange={(v) => handleChange('plate_no', v)}
                         error={errors.plate_no}
                         placeholder="90 AB 123"
                       />
                       <Field
-                        label="Technical Character"
+                        label="Teknik Özellikler"
                         value={form.technical_character}
                         onChange={(v) => handleChange('technical_character', v)}
                         error={errors.technical_character}
-                        placeholder="Yük maşını, 3 oxlu"
+                        placeholder="Yük makinesi, 3 akslı"
                         fullWidth
                       />
                     </div>
@@ -250,7 +250,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   <Section title="Teknik Özellikler ">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <Field
-                        label="Production Year"
+                        label="Üretim Yılı"
                         type="number"
                         value={form.production_year}
                         onChange={(v) => handleChange('production_year', v)}
@@ -258,7 +258,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                         placeholder="2020"
                       />
                       <Field
-                        label="Weight (kg)"
+                        label="Ağırlık (kg)"
                         type="number"
                         value={form.weight}
                         onChange={(v) => handleChange('weight', v)}
@@ -266,28 +266,28 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                         placeholder="12000"
                       />
                       <Field
-                        label="Dimension"
+                        label="Boyutlar"
                         value={form.dimension}
                         onChange={(v) => handleChange('dimension', v)}
                         error={errors.dimension}
                         placeholder="12x2.5x3.8"
                       />
                       <Field
-                        label="Engine Power"
+                        label="Motor Gücü"
                         value={form.engine_power}
                         onChange={(v) => handleChange('engine_power', v)}
                         error={errors.engine_power}
                         placeholder="440 HP"
                       />
                       <Field
-                        label="Engine Mark Model"
+                        label="Motor Marka Modeli"
                         value={form.engine_mark_model}
                         onChange={(v) => handleChange('engine_mark_model', v)}
                         error={errors.engine_mark_model}
                         placeholder="OM 471"
                       />
                       <Field
-                        label="Engine Identity"
+                        label="Motor Kimliği"
                         value={form.engine_identity}
                         onChange={(v) => handleChange('engine_identity', v)}
                         error={errors.engine_identity}
@@ -297,39 +297,39 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   </Section>
 
                   {/* LOOKUPS */}
-                  <Section title="Kategorizasyon">
+                  <Section title="Sınıflandırma">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       {/* YENİ — Status */}
                       <SelectField
-                        label="Status"
+                        label="Durum"
                         value={form.status_id}
                         onChange={(v) => handleChange('status_id', v)}
                         options={lookups.car_status || []}
                         error={errors.status_id}
                       />
                       <SelectField
-                        label="Territory"
+                        label="Bölge"
                         value={form.territory_id}
                         onChange={(v) => handleChange('territory_id', v)}
                         options={lookups.territory || []}
                         error={errors.territory_id}
                       />
                       <SelectField
-                        label="Type Transport"
+                        label="Taşıma Tipi"
                         value={form.type_id}
                         onChange={(v) => handleChange('type_id', v)}
                         options={lookups.type_transport || []}
                         error={errors.type_id}
                       />
                       <SelectField
-                        label="SubType Transport"
+                        label="Alt Taşıma Tipi"
                         value={form.subtype_id}
                         onChange={(v) => handleChange('subtype_id', v)}
                         options={lookups.sub_type_transport || []}
                         error={errors.subtype_id}
                       />
                       <SelectField
-                        label="Mark"
+                        label="Marka"
                         value={form.car_mark_id}
                         onChange={(v) => handleChange('car_mark_id', v)}
                         options={lookups.car_mark || []}
@@ -343,7 +343,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                         error={errors.car_model_id}
                       />
                       <SelectField
-                        label="Company"
+                        label="Şirket"
                         value={form.company_id}
                         onChange={(v) => handleChange('company_id', v)}
                         options={lookups.company || []}
@@ -362,7 +362,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
                   disabled={formSubmitting}
                   className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >
-                  Iptal et
+                  İptal
                 </button>
                 <button
                   type="submit"

@@ -7,7 +7,7 @@ import $api from '../http/api';
 
 export const LOOKUP_CONFIG = {
   territory: {
-    label: 'Territory',
+    label: 'Bölge',
     endpoint: '/machines',
     createPath: '/create_territory',
     fetchPath: '/fetch_territories',
@@ -15,7 +15,7 @@ export const LOOKUP_CONFIG = {
     deletePath: (id) => `/delete_territory/${id}`,
   },
   type_transport: {
-    label: 'Type Transport',
+    label: 'Taşıma Tipi',
     endpoint: '/machines',
     createPath: '/create_type_transport',
     fetchPath: '/fetch_type_transports',
@@ -23,7 +23,7 @@ export const LOOKUP_CONFIG = {
     deletePath: (id) => `/delete_type_transport/${id}`,
   },
   sub_type_transport: {
-    label: 'SubType Transport',
+    label: 'Alt Taşıma Tipi',
     endpoint: '/machines',
     createPath: '/create_sub_type_transport',
     fetchPath: '/fetch_sub_type_transports',
@@ -31,7 +31,7 @@ export const LOOKUP_CONFIG = {
     deletePath: (id) => `/delete_sub_type_transport/${id}`,
   },
   car_mark: {
-    label: 'Car Mark',
+    label: 'Marka',
     endpoint: '/machines',
     createPath: '/create_car_mark',
     fetchPath: '/fetch_car_marks',
@@ -39,7 +39,7 @@ export const LOOKUP_CONFIG = {
     deletePath: (id) => `/delete_car_mark/${id}`,
   },
   car_model: {
-    label: 'Car Model',
+    label: 'Model',
     endpoint: '/machines',
     createPath: '/create_car_model',
     fetchPath: '/fetch_car_models',
@@ -47,7 +47,7 @@ export const LOOKUP_CONFIG = {
     deletePath: (id) => `/delete_car_model/${id}`,
   },
   company: {
-    label: 'Company',
+    label: 'Şirket',
     endpoint: '/machines',
     createPath: '/create_company',
     fetchPath: '/fetch_companies',
@@ -56,7 +56,7 @@ export const LOOKUP_CONFIG = {
   },
   // YENİ
   car_status: {
-    label: 'Car Status',
+    label: 'Makine Durumu',
     endpoint: '/machines',
     createPath: '/create_car_status',
     fetchPath: '/fetch_car_statuses',

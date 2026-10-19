@@ -25,7 +25,7 @@ export const fetchStatusStatistics = createAsyncThunk(
       const message =
         err?.response?.data?.detail ||
         err?.message ||
-        'Statistika yüklənə bilmədi';
+        'İstatistikler yüklenemedi';
       return rejectWithValue(String(message));
     }
   }
@@ -38,7 +38,7 @@ export const fetchPivotStatistics = createAsyncThunk(
     try {
       return await DashboardService.fetchPivotStatistics();
     } catch (err) {
-      return rejectWithValue(String(err?.message || 'Pivot yüklənə bilmədi'));
+      return rejectWithValue(String(err?.message || 'Pivot verileri yüklenemedi'));
     }
   }
 );

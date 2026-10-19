@@ -54,19 +54,19 @@ export default function MachineTable({
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
         <p className="text-sm font-medium text-gray-900">
-          Heç bir nəticə tapılmadı
+          Sonuç bulunamadı
         </p>
         <p className="mt-1 text-sm text-gray-500">
           {hasActiveFilters
-            ? 'Filterləri dəyişdirin və ya təmizləyin'
-            : 'Hələ heç bir maşın əlavə olunmayıb'}
+            ? 'Filtreleri değiştirin veya temizleyin'
+            : 'Henüz hiçbir makine eklenmemiş'}
         </p>
         {hasActiveFilters && (
           <button
             onClick={onOpenFilters}
             className="mt-3 text-sm font-medium text-blue-600 hover:underline"
           >
-            Filterləri aç
+            Filtreleri aç
           </button>
         )}
       </div>
@@ -89,15 +89,15 @@ export default function MachineTable({
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700 rounded-lg">
             <tr>
               <th className="px-6 py-2 text-left font-medium"></th>
-              <th className="px-6 py-2 text-left font-medium">Status</th>
-              <th className="px-6 py-2 text-left font-medium">Id No</th>
-              <th className="px-6 py-2 text-left font-medium">Plate No</th>       {/* ← YENİ */}
-              <th className="px-6 py-2 text-left font-medium">Territory</th>
-              <th className="px-6 py-2 text-left font-medium">Mark</th>
+              <th className="px-6 py-2 text-left font-medium">Durum</th>
+              <th className="px-6 py-2 text-left font-medium">Kimlik No</th>
+              <th className="px-6 py-2 text-left font-medium">Plaka No</th>       {/* ← YENİ */}
+              <th className="px-6 py-2 text-left font-medium">Bölge</th>
+              <th className="px-6 py-2 text-left font-medium">Marka</th>
               <th className="px-6 py-2 text-left font-medium">Model</th>
               <th className="px-6 py-2 text-left font-medium">VIN No</th>
-              <th className="px-6 py-2 text-left font-medium">Year</th>
-              <th className="px-6 py-2 text-left font-medium">Company</th>
+              <th className="px-6 py-2 text-left font-medium">Yıl</th>
+              <th className="px-6 py-2 text-left font-medium">Şirket</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100" >

@@ -64,13 +64,14 @@ const colorTokens = {
   },
 };
 
-// status adına görə ikon seçimi (istəyə görə uyğunlaşdır)
+// Durum adına göre ikon seçimi
 const pickIcon = (name = '') => {
   const n = name.toLowerCase();
-  if (n.includes('aktiv') || n.includes('active')) return CheckCircle2;
-  if (n.includes('gözlə') || n.includes('pending')) return Clock;
-  if (n.includes('təmir') || n.includes('repair')) return Wrench;
-  if (n.includes('problem') || n.includes('xəta')) return AlertTriangle;
+  if (n.includes('aktif') || n.includes('active')) return CheckCircle2;
+  if (n.includes('bekle') || n.includes('gözlə') || n.includes('pending')) return Clock;
+  if (n.includes('tamir') || n.includes('təmir') || n.includes('repair') || n.includes('bakım') || n.includes('bakim')) return Wrench;
+  if (n.includes('problem') || n.includes('arıza') || n.includes('xəta')) return AlertTriangle;
+  if (n.includes('hurda')) return AlertTriangle;
   return Car;
 };
 
@@ -116,7 +117,7 @@ function KpiCard({ label, value, suffix, icon: Icon, color = 'gray', percent, on
       {percent !== undefined && (
         <div className="relative mt-3">
           <div className="flex items-center justify-between text-[11px] text-gray-600">
-            <span>Payı</span>
+            <span>Oranı</span>
             <span className="font-semibold text-gray-800">{percent}%</span>
           </div>
           <div className={`mt-1.5 h-1 w-full overflow-hidden rounded-full ${c.barTrack}`}>
@@ -131,7 +132,7 @@ function KpiCard({ label, value, suffix, icon: Icon, color = 'gray', percent, on
       {isTotal && (
         <div className="relative mt-3 flex items-center gap-1 text-[11px] font-medium text-gray-600">
           <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-          Tum arabalar
+          Tüm makineler
         </div>
       )}
     </button>

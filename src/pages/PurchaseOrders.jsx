@@ -10,11 +10,11 @@ export default function PurchaseOrders() {
             <BsCartCheck className="h-4 w-4" />
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-            Satinalma siparisler
+            Satın Alma Siparişleri
           </h1>
         </div>
         <p className="mt-1.5 text-sm text-gray-500">
-          Satınalma siparişlerini buradan yöneteceksiniz.
+          Satın alma siparişlerini buradan yöneteceksiniz.
         </p>
       </div>
 
@@ -24,7 +24,7 @@ export default function PurchaseOrders() {
           Henüz kayıt yok
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Satınalma siparişleri modülü yakında burada görünecek.
+          Satın alma siparişleri modülü yakında burada görünecek.
         </p>
       </div>
     </div>

@@ -37,7 +37,7 @@ export const fetchLookupIfNeeded = createAsyncThunk(
       const data = await SettingService.fetchAll(key);
       return { key, data, cached: false };
     } catch (err) {
-      return rejectWithValue(err.response?.data?.detail || 'Lookup fetch xətası');
+      return rejectWithValue(err.response?.data?.detail || 'Liste yüklenemedi');
     }
   }
 );

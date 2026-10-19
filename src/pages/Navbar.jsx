@@ -16,7 +16,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
 
-    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    const confirmLogout = window.confirm("Çıkış yapmak istediğinizden emin misiniz?");
 
     if (confirmLogout) {
       dispatch(logout());
@@ -91,7 +91,7 @@ const Navbar = () => {
                      scale-0 group-hover:scale-100 transition-all duration-150 origin-left
                      bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
                      whitespace-nowrap border border-gray-700">
-                      Data Management
+                      Veri Yönetimi
                     </span>
                   </NavLink>
                 </li>
@@ -110,7 +110,7 @@ const Navbar = () => {
                      scale-0 group-hover:scale-100 transition-all duration-150 origin-left
                      bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
                      whitespace-nowrap border border-gray-700">
-                      Warehouse Stock
+                      Depo Stoku
                     </span>
                   </NavLink>
                 </li>
@@ -129,7 +129,7 @@ const Navbar = () => {
                      scale-0 group-hover:scale-100 transition-all duration-150 origin-left
                      bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
                      whitespace-nowrap border border-gray-700">
-                      Purchasing Orders
+                      Satın Alma Siparişleri
                     </span>
                   </NavLink>
                 </li>
@@ -148,7 +148,7 @@ const Navbar = () => {
                      scale-0 group-hover:scale-100 transition-all duration-150 origin-left
                      bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
                      whitespace-nowrap border border-gray-700">
-                      Settings
+                      Ayarlar
                     </span>
                   </NavLink>
                 </li>

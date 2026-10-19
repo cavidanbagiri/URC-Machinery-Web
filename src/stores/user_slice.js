@@ -37,7 +37,7 @@ export const checkSession = createAsyncThunk(
       // Session expired
       localStorage.removeItem('access_token');
       localStorage.removeItem('user');
-      return thunkAPI.rejectWithValue('Session expired');
+      return thunkAPI.rejectWithValue('Oturum süresi doldu');
     }
   }
 );
@@ -50,7 +50,7 @@ export const register = createAsyncThunk(
       const response = await authService.register(userData);
       return response;
     } catch (error) {
-      const message = error.response?.data?.detail || error.message || 'Registration failed';
+      const message = error.response?.data?.detail || error.message || 'Kayıt başarısız oldu';
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -64,7 +64,7 @@ export const login = createAsyncThunk(
       const response = await authService.login(userData);
       return response;
     } catch (error) {
-      const message = error.response?.data?.detail || error.message || 'Login failed';
+      const message = error.response?.data?.detail || error.message || 'Giriş başarısız oldu';
       return thunkAPI.rejectWithValue(message);
     }
   }

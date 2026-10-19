@@ -43,7 +43,7 @@ export default function LookupTable({
         <div>
           <h2 className="text-sm font-semibold text-gray-900">{configLabel}</h2>
           <p className="mt-0.5 text-xs text-gray-500">
-            Cəmi: <span className="font-medium text-gray-700">{items.length}</span> element
+            Toplam: <span className="font-medium text-gray-700">{items.length}</span> öğe
           </p>
         </div>
         <button
@@ -51,7 +51,7 @@ export default function LookupTable({
           className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           <PlusIcon className="h-4 w-4" strokeWidth={2.4} />
-          Yeni əlavə et
+          Yeni Ekle
         </button>
       </div>
 
@@ -72,14 +72,14 @@ export default function LookupTable({
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-gray-400 ring-1 ring-gray-200">
               <Inbox className="h-5 w-5" />
             </div>
-            <p className="mt-3 text-sm font-medium text-gray-700">Hələ heç bir element yoxdur</p>
-            <p className="mt-1 text-xs text-gray-500">İlk elementi əlavə edərək başlayın</p>
+            <p className="mt-3 text-sm font-medium text-gray-700">Henüz hiçbir öğe yok</p>
+            <p className="mt-1 text-xs text-gray-500">İlk öğeyi ekleyerek başlayın</p>
             <button
               onClick={onCreate}
               className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               <PlusIcon className="h-4 w-4" strokeWidth={2.4} />
-              İlk elementi əlavə et
+              İlk Öğeyi Ekle
             </button>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function LookupTable({
                   Ad
                 </th>
                 <th className="px-6 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                  Əməliyyatlar
+                  İşlemler
                 </th>
               </tr>
             </thead>
@@ -112,7 +112,7 @@ export default function LookupTable({
                     {showColor && (
                       <span
                         className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${COLOR_DOT[item.color] || COLOR_DOT.gray}`}
-                        aria-label={`Rəng: ${item.color || 'gray'}`}
+                        aria-label={`Renk: ${item.color || 'gray'}`}
                       />
                     )}
                     {item.name}
@@ -121,8 +121,8 @@ export default function LookupTable({
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => onEdit(item)}
-                        aria-label={`${item.name} redaktə et`}
-                        title="Redaktə et"
+                        aria-label={`${item.name} düzenle`}
+                        title="Düzenle"
                         className="rounded-lg p-2 text-gray-500 transition hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       >
                         <PencilSquareIcon className="h-4 w-4" />

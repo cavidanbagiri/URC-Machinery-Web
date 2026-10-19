@@ -105,7 +105,7 @@ export default function MachineStatusModal({
                     Durumu Değiştir
                   </Dialog.Title>
                   <p className="mt-0.5 text-xs text-gray-500">
-                    {machine.identification_no || `Maşın #${machine.id}`}
+                    {machine.identification_no || `Makine #${machine.id}`}
                   </p>
                 </div>
                 <button
@@ -120,7 +120,7 @@ export default function MachineStatusModal({
               <div className="space-y-2 px-6 py-5">
                 {statuses.length === 0 && (
                   <p className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-6 text-center text-sm text-gray-500">
-                    Status siyahısı boşdur. Tənzimləmələrdən status əlavə edin.
+                    Durum listesi boş. Ayarlar'dan durum ekleyin.
                   </p>
                 )}
                 {statuses.map((status) => {
@@ -166,14 +166,14 @@ export default function MachineStatusModal({
                   disabled={loading}
                   className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >
-                  Iptal et
+                  İptal
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={loading || selected == null || selected === currentStatusId}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? 'Yenileniyor...' : 'Onayla'}
+                  {loading ? 'Güncelleniyor...' : 'Onayla'}
                 </button>
               </div>
             </Dialog.Panel>

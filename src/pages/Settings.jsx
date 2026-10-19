@@ -58,17 +58,17 @@ export default function Settings() {
     try {
       if (editingItem) {
         await dispatch(updateLookup({ key: activeTab, id: editingItem.id, payload })).unwrap();
-        toast.success('Uğurla yeniləndi');
+        toast.success('Başarıyla güncellendi');
       } else {
         await dispatch(createLookup({ key: activeTab, payload })).unwrap();
-        toast.success('Uğurla yaradıldı');
+        toast.success('Başarıyla oluşturuldu');
       }
       // Force dependent pages (filters, modals, export) to reload this lookup.
       dispatch(invalidateLookup(activeTab));
       setModalOpen(false);
       setEditingItem(null);
     } catch (err) {
-      toast.error(err || 'Xəta baş verdi');
+      toast.error(err || 'Bir hata oluştu');
     } finally {
       setSubmitting(false);
     }
@@ -85,11 +85,11 @@ export default function Settings() {
     try {
       await dispatch(deleteLookup({ key: activeTab, id: deletingItem.id })).unwrap();
       dispatch(invalidateLookup(activeTab));
-      toast.success('Uğurla silindi');
+      toast.success('Başarıyla silindi');
       setConfirmOpen(false);
       setDeletingItem(null);
     } catch (err) {
-      toast.error(err || 'Silinmə xətası');
+      toast.error(err || 'Silme hatası');
     } finally {
       setDeleting(false);
     }
@@ -117,11 +117,11 @@ export default function Settings() {
               <Settings2 className="h-4 w-4" strokeWidth={2.2} />
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-              Tənzimləmələr
+              Ayarlar
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
-            Siyahıları idarə edin — yarat, redaktə et, sil
+            Listeleri yönetin — oluşturun, düzenleyin, silin
           </p>
         </div>
       </div>
@@ -176,8 +176,8 @@ export default function Settings() {
         onSubmit={handleSubmit}
         title={
           editingItem
-            ? `${currentConfig.label} — Redaktə`
-            : `${currentConfig.label} — Yeni əlavə et`
+            ? `${currentConfig.label} — Düzenle`
+            : `${currentConfig.label} — Yeni Ekle`
         }
         initialValue={editingItem?.name || ''}
         initialColor={editingItem?.color || 'gray'}
@@ -194,10 +194,10 @@ export default function Settings() {
           setDeletingItem(null);
         }}
         onConfirm={handleDeleteConfirm}
-        title="Silməyə əminsiniz?"
+        title="Silmek istediğinizden emin misiniz?"
         message={
           deletingItem
-            ? `"${deletingItem.name}" elementini silmək istədiyinizə əminsiniz?`
+            ? `"${deletingItem.name}" öğesini silmek istediğinizden emin misiniz?`
             : ''
         }
         loading={deleting}

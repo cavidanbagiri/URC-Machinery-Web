@@ -137,7 +137,7 @@ export default function CommonCarsPage() {
       const message =
         typeof err === 'string'
           ? err
-          : err?.message || err?.detail || 'Silinmə xətası';
+          : err?.message || err?.detail || 'Silme hatası';
       toast.error(message);
     } finally {
       setDeleting(false);
@@ -168,12 +168,12 @@ export default function CommonCarsPage() {
       ).unwrap();
 
       const status = lookups.car_status?.find((s) => s.id === statusId);
-      toast.success(`Status "${status?.name || statusId}" olaraq dəyişdirildi`);
+      toast.success(`Durum "${status?.name || statusId}" olarak değiştirildi`);
     } catch (err) {
       const message =
         typeof err === 'string'
           ? err
-          : err?.message || err?.detail || 'Status dəyişdirilə bilmədi';
+          : err?.message || err?.detail || 'Durum değiştirilemedi';
       toast.error(message);
     } finally {
       // HƏMİŞƏ bağla
@@ -207,11 +207,11 @@ export default function CommonCarsPage() {
             <BsTruck className="h-4 w-4" />
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-            Tum Araclar
+            Tüm Makineler
           </h1>
         </div>
         <p className="mt-1.5 text-sm text-gray-500">
-          Toplam: {total} arac
+          Toplam: {total} makine
         </p>
       </div>
 
@@ -228,7 +228,7 @@ export default function CommonCarsPage() {
               onClick={handleCreate}
               className="border-b border-b-gray-200 px-4 py-1 mr-4 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100 rounded-xs"
             >
-              + Yeni Arac
+              + Yeni Makine
             </button>
 
           </div>
@@ -242,7 +242,7 @@ export default function CommonCarsPage() {
                 }`}
             >
               <FunnelIcon className="h-4 w-4" />
-              Filterlər
+              Filtreler
               {activeFilterCount > 0 && (
                 <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
                   {activeFilterCount}
@@ -268,10 +268,10 @@ export default function CommonCarsPage() {
           setDeletingMachine(null);
         }}
         onConfirm={handleDeleteConfirm}
-        title="Maşını silmək istəyirsiniz?"
+        title="Makineyi silmek istiyor musunuz?"
         message={
           deletingMachine
-            ? `"${deletingMachine.identification_no || `#${deletingMachine.id}`}" silinəcək. Bu əməliyyat geri qaytarıla bilməz.`
+            ? `"${deletingMachine.identification_no || `#${deletingMachine.id}`}" silinecek. Bu işlem geri alınamaz.`
             : ''
         }
         loading={deleting}

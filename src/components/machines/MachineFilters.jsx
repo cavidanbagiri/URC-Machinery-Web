@@ -39,7 +39,7 @@ export default function MachineFilters({ open, onClose }) {
       <div className=" border border-gray-200 bg-white p-6 rounded-xl mt-1">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Filterlər</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Filtreler</h3>
           <button
             onClick={onClose}
             className=" p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
@@ -51,21 +51,21 @@ export default function MachineFilters({ open, onClose }) {
         {/* Filters grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <FilterSelect
-            label="Status"
+            label="Durum"
             value={filters.status_id}
             onChange={(v) => handleChange('status_id', v)}
             options={lookups.car_status || []}
           />
 
           <FilterInput
-            label="Identification No"
+            label="Kimlik No"
             value={filters.identification_no}
             onChange={(v) => handleChange('identification_no', v)}
             placeholder="TRK-001..."
           />
 
           <FilterInput
-            label="Plate No"
+            label="Plaka No"
             value={filters.plate_no}
             onChange={(v) => handleChange('plate_no', v)}
             placeholder="90 AB 123"
@@ -79,28 +79,28 @@ export default function MachineFilters({ open, onClose }) {
           />
 
           <FilterSelect
-            label="Territory"
+            label="Bölge"
             value={filters.territory_id}
             onChange={(v) => handleChange('territory_id', v)}
             options={lookups.territory || []}
           />
 
           <FilterSelect
-            label="Type Transport"
+            label="Taşıma Tipi"
             value={filters.type_id}
             onChange={(v) => handleChange('type_id', v)}
             options={lookups.type_transport || []}
           />
 
           <FilterSelect
-            label="SubType Transport"
+            label="Alt Taşıma Tipi"
             value={filters.subtype_id}
             onChange={(v) => handleChange('subtype_id', v)}
             options={lookups.sub_type_transport || []}
           />
 
           <FilterSelect
-            label="Mark"
+            label="Marka"
             value={filters.car_mark_id}
             onChange={(v) => handleChange('car_mark_id', v)}
             options={lookups.car_mark || []}
@@ -114,14 +114,14 @@ export default function MachineFilters({ open, onClose }) {
           />
 
           <FilterSelect
-            label="Company"
+            label="Şirket"
             value={filters.company_id}
             onChange={(v) => handleChange('company_id', v)}
             options={lookups.company || []}
           />
 
           <FilterInput
-            label="Production Year"
+            label="Üretim Yılı"
             type="number"
             value={filters.production_year}
             onChange={(v) => handleChange('production_year', v)}
@@ -137,7 +137,7 @@ export default function MachineFilters({ open, onClose }) {
               className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
             >
               <XMarkIcon className="h-3 w-3" />
-              Filterləri təmizlə ({activeCount})
+              Filtreleri temizle ({activeCount})
             </button>
           </div>
         )}
@@ -174,7 +174,7 @@ function FilterSelect({ label, value, onChange, options }) {
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       >
-        <option value="">Hepsi</option>
+        <option value="">Tümü</option>
         {options.map((opt) => (
           <option key={opt.id} value={opt.id}>
             {opt.name}

@@ -36,7 +36,7 @@ export default function MachineDetailModal({ open, onClose, machine }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
     try {
-      return new Date(dateStr).toLocaleString('az-AZ', {
+      return new Date(dateStr).toLocaleString('tr-TR', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -85,7 +85,7 @@ export default function MachineDetailModal({ open, onClose, machine }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
                     <Dialog.Title className="text-lg font-semibold text-gray-900">
-                      {machine.identification_no || `Maşın #${machine.id}`}
+                      {machine.identification_no || `Makine #${machine.id}`}
                     </Dialog.Title>
                     {machineStatus && <StatusBadge status={machineStatus} />}
                   </div>
@@ -107,13 +107,13 @@ export default function MachineDetailModal({ open, onClose, machine }) {
               <div className="flex-1 overflow-y-auto px-6 py-5">
                 <div className="space-y-8">
                   {/* BASIC INFO */}
-                  <Section title="Əsas məlumat">
+                  <Section title="Temel Bilgiler">
                     <Grid>
-                      <InfoItem label="Identification No" value={machine.identification_no} />
+                      <InfoItem label="Kimlik No" value={machine.identification_no} />
                       <InfoItem label="VIN No" value={machine.vin_no} mono />
-                      <InfoItem label="Plate No" value={machine.plate_no} mono />       {/* ← YENİ */}
+                      <InfoItem label="Plaka No" value={machine.plate_no} mono />       {/* ← YENİ */}
                       <InfoItem
-                        label="Technical Character"
+                        label="Teknik Özellikler"
                         value={machine.technical_character}
                         fullWidth
                       />
@@ -121,41 +121,41 @@ export default function MachineDetailModal({ open, onClose, machine }) {
                   </Section>
 
                   {/* TECHNICAL SPECS */}
-                  <Section title="Texniki göstəricilər">
+                  <Section title="Teknik Özellikler">
                     <Grid>
                       <InfoItem
-                        label="Production Year"
+                        label="Üretim Yılı"
                         value={extractYear(machine.production_year)}
                       />
                       <InfoItem
-                        label="Weight"
+                        label="Ağırlık"
                         value={machine.weight ? `${machine.weight} kg` : null}
                       />
-                      <InfoItem label="Dimension" value={machine.dimension} />
-                      <InfoItem label="Engine Power" value={machine.engine_power} />
-                      <InfoItem label="Engine Mark Model" value={machine.engine_mark_model} />
-                      <InfoItem label="Engine Identity" value={machine.engine_identity} mono />
+                      <InfoItem label="Boyutlar" value={machine.dimension} />
+                      <InfoItem label="Motor Gücü" value={machine.engine_power} />
+                      <InfoItem label="Motor Marka Modeli" value={machine.engine_mark_model} />
+                      <InfoItem label="Motor Kimliği" value={machine.engine_identity} mono />
                     </Grid>
                   </Section>
 
                   {/* LOOKUPS */}
-                  <Section title="Təsnifat">
+                  <Section title="Sınıflandırma">
                     <Grid>
-                      <InfoItem label="Status" value={machineStatus?.name || '—'} />
+                      <InfoItem label="Durum" value={machineStatus?.name || '—'} />
                       <InfoItem
-                        label="Territory"
+                        label="Bölge"
                         value={lookupName('territory', machine.territory_id)}
                       />
                       <InfoItem
-                        label="Type Transport"
+                        label="Taşıma Tipi"
                         value={lookupName('type_transport', machine.type_id)}
                       />
                       <InfoItem
-                        label="SubType Transport"
+                        label="Alt Taşıma Tipi"
                         value={lookupName('sub_type_transport', machine.subtype_id)}
                       />
                       <InfoItem
-                        label="Mark"
+                        label="Marka"
                         value={lookupName('car_mark', machine.car_mark_id)}
                       />
                       <InfoItem
@@ -163,21 +163,21 @@ export default function MachineDetailModal({ open, onClose, machine }) {
                         value={lookupName('car_model', machine.car_model_id)}
                       />
                       <InfoItem
-                        label="Company"
+                        label="Şirket"
                         value={lookupName('company', machine.company_id)}
                       />
                     </Grid>
                   </Section>
 
                   {/* AUDIT */}
-                  <Section title="Sistem məlumatı">
+                  <Section title="Sistem Bilgileri">
                     <Grid>
                       <InfoItem
-                        label="Yaradılma tarixi"
+                        label="Oluşturulma Tarihi"
                         value={formatDate(machine.created_at)}
                       />
                       <InfoItem
-                        label="Yaradan (ID)"
+                        label="Oluşturan (ID)"
                         value={machine.created_by_id ? `#${machine.created_by_id}` : null}
                       />
                       <InfoItem label="ID" value={`#${machine.id}`} />
@@ -192,7 +192,7 @@ export default function MachineDetailModal({ open, onClose, machine }) {
                   onClick={onClose}
                   className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
                 >
-                  Bağla
+                  Kapat
                 </button>
               </div>
             </Dialog.Panel>

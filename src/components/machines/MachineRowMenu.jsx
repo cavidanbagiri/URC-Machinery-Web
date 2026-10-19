@@ -102,7 +102,7 @@ useEffect(() => {
             />
             <MenuItem
               icon={<ArrowPathIcon className="h-4 w-4" />}
-              label="Durum Değiştir"
+              label="Durumu Değiştir"
               onClick={() => handleAction(onChangeStatus)}
               color="yellow"
             />
