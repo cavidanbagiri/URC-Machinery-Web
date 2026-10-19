@@ -7,6 +7,9 @@ import PublicRoute from '../components/auth/PublicRoute';
 import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
 import CommonCarsPage from '../pages/CommonCarsPage'
+import Maintenance from '../pages/Maintenance'
+import Repair from '../pages/Repair'
+import Forum from '../pages/Forum'
 import Settings from '../pages/Settings'
 import WarehouseStock from '../pages/WarehouseStock'
 import PurchaseOrders from '../pages/PurchaseOrders'
@@ -46,6 +49,30 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CommonCarsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'maintenance',
+        element: (
+          <ProtectedRoute>
+            <Maintenance />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'repair',
+        element: (
+          <ProtectedRoute>
+            <Repair />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'forum',
+        element: (
+          <ProtectedRoute>
+            <Forum />
           </ProtectedRoute>
         ),
       },

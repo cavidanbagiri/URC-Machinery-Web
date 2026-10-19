@@ -1,18 +1,52 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, reset } from '../stores/user_slice';
 
 import { RxDashboard } from "react-icons/rx";
-import { BsTruck, BsBoxSeam, BsCartCheck, BsBell } from "react-icons/bs";
+import { BsTruck, BsBoxSeam, BsCartCheck, BsBell, BsTools, BsWrench, BsChatDots } from "react-icons/bs";
 import { IoSettingsOutline } from "react-icons/io5";
-
-
 import { IoIosLogOut } from "react-icons/io";
+
+const NAV_ITEMS = [
+  { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
+  { to: '/notifications', label: 'Bildirimler', icon: BsBell },
+  { to: '/common_cars', label: 'Veri Yönetimi', icon: BsTruck },
+  { to: '/maintenance', label: 'Bakım', icon: BsTools },
+  { to: '/repair', label: 'Tamir', icon: BsWrench },
+  { to: '/forum', label: 'Forum', icon: BsChatDots },
+  { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
+  { to: '/purchase_orders', label: 'Satın Alma Siparişleri', icon: BsCartCheck },
+  { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },
+];
+
+function NavItem({ item, onShowTooltip, onHideTooltip }) {
+  const Icon = item.icon;
+
+  return (
+    <li className='flex w-full'>
+      <NavLink
+        to={item.to}
+        aria-label={item.label}
+        onMouseEnter={(event) => onShowTooltip(event, item.label)}
+        onMouseLeave={onHideTooltip}
+        onFocus={(event) => onShowTooltip(event, item.label)}
+        onBlur={onHideTooltip}
+        className={({ isActive }) =>
+          `flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
+        }
+      >
+        <Icon className='text-2xl' />
+      </NavLink>
+    </li>
+  );
+}
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  const [tooltip, setTooltip] = useState(null);
 
   const handleLogout = () => {
 
@@ -25,6 +59,16 @@ const Navbar = () => {
     }
   };
 
+  const showTooltip = (event, label) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltip({
+      label,
+      top: rect.top + rect.height / 2,
+    });
+  };
+
+  const hideTooltip = () => setTooltip(null);
+
   return (
     <nav className="fixed left-0 top-0 w-16 h-screen bg-gray-900 text-white flex flex-col z-50 rounded-tr-lg rounded-tb-xl">
       {/* Header */}
@@ -33,7 +77,10 @@ const Navbar = () => {
       </div>
 
       {/* Menu Items */}
-      <ul className="flex-1 flex flex-col list-none p-0 m-0">
+      <ul
+        className="flex-1 flex flex-col list-none p-0 m-0 overflow-y-auto"
+        onScroll={hideTooltip}
+      >
         {!user ? (
           // Not logged in - show only Login
           <>
@@ -55,123 +102,14 @@ const Navbar = () => {
 
             <div className='flex flex-col items-center w-full'>
               <div className='flex flex-col w-full items-center '>
-
-                <li className='flex w-full'>
-                  <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) =>
-                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
-                    }
-                  >
-                    <RxDashboard className='text-2xl' />
-
-                    {/* Компонент Тултипа */}
-                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
-                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
-                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
-                     whitespace-nowrap border border-gray-700">
-                      Dashboard
-                    </span>
-                  </NavLink>
-                </li>
-
-
-                <li className='flex w-full'>
-                  <NavLink
-                    to="/notifications"
-                    className={({ isActive }) =>
-                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
-                    }
-                  >
-                    <BsBell className='text-2xl' />
-
-                    {/* Компонент Тултипа */}
-                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
-                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
-                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
-                     whitespace-nowrap border border-gray-700">
-                      Bildirimler
-                    </span>
-                  </NavLink>
-                </li>
-                
-
-                <li className='flex w-full'>
-                  <NavLink
-                    to="/common_cars"
-                    className={({ isActive }) =>
-                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
-                    }
-                  >
-                    <BsTruck className='text-2xl' />
-
-                    {/* Компонент Тултипа */}
-                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
-                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
-                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
-                     whitespace-nowrap border border-gray-700">
-                      Veri Yönetimi
-                    </span>
-                  </NavLink>
-                </li>
-
-                <li className='flex w-full'>
-                  <NavLink
-                    to="/warehouse_stock"
-                    className={({ isActive }) =>
-                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
-                    }
-                  >
-                    <BsBoxSeam className='text-2xl' />
-
-                    {/* Компонент Тултипа */}
-                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
-                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
-                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
-                     whitespace-nowrap border border-gray-700">
-                      Depo Stoku
-                    </span>
-                  </NavLink>
-                </li>
-
-                <li className='flex w-full'>
-                  <NavLink
-                    to="/purchase_orders"
-                    className={({ isActive }) =>
-                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
-                    }
-                  >
-                    <BsCartCheck className='text-2xl' />
-
-                    {/* Компонент Тултипа */}
-                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
-                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
-                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
-                     whitespace-nowrap border border-gray-700">
-                      Satın Alma Siparişleri
-                    </span>
-                  </NavLink>
-                </li>
-
-                <li className='flex w-full'>
-                  <NavLink
-                    to="/settings"
-                    className={({ isActive }) =>
-                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
-                    }
-                  >
-                    <IoSettingsOutline className='text-2xl' />
-
-                    {/* Компонент Тултипа */}
-                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
-                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
-                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
-                     whitespace-nowrap border border-gray-700">
-                      Ayarlar
-                    </span>
-                  </NavLink>
-                </li>
-
+                {NAV_ITEMS.map((item) => (
+                  <NavItem
+                    key={item.to}
+                    item={item}
+                    onShowTooltip={showTooltip}
+                    onHideTooltip={hideTooltip}
+                  />
+                ))}
               </div>
             </div>
 
@@ -179,6 +117,7 @@ const Navbar = () => {
               <li className="mt-auto w-full mb-4">
                 <button
                   onClick={handleLogout}
+                  aria-label="Çıkış Yap"
                   className="w-full flex items-center justify-center py-4 text-white hover:bg-gray-800 transition-colors border-none bg-transparent cursor-pointer text-base"
                 >
                   <IoIosLogOut className='text-2xl' />
@@ -190,6 +129,21 @@ const Navbar = () => {
 
         )}
       </ul>
+
+      {/* Tooltip, scroll alanının dışında tutulur; böylece kırpılmaz. */}
+      {tooltip && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none fixed z-[60] whitespace-nowrap rounded-md border border-gray-700 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
+          style={{
+            top: tooltip.top,
+            left: '4.1rem',
+            transform: 'translateY(-50%)',
+          }}
+        >
+          {tooltip.label}
+        </span>
+      )}
     </nav>
   );
 };
