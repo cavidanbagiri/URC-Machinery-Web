@@ -10,6 +10,7 @@ import CommonCarsPage from '../pages/CommonCarsPage'
 import Settings from '../pages/Settings'
 import WarehouseStock from '../pages/WarehouseStock'
 import PurchaseOrders from '../pages/PurchaseOrders'
+import Notifications from '../pages/Notifications'
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <PurchaseOrders />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'notifications',
+        element: (
+          <ProtectedRoute>
+            <Notifications />
           </ProtectedRoute>
         ),
       },
