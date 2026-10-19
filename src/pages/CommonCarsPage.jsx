@@ -7,6 +7,8 @@ import { useSearchParams } from 'react-router-dom';
 import { fetchMachines } from '../stores/machine_slice';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 
+import { BsTruck } from "react-icons/bs";
+
 import { FunnelIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 import MachineFilters from '../components/machines/MachineFilters';
@@ -198,16 +200,22 @@ export default function CommonCarsPage() {
     <div className="space-y-0 p-3">
       <Toaster position="top-right" />
 
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-2 py-4 px-1">
-        <div style={{ fontFamily: 'Inter' }}>
-          <h1 
-        className="text-3xl font-semibold tracking-tight text-gray-900">Tum Araclar</h1>
-          <p className="mt-1 text-sm text-gray-500 font-light tracking-tight">
-            Toplam: {total} arac
-          </p>
+      <div className='px-3 py-3'>
+        <div style={{ 'fontFamily': 'Inter' }}
+          className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+            <BsTruck className="h-4 w-4" />
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+            Tum Araclar
+          </h1>
         </div>
+        <p className="mt-1.5 text-sm text-gray-500">
+          Toplam: {total} arac
+        </p>
       </div>
+
+
 
       <div className='flex flex-row justify-between items-center bg-gray-100 rounded-t-lg'>
 
@@ -227,11 +235,11 @@ export default function CommonCarsPage() {
           {/* <MachineFilters /> */}
           <div className='flex items-center justify-center h-7'>
             <button
-            onClick={() => setFiltersOpen((v) => !v)}
-            className={`flex items-center gap-2  rounded-xs border-b border-b-gray-200 cursor-pointer hover:bg-gray-100 px-3 py-1 text-sm font-medium transition ${filtersOpen || activeFilterCount > 0
-              ? 'border-blue-300 bg-gray-100 text-blue-700'
-              : 'border-gray-300  text-gray-700 hover:bg-gray-50'
-              }`}
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={`flex items-center gap-2  rounded-xs border-b border-b-gray-200 cursor-pointer hover:bg-gray-100 px-3 py-1 text-sm font-medium transition ${filtersOpen || activeFilterCount > 0
+                ? 'border-blue-300 bg-gray-100 text-blue-700'
+                : 'border-gray-300  text-gray-700 hover:bg-gray-50'
+                }`}
             >
               <FunnelIcon className="h-4 w-4" />
               Filterlər

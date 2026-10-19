@@ -8,6 +8,8 @@ import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
 import CommonCarsPage from '../pages/CommonCarsPage'
 import Settings from '../pages/Settings'
+import WarehouseStock from '../pages/WarehouseStock'
+import PurchaseOrders from '../pages/PurchaseOrders'
 
 const router = createBrowserRouter([
   {
@@ -43,6 +45,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CommonCarsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'warehouse_stock',
+        element: (
+          <ProtectedRoute>
+            <WarehouseStock />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'purchase_orders',
+        element: (
+          <ProtectedRoute>
+            <PurchaseOrders />
           </ProtectedRoute>
         ),
       },

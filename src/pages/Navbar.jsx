@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout, reset } from '../stores/user_slice';
 
 import { RxDashboard } from "react-icons/rx";
-import { BsTruck } from "react-icons/bs";
+import { BsTruck, BsBoxSeam, BsCartCheck } from "react-icons/bs";
 import { IoSettingsOutline } from "react-icons/io5";
 
 
@@ -92,6 +92,44 @@ const Navbar = () => {
                      bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
                      whitespace-nowrap border border-gray-700">
                       Data Management
+                    </span>
+                  </NavLink>
+                </li>
+
+                <li className='flex w-full'>
+                  <NavLink
+                    to="/warehouse_stock"
+                    className={({ isActive }) =>
+                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
+                    }
+                  >
+                    <BsBoxSeam className='text-2xl' />
+
+                    {/* Компонент Тултипа */}
+                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
+                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
+                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
+                     whitespace-nowrap border border-gray-700">
+                      Warehouse Stock
+                    </span>
+                  </NavLink>
+                </li>
+
+                <li className='flex w-full'>
+                  <NavLink
+                    to="/purchase_orders"
+                    className={({ isActive }) =>
+                      `group relative flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
+                    }
+                  >
+                    <BsCartCheck className='text-2xl' />
+
+                    {/* Компонент Тултипа */}
+                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 pointer-events-none
+                     scale-0 group-hover:scale-100 transition-all duration-150 origin-left
+                     bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg
+                     whitespace-nowrap border border-gray-700">
+                      Purchasing Orders
                     </span>
                   </NavLink>
                 </li>
