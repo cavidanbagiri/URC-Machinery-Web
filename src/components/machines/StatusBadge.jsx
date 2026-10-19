@@ -5,7 +5,9 @@ const COLORS = {
   yellow: 'bg-yellow-100 text-yellow-700 ring-yellow-200',
   blue: 'bg-blue-100 text-blue-700 ring-blue-200',
   red: 'bg-red-100 text-red-700 ring-red-200',
+  orange: 'bg-orange-100 text-orange-700 ring-orange-200',
   gray: 'bg-gray-100 text-gray-700 ring-gray-200',
+  slate: 'bg-slate-100 text-slate-600 ring-slate-200',
 };
 
 export default function StatusBadge({ status }) {
