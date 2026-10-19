@@ -7,7 +7,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { setFilter, resetFilters } from '../../stores/machine_slice';
 
 
-export default function MachineFilters({ open, onClose }) {
+export default function MachineFilters({ open, onClose, onFilterChange }) {
 
 
   const dispatch = useDispatch();
@@ -19,10 +19,12 @@ export default function MachineFilters({ open, onClose }) {
   ).length;
 
   const handleChange = (key, value) => {
+    onFilterChange?.();
     dispatch(setFilter({ key, value }));
   };
 
   const handleReset = () => {
+    onFilterChange?.();
     dispatch(resetFilters());
   };
 

@@ -1,17 +1,14 @@
 // src/components/machines/MachineTable.jsx
 import { useSelector } from 'react-redux';
 import MachineSkeleton from './MachineSkeleton';
-import MachineRowMenu from './MachineRowMenu';
 import StatusBadge from './StatusBadge';
 
 
 
 
 export default function MachineTable({
-  onUpdate,
-  onDelete,
-  onDetail,
-  onChangeStatus,
+  selectedId,
+  onSelect,
   onOpenFilters,
   hasActiveFilters,
 }) {
@@ -88,7 +85,9 @@ export default function MachineTable({
         <table className="w-full rounded-lg" style={{'fontFamily':'Inter'}}>
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700 rounded-lg">
             <tr>
-              <th className="px-6 py-2 text-left font-medium"></th>
+              <th className="w-10 px-4 py-2 text-left font-medium">
+                <span className="sr-only">Seç</span>
+              </th>
               <th className="px-6 py-2 text-left font-medium">Durum</th>
               <th className="px-6 py-2 text-left font-medium">Kimlik No</th>
               <th className="px-6 py-2 text-left font-medium">Plaka No</th>       {/* ← YENİ */}
@@ -102,14 +101,21 @@ export default function MachineTable({
           </thead>
           <tbody className="divide-y divide-gray-100" >
             {items.map((machine) => (
-              <tr key={machine.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-1 text-right">
-                  <MachineRowMenu
-                    machine={machine}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onDetail={onDetail}
-                    onChangeStatus={onChangeStatus}
+              <tr
+                key={machine.id}
+                className={
+                  selectedId === machine.id
+                    ? 'bg-blue-50 hover:bg-blue-50'
+                    : 'hover:bg-gray-50'
+                }
+              >
+                <td className="w-10 whitespace-nowrap px-4 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedId === machine.id}
+                    onChange={() => onSelect(machine.id)}
+                    className="h-4 w-4 cursor-pointer accent-blue-600"
+                    aria-label="Makineyi seç"
                   />
                 </td>
                 {/* YENİ — Status */}

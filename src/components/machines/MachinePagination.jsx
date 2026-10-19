@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { setOffset, setLimit } from '../../stores/machine_slice';
 
-export default function MachinePagination() {
+export default function MachinePagination({ onNavigate }) {
   const dispatch = useDispatch();
   const { total, limit, offset, loading } = useSelector((s) => s.machine);
 
@@ -46,6 +46,7 @@ export default function MachinePagination() {
   };
 
   const goToPage = (page) => {
+    onNavigate?.();
     const newOffset = (page - 1) * limit;
     dispatch(setOffset(newOffset));
   };
@@ -59,6 +60,7 @@ export default function MachinePagination() {
   };
 
   const handleLimitChange = (e) => {
+    onNavigate?.();
     dispatch(setLimit(Number(e.target.value)));
   };
 

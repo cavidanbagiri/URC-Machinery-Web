@@ -9,7 +9,14 @@ import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 
 import { BsTruck } from "react-icons/bs";
 
-import { FunnelIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import {
+  FunnelIcon,
+  ChevronDownIcon,
+  PencilSquareIcon,
+  ArrowPathIcon,
+  EyeIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
 
 import MachineFilters from '../components/machines/MachineFilters';
 import MachineTable from '../components/machines/MachineTable';
@@ -36,10 +43,22 @@ const LOOKUPS_NEEDED = [
   'car_status'
 ];
 
+const ACTION_BUTTON_CLASS =
+  'flex items-center gap-1.5 rounded-xs border-b border-b-gray-200 px-3 py-1 text-sm font-medium text-gray-700 transition cursor-pointer hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40';
+
 export default function CommonCarsPage() {
   const dispatch = useDispatch();
-  const { filters, total, offset, limit } = useSelector((s) => s.machine);
+  const { filters, total, offset, limit, items, loading } = useSelector((s) => s.machine);
   const lookups = useSelector((s) => s.lookup.data);
+
+  // Tekli seçim — seçim, sayfa/filtre bağlamına bağlıdır
+  const [selection, setSelection] = useState(null);
+  const selectionContext = `${offset}|${limit}|${JSON.stringify(filters)}`;
+  const selectedId =
+    selection?.context === selectionContext ? selection.id : null;
+  const selectedMachine = selectedId
+    ? items.find((m) => m.id === selectedId) || null
+    : null;
 
   // const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -107,6 +126,15 @@ export default function CommonCarsPage() {
   }, [dispatch, offset, limit]);
 
   // ---------- HANDLERS ----------
+  const clearSelection = () => setSelection(null);
+
+  const handleSelect = (machineId) => {
+    setSelection((prev) =>
+      prev?.context === selectionContext && prev.id === machineId
+        ? null
+        : { id: machineId, context: selectionContext }
+    );
+  };
   const handleCreate = () => {
     setEditingMachine(null);
     setFormOpen(true);
@@ -133,6 +161,7 @@ export default function CommonCarsPage() {
       toast.success(`"${deletingMachine.identification_no}" silindi`);
       setDeleteOpen(false);
       setDeletingMachine(null);
+      setSelection(null);
     } catch (err) {
       const message =
         typeof err === 'string'
@@ -200,8 +229,10 @@ export default function CommonCarsPage() {
     <div className="space-y-0 p-3">
       <Toaster position="top-right" />
 
-      <div className='px-3 py-3'>
-        <div style={{ 'fontFamily': 'Inter' }}
+      <div className='px-3 py-3 flex flex-row justify-between'>
+
+        <div>
+          <div style={{ 'fontFamily': 'Inter' }}
           className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
             <BsTruck className="h-4 w-4" />
@@ -213,52 +244,114 @@ export default function CommonCarsPage() {
         <p className="mt-1.5 text-sm text-gray-500">
           Toplam: {total} makine
         </p>
-      </div>
-
-
-
-      <div className='flex flex-row justify-between items-center bg-gray-100 rounded-t-lg'>
-
-        <MachinePagination />
-
-        <div className="flex justify-end">
-          <div className="flex items-center gap-2">
-            <ExportButton />
-            <button
-              onClick={handleCreate}
-              className="border-b border-b-gray-200 px-4 py-1 mr-4 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100 rounded-xs"
-            >
-              + Yeni Makine
-            </button>
-
-          </div>
-          {/* <MachineFilters /> */}
-          <div className='flex items-center justify-center h-7'>
-            <button
-              onClick={() => setFiltersOpen((v) => !v)}
-              className={`flex items-center gap-2  rounded-xs border-b border-b-gray-200 cursor-pointer hover:bg-gray-100 px-3 py-1 text-sm font-medium transition ${filtersOpen || activeFilterCount > 0
-                ? 'border-blue-300 bg-gray-100 text-blue-700'
-                : 'border-gray-300  text-gray-700 hover:bg-gray-50'
-                }`}
-            >
-              <FunnelIcon className="h-4 w-4" />
-              Filtreler
-              {activeFilterCount > 0 && (
-                <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
-                  {activeFilterCount}
-                </span>
-              )}
-              <ChevronDownIcon
-                className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''
-                  }`}
-              />
-            </button>
-          </div>
         </div>
+
+         <div className='mr-4 flex items-center'>
+          <ExportButton />
+
+          <button
+            type="button"
+            onClick={handleCreate}
+            className={ACTION_BUTTON_CLASS}
+          >
+            <span className="text-base leading-none">+</span>
+            Yeni Makine
+          </button>
+
+         </div>
       </div>
+
+      <div className="flex flex-row justify-between items-center  p-2 ">
+
+        <div className=''>
+          {selectedMachine && (
+          <span
+            aria-live="polite"
+            className=" mr-2 text-sm font-medium text-blue-700"
+          >
+            1 makine seçildi
+          </span>
+        )}
+        </div>
+
+
+        <div className="flex flex-wrap items-center justify-end gap-1 rounded-t-lg   px-3 py-1">
+        
+
+          <button
+            type="button"
+            onClick={() => handleUpdate(selectedMachine)}
+            disabled={!selectedMachine || loading}
+            className={ACTION_BUTTON_CLASS}
+          >
+            <PencilSquareIcon className="h-4 w-4" />
+            Güncelle
+          </button>
+          <button
+            type="button"
+            onClick={() => handleChangeStatus(selectedMachine)}
+            disabled={!selectedMachine || loading}
+            className={ACTION_BUTTON_CLASS}
+          >
+            <ArrowPathIcon className="h-4 w-4" />
+            Durum Değiştir
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDetail(selectedMachine)}
+            disabled={!selectedMachine || loading}
+            className={ACTION_BUTTON_CLASS}
+          >
+            <EyeIcon className="h-4 w-4" />
+            Detaylar
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDelete(selectedMachine)}
+            disabled={!selectedMachine || loading}
+            className={ACTION_BUTTON_CLASS}
+          >
+            <TrashIcon className="h-4 w-4" />
+            Sil
+          </button>
+
+          <span className="mx-2 h-5 w-px bg-gray-300" aria-hidden="true" />
+
+          
+
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className={`${ACTION_BUTTON_CLASS} ${filtersOpen || activeFilterCount > 0 ? 'bg-blue-50' : ''
+              }`}
+          >
+            <FunnelIcon className="h-4 w-4" />
+            Filtreler
+            {activeFilterCount > 0 && (
+              <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDownIcon
+              className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''
+                }`}
+            />
+          </button>
+
+          <span className="mx-2 h-5 w-px bg-gray-300" aria-hidden="true" />
+
+      
+        </div>
+
+      </div>
+
 
       {/* Filter panel */}
-      <MachineFilters open={filtersOpen} onClose={() => setFiltersOpen(false)} />
+      <MachineFilters
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        onFilterChange={clearSelection}
+      />
 
       {/* Delete Confirm — YENİ */}
       <ConfirmDialog
@@ -279,16 +372,16 @@ export default function CommonCarsPage() {
 
       {/* Cədvəl */}
       <MachineTable
-        onUpdate={handleUpdate}
-        onDelete={handleDelete}
-        onDetail={handleDetail}
-        onChangeStatus={handleChangeStatus}
+        selectedId={selectedId}
+        onSelect={handleSelect}
         onOpenFilters={() => setFiltersOpen(true)}
         hasActiveFilters={hasActiveFilters}
       />
 
-      {/* Pagination */}
-      <MachinePagination />
+      {/* Pagination — tablonun altında */}
+      <div className="border-t border-gray-200">
+        <MachinePagination onNavigate={clearSelection} />
+      </div>
 
       {/* Form Modal */}
       <MachineFormModal

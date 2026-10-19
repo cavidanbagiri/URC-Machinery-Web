@@ -49,7 +49,7 @@ export default function ExportButton() {
     <button
       onClick={handleExport}
       disabled={exporting || total === 0}
-      className="flex items-center gap-2 border-b text-green-600 border-b-gray-200 px-4 py-1 mr-3 text-sm font-medium transition cursor-pointer hover:bg-gray-100 rounded-xs disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex items-center gap-2 border-b border-b-gray-200 px-4 py-1 text-sm font-medium text-green-600 transition cursor-pointer hover:bg-gray-100 rounded-xs disabled:cursor-not-allowed disabled:opacity-50"
     >
       <ArrowDownTrayIcon className="h-4 w-4" />
       {exporting ? 'Dışa aktarılıyor...' : 'Excel'}
