@@ -75,6 +75,9 @@ export default function CommonCarsPage() {
   // Kategori paneli (Gizle/Göster)
   const [categoriesOpen, setCategoriesOpen] = useState(true);
 
+  // Makine listesi ve kategori istatistikleri aynı anda yenilenir
+  const isRefreshing = loading || pivotLoading;
+
   // Aktiv filter sayı
   const activeFilterCount = Object.values(filters).filter(
     (v) => v !== '' && v !== null && v !== undefined
@@ -148,6 +151,11 @@ export default function CommonCarsPage() {
 
   const refreshPivot = () => {
     dispatch(fetchPivotStatistics());
+  };
+
+  const handleRefresh = () => {
+    dispatch(fetchMachines());
+    refreshPivot();
   };
 
   const handleCategorySelect = (typeId) => {
@@ -297,6 +305,21 @@ export default function CommonCarsPage() {
               <ChevronDownIcon className="h-4 w-4" />
             )}
             {categoriesOpen ? 'Gizle' : 'Göster'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            aria-busy={isRefreshing}
+            aria-label="Makine listesini ve kategorileri yenile"
+            title="Yenile"
+            className={ACTION_BUTTON_CLASS}
+          >
+            <ArrowPathIcon
+              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+            />
+            Yenile
           </button>
 
           <ExportButton />
