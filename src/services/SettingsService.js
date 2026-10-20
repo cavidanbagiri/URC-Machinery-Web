@@ -63,6 +63,14 @@ export const LOOKUP_CONFIG = {
     updatePath: (id) => `/update_car_status/${id}`,
     deletePath: (id) => `/delete_car_status/${id}`,
   },
+  repair_type: {
+    label: 'Tamir Tipi',
+    endpoint: '/machines',
+    createPath: '/create_repair_type',
+    fetchPath: '/fetch_repair_types',
+    updatePath: (id) => `/update_repair_type/${id}`,
+    deletePath: (id) => `/delete_repair_type/${id}`,
+  },
 };
 
 

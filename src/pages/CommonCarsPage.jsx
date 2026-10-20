@@ -31,6 +31,7 @@ import ExportButton from '../components/machines/ExportButton';
 import ConfirmDialog from '../components/settings/ConfirmDialog'
 import { updateMachineStatus, setFilter } from '../stores/machine_slice';
 import { deleteMachine } from '../stores/machine_slice';
+import { quickOpenRepair } from '../stores/repair_slice';
 
 
 
@@ -229,13 +230,28 @@ export default function CommonCarsPage() {
     const machineId = statusMachine?.id;
     if (!machineId) return;
 
-    try {
-      await dispatch(
-        updateMachineStatus({ id: machineId, status_id: statusId })
-      ).unwrap();
+    const status = lookups.car_status?.find((s) => s.id === statusId);
+    const isRepairStatus =
+      status?.name?.trim().toLocaleLowerCase('tr-TR') === 'tamirde';
 
-      const status = lookups.car_status?.find((s) => s.id === statusId);
-      toast.success(`Durum "${status?.name || statusId}" olarak değiştirildi`);
+    try {
+      if (isRepairStatus) {
+        // Open the repair record immediately, but leave every detail (type,
+        // entry/exit dates, notes) to the Repair page.
+        await dispatch(quickOpenRepair(machineId)).unwrap();
+        dispatch(fetchMachines());
+        refreshPivot();
+        toast.success(
+          'Makine tamire alındı. Tarihleri ve detayları Tamir sayfasından girebilirsiniz.'
+        );
+      } else {
+        await dispatch(
+          updateMachineStatus({ id: machineId, status_id: statusId })
+        ).unwrap();
+        toast.success(
+          `Durum "${status?.name || statusId}" olarak değiştirildi`
+        );
+      }
     } catch (err) {
       const message =
         typeof err === 'string'

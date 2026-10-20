@@ -67,6 +67,10 @@ export default function MachineStatusModal({
 
   if (!machine) return null;
 
+  const selectedStatus = statuses.find((status) => status.id === selected);
+  const isRepairStatus =
+    selectedStatus?.name?.trim().toLocaleLowerCase('tr-TR') === 'tamirde';
+
   const handleSubmit = () => {
     if (selected == null) return;
     onSubmit(selected);
@@ -157,6 +161,16 @@ export default function MachineStatusModal({
                     </button>
                   );
                 })}
+
+                {isRepairStatus && (
+                  <div className="rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+                    Makine <strong>Tamirde</strong> durumuna alınacak ve açık
+                    bir tamir kaydı oluşturulacak. Kayıt varsayılan olarak{' '}
+                    <strong>Diğer</strong> tipiyle açılır; tamir tipi, giriş ve
+                    çıkış tarihlerini <strong>Tamir</strong> sayfasından
+                    girebilirsiniz.
+                  </div>
+                )}
               </div>
 
               {/* Footer */}
