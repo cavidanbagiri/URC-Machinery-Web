@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
+import FlaticonIcon from '../ui/FlaticonIcon';
 import { exportMachinesToExcel } from '../../utils/exportToExcel';
 import MachineService from '../../services/MachineService';
 
@@ -51,7 +51,7 @@ export default function ExportButton() {
       disabled={exporting || total === 0}
       className="flex items-center gap-2 border-b border-b-gray-200 px-4 py-1 text-sm font-medium text-green-600 transition cursor-pointer hover:bg-gray-100 rounded-xs disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <ArrowDownTrayIcon className="h-4 w-4" />
+      <FlaticonIcon name="file-excel" size="md" />
       {exporting ? 'Dışa aktarılıyor...' : 'Excel'}
     </button>
   );

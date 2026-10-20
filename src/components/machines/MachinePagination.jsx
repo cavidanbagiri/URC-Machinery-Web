@@ -1,6 +1,6 @@
 // src/components/machines/MachinePagination.jsx
 import { useDispatch, useSelector } from 'react-redux';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import FlaticonIcon from '../ui/FlaticonIcon';
 import { setOffset, setLimit } from '../../stores/machine_slice';
 
 export default function MachinePagination({ onNavigate }) {
@@ -81,7 +81,7 @@ export default function MachinePagination({ onNavigate }) {
           disabled={currentPage === 1 || loading}
           className="rounded-lg border border-gray-300 p-2 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ChevronLeftIcon className="h-4 w-4" />
+          <FlaticonIcon name="angle-left" size="md" />
         </button>
 
         {getPageNumbers().map((page, idx) =>
@@ -113,7 +113,7 @@ export default function MachinePagination({ onNavigate }) {
           disabled={currentPage === totalPages || loading}
           className="rounded-lg border border-gray-300 p-2 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ChevronRightIcon className="h-4 w-4" />
+          <FlaticonIcon name="angle-right" size="md" />
         </button>
       </div>
 

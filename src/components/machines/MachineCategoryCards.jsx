@@ -1,45 +1,24 @@
 // src/components/machines/MachineCategoryCards.jsx
-import {
-  ArrowUpFromLine,
-  Boxes,
-  Bus,
-  BusFront,
-  Cable,
-  Car,
-  CircleAlert,
-  Construction,
-  Droplets,
-  Forklift,
-  MoveUpRight,
-  Package,
-  Recycle,
-  RefreshCw,
-  Shovel,
-  Tractor,
-  Truck,
-  Van,
-  Wind,
-  Zap,
-} from 'lucide-react';
+import FlaticonIcon from '../ui/FlaticonIcon';
 
 const TYPE_ICONS = {
-  forklift: Forklift,
-  jenerator: Zap,
-  kompressor: Wind,
-  'binek arac': Car,
-  manlift: MoveUpRight,
-  tir: Truck,
-  otobus: Bus,
-  minibus: BusFront,
-  'backhoe-loader': Shovel,
-  excavator: Construction,
-  'su tankeri': Droplets,
-  traktor: Tractor,
-  'mini loader': Boxes,
-  'hi-up': ArrowUpFromLine,
-  'mobil vinc': Cable,
-  vidanjor: Recycle,
-  kamyonet: Van,
+  forklift: 'forklift',
+  jenerator: 'bolt',
+  kompresor: 'wind',
+  'binek arac': 'car-side',
+  manlift: 'ski-lift',
+  tir: 'truck-container',
+  otobus: 'bus',
+  minibus: 'bus-alt',
+  'backhoe-loader': 'digging',
+  excavator: 'excavator',
+  'su tankeri': 'tank-water',
+  traktor: 'tractor',
+  'mini loader': 'truck-box',
+  'hi-up': 'elevator',
+  'mobil vinc': 'truck-tow',
+  vidanjor: 'waste-pollution',
+  kamyonet: 'truck-pickup',
 };
 
 const TONES = [
@@ -98,7 +77,7 @@ const normalizeTypeName = (name) =>
     .replace(/ğ/g, 'g')
     .replace(/ç/g, 'c');
 
-const getTypeIcon = (name) => TYPE_ICONS[normalizeTypeName(name)] || Package;
+const getTypeIcon = (name) => TYPE_ICONS[normalizeTypeName(name)] || 'package';
 
 export default function MachineCategoryCards({
   pivot,
@@ -117,7 +96,7 @@ export default function MachineCategoryCards({
       type_id: row.type_id,
       type_name: String(row.type_name ?? '').trim() || 'Bilinmeyen tip',
       total: Number(row.total) || 0,
-      Icon: getTypeIcon(row.type_name),
+      icon: getTypeIcon(row.type_name),
       tone: TONES[Math.abs(Number(row.type_id) || index) % TONES.length],
     }));
 
@@ -156,7 +135,7 @@ export default function MachineCategoryCards({
 }
 
 function CategoryCard({ category, active, onClick }) {
-  const { Icon, tone, type_name, total } = category;
+  const { icon, tone, type_name, total } = category;
   const Element = onClick ? 'button' : 'div';
 
   return (
@@ -175,7 +154,7 @@ function CategoryCard({ category, active, onClick }) {
       <span
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${tone.icon}`}
       >
-        <Icon className="h-4 w-4" strokeWidth={2.1} />
+        <FlaticonIcon name={icon} size="md" />
       </span>
 
       <span className="min-w-0 flex-1">
@@ -212,7 +191,7 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/60 px-4 py-10 text-center">
       <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-        <Package className="h-5 w-5" />
+        <FlaticonIcon name="package" size="lg" />
       </span>
       <p className="mt-2 text-sm font-medium text-gray-600">
         Henüz makine kategorisi yok
@@ -228,7 +207,7 @@ function ErrorState({ error, onRetry }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-red-100 bg-red-50/60 px-4 py-8 text-center">
       <span className="flex h-11 w-11 items-center justify-center rounded-full bg-red-100 text-red-600">
-        <CircleAlert className="h-5 w-5" />
+        <FlaticonIcon name="triangle-warning" size="lg" />
       </span>
       <p className="mt-2 text-sm font-medium text-red-700">
         Kategori verileri yüklenemedi
@@ -242,7 +221,7 @@ function ErrorState({ error, onRetry }) {
           onClick={onRetry}
           className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50"
         >
-          <RefreshCw className="h-3.5 w-3.5" />
+          <FlaticonIcon name="refresh" size="sm" />
           Tekrar dene
         </button>
       )}

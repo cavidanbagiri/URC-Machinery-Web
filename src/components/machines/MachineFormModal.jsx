@@ -3,7 +3,8 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+
+import FlaticonIcon from '../ui/FlaticonIcon';
 
 import {
   createMachine,
@@ -205,7 +206,7 @@ export default function MachineFormModal({
                   onClick={onClose}
                   className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  <FlaticonIcon name="cross" size="lg" />
                 </button>
               </div>
 

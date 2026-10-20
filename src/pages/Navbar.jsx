@@ -4,14 +4,19 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout, reset } from '../stores/user_slice';
 
 import { RxDashboard } from "react-icons/rx";
-import { BsTruck, BsBoxSeam, BsCartCheck, BsBell, BsTools, BsWrench, BsChatDots } from "react-icons/bs";
+import { BsBoxSeam, BsCartCheck, BsBell, BsTools, BsWrench, BsChatDots } from "react-icons/bs";
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosLogOut } from "react-icons/io";
+import FlaticonIcon from '../components/ui/FlaticonIcon';
+
+function DataManagementIcon({ className }) {
+  return <FlaticonIcon name="truck-side" className={className} />;
+}
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
   { to: '/notifications', label: 'Bildirimler', icon: BsBell },
-  { to: '/common_cars', label: 'Veri Yönetimi', icon: BsTruck },
+  { to: '/common_cars', label: 'Veri Yönetimi', icon: DataManagementIcon },
   { to: '/maintenance', label: 'Bakım', icon: BsTools },
   { to: '/repair', label: 'Tamir', icon: BsWrench },
   { to: '/forum', label: 'Forum', icon: BsChatDots },

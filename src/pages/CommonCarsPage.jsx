@@ -8,17 +8,7 @@ import { fetchMachines } from '../stores/machine_slice';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import { fetchPivotStatistics } from '../stores/dashboard_slice';
 
-import { BsTruck } from "react-icons/bs";
-
-import {
-  FunnelIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  PencilSquareIcon,
-  ArrowPathIcon,
-  EyeIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import FlaticonIcon from '../components/ui/FlaticonIcon';
 
 import MachineFilters from '../components/machines/MachineFilters';
 import MachineTable from '../components/machines/MachineTable';
@@ -289,7 +279,7 @@ export default function CommonCarsPage() {
           <div style={{ 'fontFamily': 'Inter' }}
           className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-            <BsTruck className="h-4 w-4" />
+            <FlaticonIcon name="truck-side" size="lg" />
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
             Tüm Makineler
@@ -316,9 +306,9 @@ export default function CommonCarsPage() {
             className={ACTION_BUTTON_CLASS}
           >
             {categoriesOpen ? (
-              <ChevronUpIcon className="h-4 w-4" />
+              <FlaticonIcon name="angle-up" size="md" />
             ) : (
-              <ChevronDownIcon className="h-4 w-4" />
+              <FlaticonIcon name="angle-down" size="md" />
             )}
             {categoriesOpen ? 'Gizle' : 'Göster'}
           </button>
@@ -332,8 +322,10 @@ export default function CommonCarsPage() {
             title="Yenile"
             className={ACTION_BUTTON_CLASS}
           >
-            <ArrowPathIcon
-              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+            <FlaticonIcon
+              name="refresh"
+              size="md"
+              className={isRefreshing ? 'animate-spin' : ''}
             />
             Yenile
           </button>
@@ -345,7 +337,7 @@ export default function CommonCarsPage() {
             onClick={handleCreate}
             className={ACTION_BUTTON_CLASS}
           >
-            <span className="text-base leading-none">+</span>
+            <FlaticonIcon name="plus" size="md" />
             Yeni Makine
           </button>
 
@@ -388,7 +380,7 @@ export default function CommonCarsPage() {
             disabled={!selectedMachine || loading}
             className={ACTION_BUTTON_CLASS}
           >
-            <PencilSquareIcon className="h-4 w-4" />
+            <FlaticonIcon name="edit" size="md" />
             Güncelle
           </button>
           <button
@@ -397,7 +389,7 @@ export default function CommonCarsPage() {
             disabled={!selectedMachine || loading}
             className={ACTION_BUTTON_CLASS}
           >
-            <ArrowPathIcon className="h-4 w-4" />
+            <FlaticonIcon name="exchange" size="md" />
             Durum Değiştir
           </button>
           <button
@@ -406,7 +398,7 @@ export default function CommonCarsPage() {
             disabled={!selectedMachine || loading}
             className={ACTION_BUTTON_CLASS}
           >
-            <EyeIcon className="h-4 w-4" />
+            <FlaticonIcon name="eye" size="md" />
             Detaylar
           </button>
           <button
@@ -415,7 +407,7 @@ export default function CommonCarsPage() {
             disabled={!selectedMachine || loading}
             className={ACTION_BUTTON_CLASS}
           >
-            <TrashIcon className="h-4 w-4" />
+            <FlaticonIcon name="trash" size="md" />
             Sil
           </button>
 
@@ -429,16 +421,17 @@ export default function CommonCarsPage() {
             className={`${ACTION_BUTTON_CLASS} ${filtersOpen || activeFilterCount > 0 ? 'bg-blue-50' : ''
               }`}
           >
-            <FunnelIcon className="h-4 w-4" />
+            <FlaticonIcon name="filters" size="md" />
             Filtreler
             {activeFilterCount > 0 && (
               <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
                 {activeFilterCount}
               </span>
             )}
-            <ChevronDownIcon
-              className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''
-                }`}
+            <FlaticonIcon
+              name="angle-down"
+              size="md"
+              className={`transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
             />
           </button>
 
@@ -486,6 +479,18 @@ export default function CommonCarsPage() {
       <div className="border-t border-gray-200">
         <MachinePagination onNavigate={clearSelection} />
       </div>
+
+      <p className="px-2 pb-2 text-right text-[10px] text-gray-400">
+        İkonlar:{' '}
+        <a
+          href="https://www.flaticon.com/uicons"
+          target="_blank"
+          rel="noreferrer"
+          className="transition hover:text-gray-600 hover:underline"
+        >
+          Flaticon Uicons
+        </a>
+      </p>
 
       {/* Form Modal */}
       <MachineFormModal

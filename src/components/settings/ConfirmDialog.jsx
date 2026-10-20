@@ -1,7 +1,7 @@
 // src/components/settings/ConfirmDialog.jsx
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import FlaticonIcon from '../ui/FlaticonIcon';
 
 export default function ConfirmDialog({ open, onClose, onConfirm, title, message, loading }) {
   return (
@@ -25,7 +25,7 @@ export default function ConfirmDialog({ open, onClose, onConfirm, title, message
               <div className="px-6 py-6">
                 <div className="flex items-start gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 ring-1 ring-red-100">
-                    <ExclamationTriangleIcon className="h-5 w-5" strokeWidth={2.2} />
+                    <FlaticonIcon name="triangle-warning" size="lg" />
                   </div>
                   <div className="flex-1 pt-0.5">
                     <Dialog.Title className="text-base font-semibold text-gray-900">

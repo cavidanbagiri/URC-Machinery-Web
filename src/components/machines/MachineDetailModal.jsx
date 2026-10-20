@@ -2,7 +2,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { useSelector } from 'react-redux';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import FlaticonIcon from '../ui/FlaticonIcon';
 import StatusBadge from './StatusBadge';
 
 
@@ -99,7 +99,7 @@ export default function MachineDetailModal({ open, onClose, machine }) {
                   onClick={onClose}
                   className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  <FlaticonIcon name="cross" size="lg" />
                 </button>
               </div>
 

@@ -4,6 +4,7 @@ import App from './App'
 import store from './stores/index';  // Import default export
 import { Provider } from 'react-redux'
 import './index.css'
+import '@flaticon/flaticon-uicons/css/regular/rounded.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

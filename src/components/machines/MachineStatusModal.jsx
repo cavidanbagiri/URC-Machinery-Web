@@ -1,7 +1,7 @@
 // src/components/machines/MachineStatusModal.jsx
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
-import { XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import FlaticonIcon from '../ui/FlaticonIcon';
 
 const colorClasses = {
   gray: {
@@ -116,7 +116,7 @@ export default function MachineStatusModal({
                   onClick={onClose}
                   className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  <FlaticonIcon name="cross" size="lg" />
                 </button>
               </div>
 
@@ -156,7 +156,11 @@ export default function MachineStatusModal({
                       </div>
 
                       {isSelected && (
-                        <CheckCircleIcon className={`h-5 w-5 ${c.text}`} />
+                        <FlaticonIcon
+                          name="check-circle"
+                          size="lg"
+                          className={c.text}
+                        />
                       )}
                     </button>
                   );

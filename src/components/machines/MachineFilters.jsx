@@ -2,8 +2,8 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
 
+import FlaticonIcon from '../ui/FlaticonIcon';
 import { setFilter, resetFilters } from '../../stores/machine_slice';
 
 
@@ -46,7 +46,7 @@ export default function MachineFilters({ open, onClose, onFilterChange }) {
             onClick={onClose}
             className=" p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
-            <XMarkIcon className="h-4 w-4" />
+            <FlaticonIcon name="cross" size="md" />
           </button>
         </div>
 
@@ -138,7 +138,7 @@ export default function MachineFilters({ open, onClose, onFilterChange }) {
               onClick={handleReset}
               className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
             >
-              <XMarkIcon className="h-3 w-3" />
+              <FlaticonIcon name="filter-slash" size="sm" />
               Filtreleri temizle ({activeCount})
             </button>
           </div>
