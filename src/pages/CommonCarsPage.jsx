@@ -6,12 +6,14 @@ import { useSearchParams } from 'react-router-dom';
 
 import { fetchMachines } from '../stores/machine_slice';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
+import { fetchPivotStatistics } from '../stores/dashboard_slice';
 
 import { BsTruck } from "react-icons/bs";
 
 import {
   FunnelIcon,
   ChevronDownIcon,
+  ChevronUpIcon,
   PencilSquareIcon,
   ArrowPathIcon,
   EyeIcon,
@@ -22,6 +24,7 @@ import MachineFilters from '../components/machines/MachineFilters';
 import MachineTable from '../components/machines/MachineTable';
 import MachinePagination from '../components/machines/MachinePagination';
 import MachineFormModal from '../components/machines/MachineFormModal';
+import MachineCategoryCards from '../components/machines/MachineCategoryCards';
 import MachineDetailModal from '../components/machines/MachineDetailModal';
 import MachineStatusModal from '../components/machines/MachineStatusModal';
 import ExportButton from '../components/machines/ExportButton';
@@ -49,6 +52,11 @@ const ACTION_BUTTON_CLASS =
 export default function CommonCarsPage() {
   const dispatch = useDispatch();
   const { filters, total, offset, limit, items, loading } = useSelector((s) => s.machine);
+  const {
+    pivot,
+    pivotLoading,
+    error: dashboardError,
+  } = useSelector((s) => s.dashboard);
   const lookups = useSelector((s) => s.lookup.data);
 
   // Tekli seçim — seçim, sayfa/filtre bağlamına bağlıdır
@@ -64,6 +72,8 @@ export default function CommonCarsPage() {
 
   // Filter panel state
   const [filtersOpen, setFiltersOpen] = useState(false);
+  // Kategori paneli (Gizle/Göster)
+  const [categoriesOpen, setCategoriesOpen] = useState(true);
 
   // Aktiv filter sayı
   const activeFilterCount = Object.values(filters).filter(
@@ -96,6 +106,7 @@ export default function CommonCarsPage() {
   );
 
   const isFirstRender = useRef(true);
+  const isPivotFirstLoad = useRef(true);
 
   // Lookup-ları bir dəfə yüklə
   useEffect(() => {
@@ -108,6 +119,13 @@ export default function CommonCarsPage() {
       isFirstRender.current = false;
       dispatch(fetchMachines());
     }
+  }, [dispatch]);
+
+  // Kategori kartları için pivot istatistiklerini yükle
+  useEffect(() => {
+    if (!isPivotFirstLoad.current) return;
+    isPivotFirstLoad.current = false;
+    dispatch(fetchPivotStatistics());
   }, [dispatch]);
 
   // Filter dəyişdikdə (debounce)
@@ -127,6 +145,17 @@ export default function CommonCarsPage() {
 
   // ---------- HANDLERS ----------
   const clearSelection = () => setSelection(null);
+
+  const refreshPivot = () => {
+    dispatch(fetchPivotStatistics());
+  };
+
+  const handleCategorySelect = (typeId) => {
+    const current = String(filters.type_id ?? '');
+    const next = current === String(typeId) ? '' : String(typeId);
+    clearSelection();
+    dispatch(setFilter({ key: 'type_id', value: next }));
+  };
 
   const handleSelect = (machineId) => {
     setSelection((prev) =>
@@ -162,6 +191,7 @@ export default function CommonCarsPage() {
       setDeleteOpen(false);
       setDeletingMachine(null);
       setSelection(null);
+      refreshPivot();
     } catch (err) {
       const message =
         typeof err === 'string'
@@ -247,6 +277,28 @@ export default function CommonCarsPage() {
         </div>
 
          <div className='mr-4 flex items-center'>
+          <button
+            type="button"
+            onClick={() => setCategoriesOpen((value) => !value)}
+            aria-expanded={categoriesOpen}
+            aria-controls={
+              categoriesOpen ? 'machine-category-panel' : undefined
+            }
+            aria-label={
+              categoriesOpen
+                ? 'Makine kategorilerini gizle'
+                : 'Makine kategorilerini göster'
+            }
+            className={ACTION_BUTTON_CLASS}
+          >
+            {categoriesOpen ? (
+              <ChevronUpIcon className="h-4 w-4" />
+            ) : (
+              <ChevronDownIcon className="h-4 w-4" />
+            )}
+            {categoriesOpen ? 'Gizle' : 'Göster'}
+          </button>
+
           <ExportButton />
 
           <button
@@ -260,6 +312,19 @@ export default function CommonCarsPage() {
 
          </div>
       </div>
+
+      {categoriesOpen && (
+        <div className="px-3 pb-3">
+          <MachineCategoryCards
+            pivot={pivot}
+            loading={pivotLoading}
+            error={dashboardError}
+            activeTypeId={filters.type_id}
+            onSelectType={handleCategorySelect}
+            onRefresh={refreshPivot}
+          />
+        </div>
+      )}
 
       <div className="flex flex-row justify-between items-center  p-2 ">
 
@@ -391,6 +456,7 @@ export default function CommonCarsPage() {
           setEditingMachine(null);
         }}
         editingMachine={editingMachine}
+        onSaved={refreshPivot}
       />
       {/* Detail Modal — YENİ */}
       <MachineDetailModal

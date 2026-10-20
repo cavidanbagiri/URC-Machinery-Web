@@ -32,7 +32,12 @@ const emptyForm = {
 
 };
 
-export default function MachineFormModal({ open, onClose, editingMachine }) {
+export default function MachineFormModal({
+  open,
+  onClose,
+  editingMachine,
+  onSaved,
+}) {
   const dispatch = useDispatch();
   const lookups = useSelector((s) => s.lookup.data);
   const { formSubmitting } = useSelector((s) => s.machine);
@@ -159,6 +164,7 @@ export default function MachineFormModal({ open, onClose, editingMachine }) {
         toast.success('Başarıyla oluşturuldu');
       }
       onClose();
+      onSaved?.();
     } catch (err) {
       toast.error(err || 'Bir hata oluştu');
     }
