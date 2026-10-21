@@ -7,15 +7,15 @@
 import axios from 'axios';
 
 // Set VITE_API_URL in frontend-web/.env for local development.
-// export const BASE_URL =
-//   import.meta.env.VITE_API_URL || 'https://urc-machinery-server.onrender.com/api';
+export const BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://urc-machinery-server.onrender.com/api';
 // export const BASE_URL =
 //   'http://localhost:8000/api';
 // Instead of localhost or Render URL
 // const API_BASE_URL = "http://87.242.87.34:8000"
 
-export const BASE_URL =
-  import.meta.env.VITE_API_URL || "https://87.242.87.34";
+// export const BASE_URL =
+//   import.meta.env.VITE_API_URL || "https://87.242.87.34";
 
 
 const config = {
