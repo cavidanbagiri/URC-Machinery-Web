@@ -147,6 +147,80 @@ export const updateMachineStatus = createAsyncThunk(
 
 
 // =========================================================
+// MACHINE PHOTOS
+// =========================================================
+
+/** FastAPI returns either a string or a pydantic error list in ``detail``. */
+const photoErrorMessage = (err, fallback) => {
+  const detail = err.response?.data?.detail;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((item) => item.msg || String(item)).join(', ');
+  }
+  return err.message || fallback;
+};
+
+export const fetchMachineDetail = createAsyncThunk(
+  'machine/fetchMachineDetail',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await MachineService.fetchMachineById(id);
+    } catch (err) {
+      return rejectWithValue(
+        photoErrorMessage(err, 'Makine bilgileri getirilemedi')
+      );
+    }
+  }
+);
+
+export const fetchMachinePhotos = createAsyncThunk(
+  'machine/fetchMachinePhotos',
+  async (machineId, { rejectWithValue }) => {
+    try {
+      return await MachineService.fetchMachinePhotos(machineId);
+    } catch (err) {
+      return rejectWithValue(photoErrorMessage(err, 'Fotoğraflar getirilemedi'));
+    }
+  }
+);
+
+export const uploadMachinePhoto = createAsyncThunk(
+  'machine/uploadMachinePhoto',
+  async ({ machineId, file, isPrimary = false }, { rejectWithValue }) => {
+    try {
+      return await MachineService.uploadMachinePhoto(machineId, file, isPrimary);
+    } catch (err) {
+      return rejectWithValue(photoErrorMessage(err, 'Fotoğraf yüklenemedi'));
+    }
+  }
+);
+
+export const setPrimaryMachinePhoto = createAsyncThunk(
+  'machine/setPrimaryMachinePhoto',
+  async (photoId, { rejectWithValue }) => {
+    try {
+      return await MachineService.setPrimaryMachinePhoto(photoId);
+    } catch (err) {
+      return rejectWithValue(
+        photoErrorMessage(err, 'Ana fotoğraf güncellenemedi')
+      );
+    }
+  }
+);
+
+export const deleteMachinePhoto = createAsyncThunk(
+  'machine/deleteMachinePhoto',
+  async (photoId, { rejectWithValue }) => {
+    try {
+      return await MachineService.deleteMachinePhoto(photoId);
+    } catch (err) {
+      return rejectWithValue(photoErrorMessage(err, 'Fotoğraf silinemedi'));
+    }
+  }
+);
+
+
+// =========================================================
 // SLICE
 // =========================================================
 

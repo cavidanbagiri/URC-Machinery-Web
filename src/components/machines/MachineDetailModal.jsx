@@ -4,15 +4,25 @@ import { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import FlaticonIcon from '../ui/FlaticonIcon';
 import StatusBadge from './StatusBadge';
+import MachinePhotoGallery from './MachinePhotoGallery';
 
 
 
 
-export default function MachineDetailModal({ open, onClose, machine }) {
+export default function MachineDetailModal({
+  open,
+  onClose,
+  machine,
+  onPhotosChange,
+}) {
 
   const lookups = useSelector((s) => s.lookup.data);
 
   if (!machine) return null;
+
+  // Photos live on the machine record; the gallery reports every mutation back
+  // to the page, which re-renders us with the fresh list.
+  const photos = machine.photos ?? [];
 
 
   // Lookup ID → ad
@@ -106,6 +116,15 @@ export default function MachineDetailModal({ open, onClose, machine }) {
               {/* Body */}
               <div className="flex-1 overflow-y-auto px-6 py-5">
                 <div className="space-y-8">
+                  {/* PHOTOS */}
+                  <Section title="Fotoğraflar">
+                    <MachinePhotoGallery
+                      machineId={machine.id}
+                      photos={photos}
+                      onChange={onPhotosChange}
+                    />
+                  </Section>
+
                   {/* BASIC INFO */}
                   <Section title="Temel Bilgiler">
                     <Grid>

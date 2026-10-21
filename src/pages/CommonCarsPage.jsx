@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
 
-import { fetchMachines } from '../stores/machine_slice';
+import { fetchMachines, fetchMachineDetail } from '../stores/machine_slice';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import { fetchPivotStatistics } from '../stores/dashboard_slice';
 
@@ -202,9 +202,18 @@ export default function CommonCarsPage() {
     }
   };
 
-  const handleDetail = (machine) => {
+  const handleDetail = async (machine) => {
+    // Show the row immediately, then replace it with the full record
+    // (including the photo list) once the detail request resolves.
     setDetailMachine(machine);
     setDetailOpen(true);
+
+    try {
+      const fresh = await dispatch(fetchMachineDetail(machine.id)).unwrap();
+      setDetailMachine(fresh);
+    } catch {
+      // Keep the list row; the modal already renders it.
+    }
   };
 
   const handleChangeStatus = (machine) => {
@@ -510,6 +519,11 @@ export default function CommonCarsPage() {
           setDetailMachine(null);
         }}
         machine={detailMachine}
+        onPhotosChange={(nextPhotos) =>
+          setDetailMachine((current) =>
+            current ? { ...current, photos: nextPhotos } : current
+          )
+        }
       />
       {/* Status Modal — YENİ */}
       <MachineStatusModal
