@@ -103,7 +103,7 @@ export default function RepairSummaryCards({
         value={data.active}
         hint="Açık tamir kaydı"
         icon={Wrench}
-        tone="blue"
+        tone="amber"
         onClick={() => onSelectFilters?.({ status: 'tamirde' })}
       />
       <SummaryCard
@@ -119,7 +119,7 @@ export default function RepairSummaryCards({
         value={data.due_soon}
         hint="3 gün içinde çıkış"
         icon={Clock}
-        tone="amber"
+        tone="blue"
         onClick={() => onSelectFilters?.({ status: 'tamirde', due_soon: true })}
       />
       <SummaryCard
