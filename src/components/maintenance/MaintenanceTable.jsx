@@ -6,6 +6,7 @@ import {
   PlusCircleIcon,
 } from '@heroicons/react/24/outline';
 
+import FlaticonIcon from '../ui/FlaticonIcon';
 import StatusBadge from '../machines/StatusBadge';
 import {
   formatCounter,
@@ -78,6 +79,9 @@ export default function MaintenanceTable({
   onReading,
   onComplete,
   onHistory,
+  sortBy,
+  sortOrder,
+  onSortChange,
 }) {
   if (loading && items.length === 0) {
     return (
@@ -129,7 +133,35 @@ export default function MaintenanceTable({
               <th className="px-4 py-2.5 text-left font-medium">Plan</th>
               <th className="px-4 py-2.5 text-left font-medium">Son Bakım</th>
               <th className="px-4 py-2.5 text-left font-medium">Güncel Sayaç</th>
-              <th className="px-4 py-2.5 text-left font-medium">Kalan</th>
+              <th
+                className="px-4 py-2.5 text-left font-medium"
+                aria-sort={
+                  sortBy === 'remaining'
+                    ? sortOrder === 'desc'
+                      ? 'descending'
+                      : 'ascending'
+                    : 'none'
+                }
+              >
+                <button
+                  type="button"
+                  onClick={() => onSortChange?.()}
+                  title="Kalan değerine göre sırala"
+                  className={`inline-flex items-center gap-1 rounded transition hover:text-blue-700 ${
+                    sortBy === 'remaining' ? 'text-blue-700' : ''
+                  }`}
+                >
+                  Kalan
+                  <FlaticonIcon
+                    name={
+                      sortBy === 'remaining'
+                        ? `angle-${sortOrder === 'desc' ? 'down' : 'up'}`
+                        : 'sort'
+                    }
+                    size="xs"
+                  />
+                </button>
+              </th>
               <th className="px-4 py-2.5 text-right font-medium">İşlemler</th>
             </tr>
           </thead>

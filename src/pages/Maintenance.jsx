@@ -14,8 +14,10 @@ import {
   fetchMaintenance,
   fetchMaintenanceSummary,
   resetFilters,
+  resetSort,
   setFilter,
   setFilters,
+  setSort,
 } from '../stores/maintenance_slice';
 
 import MaintenanceSummaryCards from '../components/maintenance/MaintenanceSummaryCards';
@@ -37,6 +39,8 @@ export default function Maintenance() {
     limit,
     offset,
     filters,
+    sort_by,
+    sort_order,
     loading,
     error,
     summary,
@@ -87,11 +91,11 @@ export default function Maintenance() {
     return () => clearTimeout(timeout);
   }, [dispatch, filters]);
 
-  // Sayfalama değişince (hemen)
+  // Sayfalama / sıralama değişince (hemen)
   useEffect(() => {
     if (isFirstRender.current) return;
     dispatch(fetchMaintenance());
-  }, [dispatch, offset, limit]);
+  }, [dispatch, offset, limit, sort_by, sort_order]);
 
   // İlk render tamamlandı
   useEffect(() => {
@@ -124,7 +128,22 @@ export default function Maintenance() {
 
   const handleResetFilters = () => {
     dispatch(resetFilters());
+    dispatch(resetSort());
     setFiltersOpen(false);
+  };
+
+  // "Kalan" kolonuna tıklayınca artan/azalan sıralama arasında geçiş yap.
+  const toggleRemainingSort = () => {
+    if (sort_by !== 'remaining') {
+      dispatch(setSort({ field: 'remaining', order: 'asc' }));
+      return;
+    }
+    dispatch(
+      setSort({
+        field: 'remaining',
+        order: sort_order === 'desc' ? 'asc' : 'desc',
+      })
+    );
   };
 
   const openPlan = (item) => {
@@ -263,6 +282,9 @@ export default function Maintenance() {
           onReading={openReading}
           onComplete={openComplete}
           onHistory={openHistory}
+          sortBy={sort_by}
+          sortOrder={sort_order}
+          onSortChange={toggleRemainingSort}
         />
 
         <MaintenancePagination />

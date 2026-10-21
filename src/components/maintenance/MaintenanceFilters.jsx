@@ -6,19 +6,26 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import {
   MAINTENANCE_STATUS_OPTIONS,
   resetFilters,
+  resetSort,
   setFilter,
   setFilters,
+  setSort,
 } from '../../stores/maintenance_slice';
 
 export default function MaintenanceFilters({ open, onClose, onFilterChange }) {
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.maintenance.filters);
+  const sortBy = useSelector((s) => s.maintenance.sort_by);
+  const sortOrder = useSelector((s) => s.maintenance.sort_order);
   const lookups = useSelector((s) => s.lookup.data);
 
-  const activeCount = Object.entries(filters).filter(([key, value]) => {
-    if (key === 'include_inactive') return value === true;
-    return value !== '' && value !== null && value !== undefined;
-  }).length;
+  const activeCount =
+    Object.entries(filters).filter(([key, value]) => {
+      if (key === 'include_inactive') return value === true;
+      return value !== '' && value !== null && value !== undefined;
+    }).length + (sortBy ? 1 : 0);
+
+  const sortValue = sortBy ? `${sortBy}:${sortOrder || 'asc'}` : '';
 
   const handleChange = (key, value) => {
     onFilterChange?.();
@@ -31,9 +38,20 @@ export default function MaintenanceFilters({ open, onClose, onFilterChange }) {
     dispatch(setFilter({ key, value }));
   };
 
+  const handleSortChange = (value) => {
+    onFilterChange?.();
+    if (!value) {
+      dispatch(setSort({ field: '', order: '' }));
+      return;
+    }
+    const [field, order] = value.split(':');
+    dispatch(setSort({ field, order: order || 'asc' }));
+  };
+
   const handleReset = () => {
     onFilterChange?.();
     dispatch(resetFilters());
+    dispatch(resetSort());
   };
 
   return (
@@ -98,6 +116,16 @@ export default function MaintenanceFilters({ open, onClose, onFilterChange }) {
             <option value="">Tümü</option>
             <option value="true">Planı olanlar</option>
             <option value="false">Planı olmayanlar</option>
+          </FilterSelect>
+
+          <FilterSelect
+            label="Sıralama (Kalan)"
+            value={sortValue}
+            onChange={handleSortChange}
+          >
+            <option value="">Varsayılan (durum önceliği)</option>
+            <option value="remaining:asc">Kalan — Artan (acil önce)</option>
+            <option value="remaining:desc">Kalan — Azalan (en fazla kalan önce)</option>
           </FilterSelect>
 
           <FilterSelect

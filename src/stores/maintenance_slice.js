@@ -42,6 +42,9 @@ const initialState = {
   limit: 20,
   offset: 0,
   filters: { ...initialFilters },
+  // Sıralama filtrelerden ayrı tutulur: "Kalan" kolonu için asc/desc.
+  sort_by: '',
+  sort_order: '',
   loading: false,
   error: null,
   listRequestId: null,
@@ -80,12 +83,15 @@ function errorMessage(err, fallback) {
 export const fetchMaintenance = createAsyncThunk(
   'maintenance/fetchMaintenance',
   async (_, { getState, rejectWithValue }) => {
-    const { limit, offset, filters } = getState().maintenance;
+    const { limit, offset, filters, sort_by, sort_order } = getState().maintenance;
     try {
       return await MaintenanceService.fetchMaintenance({
         limit,
         offset,
         ...filters,
+        // Boş değerler servis tarafında temizlenir; varsayılan sıralama korunur.
+        sort_by,
+        sort_order,
       });
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Bakım listesi yüklenemedi'));
@@ -171,6 +177,17 @@ const maintenanceSlice = createSlice({
     },
     resetFilters(state) {
       state.filters = { ...initialFilters };
+      state.offset = 0;
+    },
+    setSort(state, action) {
+      const { field = '', order = 'asc' } = action.payload || {};
+      state.sort_by = field;
+      state.sort_order = field ? order : '';
+      state.offset = 0;
+    },
+    resetSort(state) {
+      state.sort_by = '';
+      state.sort_order = '';
       state.offset = 0;
     },
     setLimit(state, action) {
@@ -302,6 +319,8 @@ export const {
   setFilter,
   setFilters,
   resetFilters,
+  setSort,
+  resetSort,
   setLimit,
   setOffset,
   clearMutationError,
