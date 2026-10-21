@@ -15,7 +15,7 @@ import axios from 'axios';
 // const API_BASE_URL = "http://87.242.87.34:8000"
 
 export const BASE_URL =
-  import.meta.env.VITE_API_URL || "http://87.242.87.34:8000";
+  import.meta.env.VITE_API_URL || "https://87.242.87.34:8000";
 
 
 const config = {
