@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login, reset } from '../../stores/user_slice';
 
+import forklift from '../../assets/icons/forklift.png'
+
 // Custom hook for form validation
 const useFormValidation = () => {
   const [errors, setErrors] = useState({});
@@ -208,6 +210,8 @@ const LoginComponent = () => {
             Devam etmek için giriş yapın
           </p>
         </div>
+
+        <img src={forklift} alt="Description of the image" />
         
         {/* Form Container */}
         <div className="px-8 py-6">

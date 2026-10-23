@@ -1,5 +1,6 @@
 // src/components/machines/MachineTable.jsx
 import { useSelector } from 'react-redux';
+import FlaticonIcon from '../ui/FlaticonIcon';
 import MachineSkeleton from './MachineSkeleton';
 import StatusBadge from './StatusBadge';
 
@@ -9,11 +10,19 @@ import StatusBadge from './StatusBadge';
 export default function MachineTable({
   selectedId,
   onSelect,
+  onOpenDetail,
   onOpenFilters,
   hasActiveFilters,
 }) {
   const { items, loading } = useSelector((s) => s.machine);
   const lookups = useSelector((s) => s.lookup.data);
+
+  // List rows already carry their photos (with a presigned `url`); prefer the
+  // primary one and fall back to the first uploaded photo.
+  const primaryPhotoOf = (machine) => {
+    const photos = machine.photos || [];
+    return photos.find((photo) => photo.is_primary) || photos[0] || null;
+  };
 
   // Lookup ID → ad
   const lookupName = (key, id) => {
@@ -88,6 +97,7 @@ export default function MachineTable({
               <th className="w-10 px-4 py-2 text-left font-medium">
                 <span className="sr-only">Seç</span>
               </th>
+              <th className="px-6 py-2 text-left font-medium">Fotoğraf</th>
               <th className="px-6 py-2 text-left font-medium">Durum</th>
               <th className="px-6 py-2 text-left font-medium">Kimlik No</th>
               <th className="px-6 py-2 text-left font-medium">Plaka No</th>       {/* ← YENİ */}
@@ -100,7 +110,11 @@ export default function MachineTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100" >
-            {items.map((machine) => (
+            {items.map((machine) => {
+              const photo = primaryPhotoOf(machine);
+              const photoCount = machine.photos?.length || 0;
+
+              return (
               <tr
                 key={machine.id}
                 className={
@@ -117,6 +131,39 @@ export default function MachineTable({
                     className="h-4 w-4 cursor-pointer accent-blue-600"
                     aria-label="Makineyi seç"
                   />
+                </td>
+                {/* Fotoğraf — ana fotoğraf, tıklayınca detay açılır */}
+                <td className="whitespace-nowrap px-6 py-2">
+                  <button
+                    type="button"
+                    onClick={() => onOpenDetail?.(machine)}
+                    disabled={!onOpenDetail}
+                    title={
+                      photo?.url
+                        ? 'Fotoğrafı büyüt'
+                        : 'Fotoğraf yok — detaydan yükleyin'
+                    }
+                    aria-label={`${machine.identification_no || 'Makine'} fotoğrafı`}
+                    className="group relative block h-10 w-14 overflow-hidden rounded-md border border-gray-200 bg-gray-50 disabled:cursor-default"
+                  >
+                    {photo?.url ? (
+                      <img
+                        src={photo.url}
+                        alt={`${machine.identification_no || 'Makine'} fotoğrafı`}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition duration-200 group-hover:scale-105"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-gray-300">
+                        <FlaticonIcon name="picture" size="md" />
+                      </span>
+                    )}
+                    {photoCount > 1 && (
+                      <span className="absolute bottom-0 right-0 rounded-tl bg-black/60 px-1 text-[10px] font-medium leading-4 text-white">
+                        {photoCount}
+                      </span>
+                    )}
+                  </button>
                 </td>
                 {/* YENİ — Status */}
                 <td className="whitespace-nowrap px-6 py-2">
@@ -148,7 +195,8 @@ export default function MachineTable({
                 </td>
                 
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

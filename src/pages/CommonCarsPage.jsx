@@ -152,6 +152,7 @@ export default function CommonCarsPage() {
   const handleCategorySelect = (typeId) => {
     const current = String(filters.type_id ?? '');
     const next = current === String(typeId) ? '' : String(typeId);
+    setCategoriesOpen(false)
     clearSelection();
     dispatch(setFilter({ key: 'type_id', value: next }));
   };
@@ -354,7 +355,7 @@ export default function CommonCarsPage() {
       </div>
 
       {categoriesOpen && (
-        <div className="px-3 pb-3">
+        <div className="px-3 pb-3 ">
           <MachineCategoryCards
             pivot={pivot}
             loading={pivotLoading}
@@ -480,6 +481,7 @@ export default function CommonCarsPage() {
       <MachineTable
         selectedId={selectedId}
         onSelect={handleSelect}
+        onOpenDetail={handleDetail}
         onOpenFilters={() => setFiltersOpen(true)}
         hasActiveFilters={hasActiveFilters}
       />

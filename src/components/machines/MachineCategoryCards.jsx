@@ -1,6 +1,10 @@
 // src/components/machines/MachineCategoryCards.jsx
 import FlaticonIcon from '../ui/FlaticonIcon';
 
+
+import forklift from '../../assets/icons/forklift3.png'
+
+
 const TYPE_ICONS = {
   forklift: 'forklift',
   jenerator: 'bolt',
@@ -64,7 +68,10 @@ const TONES = [
   },
 ];
 
-const WRAP_CLASS = 'flex flex-wrap gap-1.5';
+const WRAP_CLASS = 'grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4';
+
+// Tip adına görə real şəkil (hazırda yalnız forklift üçün var).
+const TYPE_IMAGES = { forklift };
 
 const normalizeTypeName = (name) =>
   String(name ?? '')
@@ -114,7 +121,7 @@ export default function MachineCategoryCards({
         ) : (
           <div className={WRAP_CLASS}>
             {categories.map((category) => (
-              <CategoryCard
+              <CategoryCard className=""
                 key={category.type_id ?? category.type_name}
                 category={category}
                 active={
@@ -137,6 +144,8 @@ export default function MachineCategoryCards({
 function CategoryCard({ category, active, onClick }) {
   const { icon, tone, type_name, total } = category;
   const Element = onClick ? 'button' : 'div';
+  // Forklift üçün real şəkil; digər tiplər üçün tip ikonu göstərilir.
+  const image = TYPE_IMAGES[normalizeTypeName(type_name)];
 
   return (
     <Element
@@ -145,29 +154,34 @@ function CategoryCard({ category, active, onClick }) {
       aria-pressed={onClick ? active : undefined}
       aria-label={`${type_name}: ${total} makine`}
       title={`${type_name} — ${total} makine`}
-      className={`flex min-w-0 flex-[1_1_128px] max-w-[130px] items-center gap-2.5 rounded-xl border px-2 py-2 text-left transition ${tone.card} ${
+      className={`flex w-full min-w-0 items-center justify-center gap-2.5 rounded-xl px-2 py-2 text-left transition ${
         onClick
-          ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
+          ? 'cursor-pointer transition delay-10 duration-50 ease-in-out hover:-translate-y-1 hover:scale-101 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
           : ''
-      } ${active ? 'ring-2 ring-blue-500 ring-offset-1' : ''}`}
+      } ${active ? 'ring-2 ring-gray-300 ring-offset-1 duration-400' : ''}`}
     >
       <span
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${tone.icon}`}
+        className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-lg ${tone.icon}`}
       >
-        <FlaticonIcon name={icon} size="md" />
+        {image ? (
+          <img src={image} alt="" className="h-20 w-28 object-contain" />
+        ) : (
+          <FlaticonIcon name={icon} size="2xl" />
+        )}
       </span>
 
-      <span className="min-w-0 flex-1">
+      <span style={{'fontFamily':'IBM Plex Sans'}}
+        className="min-w-0 flex flex-col w-full  ">
+        <span 
+          className={`block text-6xl pl-4 font-thin leading-tight `}
+        >
+          {total}
+        </span>
         <span
-          className="block truncate text-[10px] font-medium uppercase text-gray-500"
+          className="block truncate text-[14px] pl-4 font-extrabold uppercase text-black"
           title={type_name}
         >
           {type_name}
-        </span>
-        <span
-          className={`block text-lg font-semibold leading-tight ${tone.value}`}
-        >
-          {total}
         </span>
       </span>
     </Element>
@@ -177,10 +191,10 @@ function CategoryCard({ category, active, onClick }) {
 function SkeletonCards() {
   return (
     <div className={WRAP_CLASS}>
-      {Array.from({ length: 10 }).map((_, index) => (
+      {Array.from({ length: 8 }).map((_, index) => (
         <div
           key={index}
-          className="h-[52px] flex-[1_1_128px] max-w-[170px] animate-pulse rounded-xl bg-gray-100 ring-1 ring-gray-200/60"
+          className="h-32 animate-pulse rounded-xl bg-gray-100 ring-1 ring-gray-200/60"
         />
       ))}
     </div>
