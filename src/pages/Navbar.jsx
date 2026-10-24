@@ -8,6 +8,9 @@ import { BsBoxSeam, BsCartCheck, BsBell, BsTools, BsWrench, BsChatDots } from "r
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosLogOut } from "react-icons/io";
 import FlaticonIcon from '../components/ui/FlaticonIcon';
+import { PiCraneTowerBold } from "react-icons/pi";
+
+
 
 function DataManagementIcon({ className }) {
   return <FlaticonIcon name="truck-side" className={className} />;
@@ -16,7 +19,7 @@ function DataManagementIcon({ className }) {
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
   { to: '/notifications', label: 'Bildirimler', icon: BsBell },
-  { to: '/common_cars', label: 'Veri Yönetimi', icon: DataManagementIcon },
+  { to: '/common_cars', label: 'Tum Makineler', icon: PiCraneTowerBold },
   { to: '/maintenance', label: 'Bakım', icon: BsTools },
   { to: '/repair', label: 'Tamir', icon: BsWrench },
   { to: '/forum', label: 'Forum', icon: BsChatDots },
