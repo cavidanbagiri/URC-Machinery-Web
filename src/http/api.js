@@ -8,9 +8,9 @@ import axios from 'axios';
 //   import.meta.env.VITE_API_URL || 'https://urc-machinery-server.onrender.com/api';
 // export const BASE_URL =
 //   import.meta.env.VITE_API_URL || 'https://api.ustaymakine.com/api';
-// export const BASE_URL =
-//   'http://localhost:8000/api';
-export const BASE_URL ="https://api.ustaymakine.com/api";
+export const BASE_URL =
+  'http://localhost:8000/api';
+// export const BASE_URL ="https://api.ustaymakine.com/api";
 
 // Instead of localhost or Render URL
 // const API_BASE_URL = "http://87.242.87.34:8000"
