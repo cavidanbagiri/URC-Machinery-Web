@@ -5,7 +5,7 @@ import axios from 'axios';
 
 // Set VITE_API_URL in frontend-web/.env for local development.
 export const BASE_URL =
-  import.meta.env.VITE_API_URL || 'https://urc-machinery-server.onrender.com';
+  import.meta.env.VITE_API_URL || 'https://urc-machinery-server.onrender.com/api';
 // export const BASE_URL =
 //   import.meta.env.VITE_API_URL || 'https://api.ustaymakine.com/api';
 // export const BASE_URL =
