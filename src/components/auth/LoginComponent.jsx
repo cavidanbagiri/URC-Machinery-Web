@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login, reset } from '../../stores/user_slice';
 
-import forklift from '../../assets/icons/forklift.png'
+import forklift from '../../assets/icons/forklift3.png'
 
 // Custom hook for form validation
 const useFormValidation = () => {

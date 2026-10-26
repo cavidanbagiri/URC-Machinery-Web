@@ -2,7 +2,24 @@
 import FlaticonIcon from '../ui/FlaticonIcon';
 
 
+import backhoeloader from '../../assets/icons/backhoe-loader.png'
+import binekarac from '../../assets/icons/binek-arac.png'
+import dorse from '../../assets/icons/dorse.png'
+import hiup from '../../assets/icons/hi-up.png'
+import isildaklijenerator from '../../assets/icons/isildakli-jenerator.png'
+import kompressor from '../../assets/icons/kompresor.png'
+import manlift from '../../assets/icons/manlift.png'
+import miniloader from '../../assets/icons/mini-loader.png'
+import minibus from '../../assets/icons/minibus.png'
+import mobilvinc from '../../assets/icons/mobil-vinc.png'
+import otobus from '../../assets/icons/otobus.png'
 import forklift from '../../assets/icons/forklift3.png'
+import sutankeri from '../../assets/icons/su-tankeri.png'
+import teleskopikforklift from '../../assets/icons/teleskopik-forklift.png'
+import tir from '../../assets/icons/tir.png'
+import traktor from '../../assets/icons/traktor.png'
+import vidanjor from '../../assets/icons/vidanjor.png'
+
 
 
 const TYPE_ICONS = {
@@ -71,7 +88,25 @@ const TONES = [
 const WRAP_CLASS = 'grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4';
 
 // Tip adına görə real şəkil (hazırda yalnız forklift üçün var).
-const TYPE_IMAGES = { forklift };
+const TYPE_IMAGES = {
+  forklift
+  , backhoeloader
+  , binekarac
+  , dorse
+  , hiup
+  , isildaklijenerator
+  , kompressor
+  , manlift
+  , miniloader
+  , minibus
+  , mobilvinc
+  , otobus
+  , sutankeri
+  , teleskopikforklift
+  , tir
+  , traktor
+  , vidanjor
+};
 
 const normalizeTypeName = (name) =>
   String(name ?? '')
@@ -145,7 +180,17 @@ function CategoryCard({ category, active, onClick }) {
   const { icon, tone, type_name, total } = category;
   const Element = onClick ? 'button' : 'div';
   // Forklift üçün real şəkil; digər tiplər üçün tip ikonu göstərilir.
-  const image = TYPE_IMAGES[normalizeTypeName(type_name)];
+  
+  // const image = TYPE_IMAGES[normalizeTypeName(type_name)];
+
+  let image = TYPE_IMAGES[normalizeTypeName(type_name)];
+
+  if (type_name === 'Binek Arac'){image = binekarac}
+  if (type_name === 'Mobil Vinc'){image = mobilvinc}
+  if (type_name === 'Backhoe-Loader'){image = backhoeloader}
+  if (type_name === 'Mini Loader'){image = miniloader}
+  if (type_name === 'Hi-Up'){image = hiup}
+  if (type_name === 'Su Tankeri'){image = sutankeri}
 
   return (
     <Element
@@ -154,14 +199,23 @@ function CategoryCard({ category, active, onClick }) {
       aria-pressed={onClick ? active : undefined}
       aria-label={`${type_name}: ${total} makine`}
       title={`${type_name} — ${total} makine`}
-      className={`flex w-full min-w-0 items-center justify-center gap-2.5 rounded-xl px-2 py-2 text-left transition ${
-        onClick
+      className={`flex w-full min-w-0 items-center justify-center gap-2.5 rounded-xl px-2 py-2 text-left transition ${onClick
           ? 'cursor-pointer transition delay-10 duration-50 ease-in-out hover:-translate-y-1 hover:scale-101 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
           : ''
-      } ${active ? 'ring-2 ring-gray-300 ring-offset-1 duration-400' : ''}`}
+        } ${active ? 'ring-2 ring-gray-300 ring-offset-1 duration-400' : ''}`}
     >
-      <span
+      {/* <span
         className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-lg ${tone.icon}`}
+      >
+        {image ? (
+          <img src={image} alt="" className="h-20 w-28 object-contain" />
+        ) : (
+          <FlaticonIcon name={icon} size="2xl" />
+        )}
+      </span> */}
+
+      <span
+        className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-lg `}
       >
         {image ? (
           <img src={image} alt="" className="h-20 w-28 object-contain" />
@@ -170,9 +224,11 @@ function CategoryCard({ category, active, onClick }) {
         )}
       </span>
 
-      <span style={{'fontFamily':'IBM Plex Sans'}}
+      <span>{type_name}</span>
+
+      <span style={{ 'fontFamily': 'IBM Plex Sans' }}
         className="min-w-0 flex flex-col w-full  ">
-        <span 
+        <span
           className={`block text-6xl pl-4 font-thin leading-tight `}
         >
           {total}
