@@ -2,7 +2,7 @@
 import FlaticonIcon from '../ui/FlaticonIcon';
 
 
-import backhoeloader from '../../assets/icons/back.ico'
+import backhoeloader from '../../assets/icons/backhoe-loader.png'
 import binekarac from '../../assets/icons/binek-arac.png'
 import dorse from '../../assets/icons/dorse.png'
 import hiup from '../../assets/icons/hi-up.png'
