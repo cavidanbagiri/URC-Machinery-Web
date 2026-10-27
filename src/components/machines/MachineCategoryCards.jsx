@@ -2,18 +2,18 @@
 import FlaticonIcon from '../ui/FlaticonIcon';
 
 
-import backhoeloader from '../../assets/icons/backhoe-loader.png'
+import backhoeloader from '../../assets/icons/back.ico'
 import binekarac from '../../assets/icons/binek-arac.png'
 import dorse from '../../assets/icons/dorse.png'
 import hiup from '../../assets/icons/hi-up.png'
 import isildaklijenerator from '../../assets/icons/isildakli-jenerator.png'
 import kompressor from '../../assets/icons/kompresor.png'
-import manlift from '../../assets/icons/manlift.png'
+import manlift from '../../assets/icons/manlifticon.ico'
 import miniloader from '../../assets/icons/mini-loader.png'
 import minibus from '../../assets/icons/minibus.png'
-import mobilvinc from '../../assets/icons/mobil-vinc.png'
+import mobilvinc from '../../assets/icons/mobil.ico'
 import otobus from '../../assets/icons/otobus.png'
-import forklift from '../../assets/icons/forklift3.png'
+import forklift from '../../assets/icons/forklift4.png'
 import sutankeri from '../../assets/icons/su-tankeri.png'
 import teleskopikforklift from '../../assets/icons/teleskopik-forklift.png'
 import tir from '../../assets/icons/tir.png'
@@ -224,7 +224,7 @@ function CategoryCard({ category, active, onClick }) {
         )}
       </span>
 
-      <span>{type_name}</span>
+      {/* <span>{type_name}</span> */}
 
       <span style={{ 'fontFamily': 'IBM Plex Sans' }}
         className="min-w-0 flex flex-col w-full  ">
