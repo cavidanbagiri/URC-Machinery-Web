@@ -189,13 +189,14 @@ function CategoryCard({ category, active, onClick }) {
 
   let image = TYPE_IMAGES[normalizeTypeName(type_name)];
 
-  if (type_name === 'Binek Arac') { image = binekarac }
-  if (type_name === 'Mobil Vinc') { image = mobilvinc }
+  if (type_name === 'Binek Araç') { image = binekarac }
+  if (type_name === 'Mobil Vinç') { image = mobilvinc }
   if (type_name === 'Backhoe-Loader') { image = backhoeloader }
   if (type_name === 'Mini Loader') { image = miniloader }
   if (type_name === 'Hi-Up') { image = hiup }
   if (type_name === 'Su Tankeri') { image = sutankeri }
   if (type_name === 'Işıldaklı Jeneratör') { image = lighttower }
+  if (type_name === 'Lastikli Excavatör') { image = excavator }
 
   return (
     <Element
