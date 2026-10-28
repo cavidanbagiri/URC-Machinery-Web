@@ -89,7 +89,7 @@ const TONES = [
   },
 ];
 
-const WRAP_CLASS = 'grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl-grid-cols-5';
+const WRAP_CLASS = 'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:grid-cols-5';
 
 const TYPE_IMAGES = {
 lighttower,
