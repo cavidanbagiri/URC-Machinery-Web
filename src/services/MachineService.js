@@ -7,7 +7,6 @@ class MachineService {
    * @param {Object} params — limit, offset, filterlər
    */
   async fetchMachines(params = {}) {
-    // Boş dəyərləri təmizlə (undefined, null, '')
     const cleanParams = Object.fromEntries(
       Object.entries(params).filter(
         ([, value]) => value !== undefined && value !== null && value !== ''

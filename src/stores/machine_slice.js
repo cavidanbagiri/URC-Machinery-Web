@@ -49,6 +49,7 @@ export const fetchMachines = createAsyncThunk(
         offset,
         ...filters,
       });
+      // console.log('comimng data is : ', data)
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.detail || 'Veriler yüklenemedi');

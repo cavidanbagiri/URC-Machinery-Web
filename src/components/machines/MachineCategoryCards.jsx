@@ -89,7 +89,7 @@ const TONES = [
   },
 ];
 
-const WRAP_CLASS = 'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6';
+const WRAP_CLASS = 'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  2xl:grid-cols-6';
 
 const TYPE_IMAGES = {
 lighttower,
@@ -151,6 +151,30 @@ export default function MachineCategoryCards({
 
   const hasData = categories.length > 0;
 
+  console.log(categories)
+
+  let temp = [];
+  temp.push(categories[9])
+  temp.push(categories[2])
+  temp.push(categories[4])
+  temp.push(categories[7])
+  temp.push(categories[14])
+  temp.push(categories[10])
+  temp.push(categories[13])
+  temp.push(categories[12])
+  temp.push(categories[17])
+  temp.push(categories[15])
+  temp.push(categories[16])
+  temp.push(categories[0])
+  temp.push(categories[8])
+  temp.push(categories[1])
+  temp.push(categories[3])
+  temp.push(categories[6])
+  temp.push(categories[5])
+  temp.push(categories[11])
+
+  console.log(temp)
+
   return (
     <section className="overflow-hidden">
       <div id="machine-category-panel" className="py-4">
@@ -162,7 +186,7 @@ export default function MachineCategoryCards({
           <EmptyState />
         ) : (
           <div className={WRAP_CLASS}>
-            {categories.map((category) => (
+            {temp.map((category) => (
               <CategoryCard className=""
                 key={category.type_id ?? category.type_name}
                 category={category}
