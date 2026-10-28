@@ -13,6 +13,7 @@ export default function MachineTable({
   onOpenDetail,
   onOpenFilters,
   hasActiveFilters,
+  handleDetail
 }) {
   const { items, loading } = useSelector((s) => s.machine);
   const lookups = useSelector((s) => s.lookup.data);
@@ -119,7 +120,7 @@ export default function MachineTable({
                 key={machine.id}
                 className={
                   selectedId === machine.id
-                    ? 'bg-blue-50 hover:bg-blue-50'
+                    ? 'bg-blue-50 hover:bg-blue-50 '
                     : 'hover:bg-gray-50'
                 }
               >
@@ -165,33 +166,69 @@ export default function MachineTable({
                     )}
                   </button>
                 </td>
-                {/* YENİ — Status */}
                 <td className="whitespace-nowrap px-6 py-2">
                   <StatusBadge status={getStatus(machine.status_id)} />
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[11px] font-medium text-gray-900">
-                  {machine.identification_no || '—'}
+                <td
+                onClick={()=>{
+                  handleDetail(machine)
+                }}
+                className="whitespace-nowrap px-6 py-2 text-[11px] font-medium text-gray-900">
+                  <span className='cursor-pointer hover:underline '>{machine.identification_no || '—'}</span>
                 </td>
-                <td style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[11px] font-mono text-gray-700">
-                  {machine.plate_no || '—'}                                       {/* ← YENİ */}
+                <td onClick={()=>{
+                  handleDetail(machine)
+                }}
+                 style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[11px] font-mono text-gray-700">
+                  <span className='cursor-pointer hover:underline '>{machine.plate_no || '—'}</span>                                      
                 </td>
-                <td style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  {lookupName('territory', machine.territory_id)}
+                <td onClick={()=>{
+                  handleDetail(machine)
+                }}
+                 style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                  <span className='cursor-pointer hover:underline '>
+                    {lookupName('territory', machine.territory_id)}
+                  </span>
                 </td>
-                <td style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                <td onClick={()=>{
+                  handleDetail(machine)
+                }}
+                 style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                  <span className='cursor-pointer hover:underline '>
                   {lookupName('car_mark', machine.car_mark_id)}
+                  </span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                <td onClick={()=>{
+                  handleDetail(machine)
+                }}
+                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                  <span className='cursor-pointer hover:underline '>
                   {lookupName('car_model', machine.car_model_id)}
+                  </span>  
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                <td onClick={()=>{
+                  handleDetail(machine)
+                }}
+                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                  <span className='cursor-pointer hover:underline '>
                   {machine.vin_no || '—'}
+                  </span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  {extractYear(machine.production_year)}
+                <td onClick={()=>{
+                  handleDetail(machine)
+                }}
+                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                  <span className='cursor-pointer hover:underline '>
+                    {extractYear(machine.production_year)}
+                  </span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  {lookupName('company', machine.company_id)}
+                <td
+                onClick={()=>{
+                  handleDetail(machine)
+                }}
+                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
+                  {/* {lookupName('company', machine.company_id)} */}
+                  <span className='cursor-pointer hover:underline '>{lookupName('company', machine.company_id)}</span>
                 </td>
                 
               </tr>

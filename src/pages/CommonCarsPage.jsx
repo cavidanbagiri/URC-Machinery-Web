@@ -484,6 +484,7 @@ export default function CommonCarsPage() {
         onOpenDetail={handleDetail}
         onOpenFilters={() => setFiltersOpen(true)}
         hasActiveFilters={hasActiveFilters}
+        handleDetail={handleDetail}
       />
 
       {/* Pagination — tablonun altında */}
