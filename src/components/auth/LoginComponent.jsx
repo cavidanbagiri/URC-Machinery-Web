@@ -211,7 +211,7 @@ const LoginComponent = () => {
           </p>
         </div>
 
-        <img src={forklift} alt="Description of the image" />
+        {/* <img src={forklift} alt="Description of the image" /> */}
         
         {/* Form Container */}
         <div className="px-8 py-6">
