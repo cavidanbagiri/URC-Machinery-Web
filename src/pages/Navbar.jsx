@@ -9,6 +9,13 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosLogOut } from "react-icons/io";
 import FlaticonIcon from '../components/ui/FlaticonIcon';
 import { PiCraneTowerBold } from "react-icons/pi";
+import { HiOutlineWrench } from "react-icons/hi2";
+import { HiOutlineWrenchScrewdriver } from "react-icons/hi2";
+import { GiCrane } from "react-icons/gi";
+import { PiWrenchLight } from "react-icons/pi";
+
+
+
 
 
 
@@ -19,9 +26,9 @@ function DataManagementIcon({ className }) {
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
   { to: '/notifications', label: 'Bildirimler', icon: BsBell },
-  { to: '/common_cars', label: 'Tum Makineler', icon: PiCraneTowerBold },
-  { to: '/maintenance', label: 'Bakım', icon: BsTools },
-  { to: '/repair', label: 'Tamir', icon: BsWrench },
+  { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
+  { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
+  { to: '/repair', label: 'Tamir', icon: PiWrenchLight },
   { to: '/forum', label: 'Forum', icon: BsChatDots },
   { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
   { to: '/purchase_orders', label: 'Satın Alma Siparişleri', icon: BsCartCheck },
@@ -138,7 +145,6 @@ const Navbar = () => {
         )}
       </ul>
 
-      {/* Tooltip, scroll alanının dışında tutulur; böylece kırpılmaz. */}
       {tooltip && (
         <span
           aria-hidden="true"

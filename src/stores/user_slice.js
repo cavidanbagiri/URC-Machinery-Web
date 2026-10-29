@@ -42,6 +42,32 @@ export const checkSession = createAsyncThunk(
   }
 );
 
+// Load the latest profile (name, position, photo) without rotating the tokens.
+export const fetchCurrentUser = createAsyncThunk(
+  'auth/fetchCurrentUser',
+  async (_, thunkAPI) => {
+    try {
+      return await authService.getCurrentUser();
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || '';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Replace the profile photo; the server answers with the updated profile.
+export const uploadAvatar = createAsyncThunk(
+  'auth/uploadAvatar',
+  async (file, thunkAPI) => {
+    try {
+      return await authService.uploadAvatar(file);
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || '';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 // Register async thunk
 export const register = createAsyncThunk(
   'auth/register',
@@ -166,6 +192,20 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
         state.accessToken = null;
+      })
+      // Latest profile fetched by the dashboard header
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.user = action.payload;
+          localStorage.setItem('user', JSON.stringify(action.payload));
+        }
+      })
+      // New profile photo: the server returns the serialized profile
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.user = action.payload;
+          localStorage.setItem('user', JSON.stringify(action.payload));
+        }
       })
   },
 });

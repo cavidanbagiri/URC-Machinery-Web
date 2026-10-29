@@ -49,12 +49,28 @@ const getCurrentUser = async () => {
   return response.data;
 };
 
+/**
+ * Replace the signed-in user's profile photo. The shared axios instance
+ * defaults to JSON, so the Content-Type must be overridden here (axios adds
+ * the multipart boundary itself). The server answers with the fresh profile.
+ */
+const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await $api.post('/auth/me/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+
 const authService = {
   register,
   login,
   logout,
   refreshToken,
   getCurrentUser,
+  uploadAvatar,
 };
 
 export default authService;

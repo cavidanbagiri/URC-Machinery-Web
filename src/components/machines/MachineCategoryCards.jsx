@@ -151,29 +151,14 @@ export default function MachineCategoryCards({
 
   const hasData = categories.length > 0;
 
-  console.log(categories)
-
-  let temp = [];
-  temp.push(categories[9])
-  temp.push(categories[2])
-  temp.push(categories[4])
-  temp.push(categories[7])
-  temp.push(categories[14])
-  temp.push(categories[10])
-  temp.push(categories[13])
-  temp.push(categories[12])
-  temp.push(categories[17])
-  temp.push(categories[15])
-  temp.push(categories[16])
-  temp.push(categories[0])
-  temp.push(categories[8])
-  temp.push(categories[1])
-  temp.push(categories[3])
-  temp.push(categories[6])
-  temp.push(categories[5])
-  temp.push(categories[11])
-
-  console.log(temp)
+  // Fixed visual order for the card grid (positions inside ``categories``).
+  // Guarded so a shorter list (some types without machines) cannot crash the page.
+  const CARD_ORDER = [9, 2, 4, 7, 14, 10, 13, 12, 17, 15, 16, 0, 8, 1, 3, 6, 5, 11];
+  const orderedIndexes = new Set(CARD_ORDER);
+  const orderedCategories = [
+    ...CARD_ORDER.map((index) => categories[index]).filter(Boolean),
+    ...categories.filter((_, index) => !orderedIndexes.has(index)),
+  ];
 
   return (
     <section className="overflow-hidden">
@@ -186,7 +171,7 @@ export default function MachineCategoryCards({
           <EmptyState />
         ) : (
           <div className={WRAP_CLASS}>
-            {temp.map((category) => (
+            {orderedCategories.map((category) => (
               <CategoryCard className=""
                 key={category.type_id ?? category.type_name}
                 category={category}
@@ -208,7 +193,7 @@ export default function MachineCategoryCards({
 }
 
 function CategoryCard({ category, active, onClick }) {
-  const { icon, tone, type_name, total } = category;
+  const { icon, type_name, total } = category;
   const Element = onClick ? 'button' : 'div';
 
   let image = TYPE_IMAGES[normalizeTypeName(type_name)];
