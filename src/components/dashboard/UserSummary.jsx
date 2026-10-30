@@ -12,16 +12,6 @@ const MAX_UPLOAD_MB = 10;
 const messageOf = (err, fallback) =>
   typeof err === 'string' ? err : err?.message || fallback;
 
-/**
- * Signed-in user badge for the dashboard header: photo (or initials), full name
- * and position. ``image_url`` comes from ``users.image_id -> images.url``; when
- * it is missing or fails to load the initials avatar is shown instead.
- *
- * Hovering (or focusing) the avatar reveals an edit affordance; pressing it
- * opens the file picker and the chosen photo is uploaded to
- * ``POST /auth/me/avatar``. The server answers with the fresh profile, so the
- * new ``image_url`` lands in redux and the badge re-renders immediately.
- */
 export default function UserSummary({ user }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
@@ -29,8 +19,7 @@ export default function UserSummary({ user }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
-  // Remembering which URL failed (instead of a boolean + effect) keeps the
-  // fallback correct when the profile is refreshed with a new photo.
+
   const [failedUrl, setFailedUrl] = useState('');
 
   if (!user) return null;
@@ -38,8 +27,7 @@ export default function UserSummary({ user }) {
   const imageUrl = user?.image_url || '';
   const fullName = buildFullName(user?.firstname, user?.lastname) || 'Kullanıcı';
   const initials = buildInitials(user?.firstname, user?.lastname);
-  // ``status_text`` holds permission values (1/10/100/1000) in this database,
-  // so the email is the better placeholder until a position is filled in.
+
   const position = formatPersonName(user?.position) || user?.email || '';
   const showImage = Boolean(imageUrl) && failedUrl !== imageUrl;
 
@@ -101,7 +89,6 @@ export default function UserSummary({ user }) {
             </span>
           )}
 
-          {/* Hover / keyboard-focus overlay with the edit affordance */}
           <span
             aria-hidden="true"
             className={`absolute inset-0 flex items-center justify-center bg-gray-900/55 text-white transition-opacity ${

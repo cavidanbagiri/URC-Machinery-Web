@@ -15,7 +15,7 @@ import { GiCrane } from "react-icons/gi";
 import { PiWrenchLight } from "react-icons/pi";
 
 
-
+import logo from '../assets/main_logo.png'
 
 
 
@@ -48,10 +48,10 @@ function NavItem({ item, onShowTooltip, onHideTooltip }) {
         onFocus={(event) => onShowTooltip(event, item.label)}
         onBlur={onHideTooltip}
         className={({ isActive }) =>
-          `flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800 transition-colors ${isActive ? 'font-medium' : ''}`
+          `flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-300 transition-colors ${isActive ? 'font-medium' : ''}`
         }
       >
-        <Icon className='text-2xl' />
+        <Icon className='text-2xl text-black' />
       </NavLink>
     </li>
   );
@@ -85,10 +85,13 @@ const Navbar = () => {
   const hideTooltip = () => setTooltip(null);
 
   return (
-    <nav className="fixed left-0 top-0 w-16 h-screen bg-gray-900 text-white flex flex-col z-50 rounded-tr-lg rounded-tb-xl">
+    <nav className="fixed  left-0 top-0 w-16 h-screen bg-white text-white flex flex-col z-50 rounded-tr-lg rounded-tb-xl shadow-sm">
       {/* Header */}
       <div className="flex flex-row items-center justify-center py-4 border-b border-gray-700">
-        <h2 className="text-2xl font-bold text-white ">UM</h2>
+        {/* <h2 className="text-2xl font-bold text-white ">UM</h2> */}
+        <div className=' flex flex-row items-center justify-center'>
+          <img className='text-center ml-6' src={logo} />
+        </div>
       </div>
 
       {/* Menu Items */}
@@ -133,7 +136,7 @@ const Navbar = () => {
                 <button
                   onClick={handleLogout}
                   aria-label="Çıkış Yap"
-                  className="w-full flex items-center justify-center py-4 text-white hover:bg-gray-800 transition-colors border-none bg-transparent cursor-pointer text-base"
+                  className="w-full flex items-center justify-center py-4 text-black hover:bg-gray-100 transition-colors border-none bg-transparent cursor-pointer text-base"
                 >
                   <IoIosLogOut className='text-2xl' />
                 </button>
