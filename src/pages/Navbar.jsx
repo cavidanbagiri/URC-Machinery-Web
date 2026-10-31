@@ -25,14 +25,14 @@ function DataManagementIcon({ className }) {
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
-  { to: '/notifications', label: 'Bildirimler', icon: BsBell },
   { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
+  { to: '/repair', label: 'Arızalı Ekipman', icon: PiWrenchLight },
   { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
-  { to: '/repair', label: 'Tamir', icon: PiWrenchLight },
   { to: '/forum', label: 'Forum', icon: BsChatDots },
   { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
   { to: '/purchase_orders', label: 'Satın Alma Siparişleri', icon: BsCartCheck },
   { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },
+  { to: '/notifications', label: 'Bildirimler', icon: BsBell },
 ];
 
 function NavItem({ item, onShowTooltip, onHideTooltip }) {

@@ -181,7 +181,7 @@ export default function Repair() {
               <BsWrench className="h-4 w-4" />
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-              Tamir
+              Arızalı Ekipman
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
@@ -209,7 +209,7 @@ export default function Repair() {
             className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
           >
             <PlusIcon className="h-4 w-4" />
-            Yeni Tamir
+            Yeni Arıza
           </button>
         </div>
       </div>

@@ -112,7 +112,7 @@ export default function RepairTable({
               <th className="px-4 py-2.5 text-left font-medium">Arıza Yeri</th>
               <th className="px-4 py-2.5 text-left font-medium">Giriş</th>
               <th className="px-4 py-2.5 text-left font-medium">Tahmini Çıkış</th>
-              <th className="px-4 py-2.5 text-left font-medium">Çıkış</th>
+              <th className="px-4 py-2.5 text-left font-medium">Güncel Durum</th>
               <th className="px-4 py-2.5 text-right font-medium">İşlemler</th>
             </tr>
           </thead>
@@ -146,7 +146,7 @@ export default function RepairTable({
                     <p className="truncate">{item.fault_location || '—'}</p>
                     {item.notes && (
                       <p className="truncate text-[11px] text-gray-400">
-                        {item.notes}
+                        {/* {item.notes} */}
                       </p>
                     )}
                   </td>
@@ -181,9 +181,18 @@ export default function RepairTable({
                     )}
                   </td>
 
+                    {/* Makinelerin guncel ariza ariza yerinden cikip guncel durum isimli yeni column asagisinda gonderildi */}
                   <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
-                    {formatDate(item.exit_date)}
+                    {/* {formatDate(item.exit_date)} */}
+                    {item.notes && (
+                      <p className="truncate text-[12px] text-gray-800">
+                        {item.notes}
+                      </p>
+                    )}
                   </td>
+
+                  {/* <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  </td> */}
 
                   <td className="whitespace-nowrap px-4 py-2.5 text-right">
                     <div className="flex items-center justify-end gap-1">

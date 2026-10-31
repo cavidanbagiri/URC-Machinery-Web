@@ -212,7 +212,7 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
               ? 'Kaydediliyor...'
               : record
                 ? 'Değişiklikleri Kaydet'
-                : 'Tamir Kaydı Aç'}
+                : 'Arıza Kaydı Aç'}
           </PrimaryButton>
         </>
       }
@@ -326,7 +326,7 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
             Tamir Bilgileri
           </h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <ModalField label="Tamir Tipi *" error={errors.repair_type_id}>
+            <ModalField label="Arıza Kategorisi *" error={errors.repair_type_id}>
               <select
                 value={form.repair_type_id}
                 onChange={(e) => handleTypeChange(e.target.value)}
@@ -342,7 +342,7 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
             </ModalField>
 
             <ModalField
-              label="Arıza Yeri"
+              label="Arıza Tanımı"
               hint="Makine üzerindeki bölüm / parça"
             >
               <input
@@ -396,7 +396,7 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
           </div>
         </section>
 
-        <ModalField label="Notlar">
+        <ModalField label="Güncel Durum">
           <textarea
             rows={3}
             value={form.notes}
@@ -409,7 +409,7 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
 
         {!record && (
           <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-800">
-            Kayıt açıldığında makinenin durumu <strong>Tamirde</strong> olarak
+            Kayıt açıldığında makinenin durumu <strong>Arızalı</strong> olarak
             güncellenir. Tamir kapatıldığında önceki makine durumu geri yüklenir.
           </div>
         )}
