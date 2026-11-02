@@ -30,7 +30,14 @@ import RepairReopenModal from '../components/repair/RepairReopenModal';
 import RepairNoteModal from '../components/repair/RepairNoteModal';
 import RepairHistoryDrawer from '../components/repair/RepairHistoryDrawer';
 
-const LOOKUPS_NEEDED = ['repair_type', 'territory', 'type_transport', 'company'];
+const LOOKUPS_NEEDED = [
+  'repair_type',
+  'garage_service',
+  'territory',
+  'type_transport',
+  'company',
+];
+
 
 export default function Repair() {
   const dispatch = useDispatch();

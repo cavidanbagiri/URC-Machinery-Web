@@ -11,6 +11,7 @@ import FlaticonIcon from '../components/ui/FlaticonIcon';
 import { PiCraneTowerBold } from "react-icons/pi";
 import { HiOutlineWrench } from "react-icons/hi2";
 import { HiOutlineWrenchScrewdriver } from "react-icons/hi2";
+import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import { GiCrane } from "react-icons/gi";
 import { PiWrenchLight } from "react-icons/pi";
 
@@ -27,12 +28,13 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
   { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
   { to: '/repair', label: 'Arızalı Ekipman', icon: PiWrenchLight },
+  { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
   { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
-  { to: '/forum', label: 'Forum', icon: BsChatDots },
+  { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },
   { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
-  { to: '/purchase_orders', label: 'Satın Alma Siparişleri', icon: BsCartCheck },
   { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },
   { to: '/notifications', label: 'Bildirimler', icon: BsBell },
+  { to: '/forum', label: 'Forum', icon: BsChatDots },
 ];
 
 function NavItem({ item, onShowTooltip, onHideTooltip }) {

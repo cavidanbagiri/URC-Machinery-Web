@@ -71,6 +71,14 @@ export const LOOKUP_CONFIG = {
     updatePath: (id) => `/update_repair_type/${id}`,
     deletePath: (id) => `/delete_repair_type/${id}`,
   },
+  garage_service: {
+    label: 'Garaj Servisi',
+    endpoint: '/machines',
+    createPath: '/create_garage_service',
+    fetchPath: '/fetch_garage_services',
+    updatePath: (id) => `/update_garage_service/${id}`,
+    deletePath: (id) => `/delete_garage_service/${id}`,
+  },
 };
 
 

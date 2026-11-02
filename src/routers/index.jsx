@@ -9,10 +9,11 @@ import Dashboard from '../pages/Dashboard';
 import CommonCarsPage from '../pages/CommonCarsPage'
 import Maintenance from '../pages/Maintenance'
 import Repair from '../pages/Repair'
+import DailyFaults from '../pages/DailyFaults'
 import Forum from '../pages/Forum'
 import Settings from '../pages/Settings'
 import WarehouseStock from '../pages/WarehouseStock'
-import PurchaseOrders from '../pages/PurchaseOrders'
+import PurchaseRequests from '../pages/PurchaseRequests'
 import Notifications from '../pages/Notifications'
 
 const router = createBrowserRouter([
@@ -69,6 +70,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: 'daily_faults',
+        element: (
+          <ProtectedRoute>
+            <DailyFaults />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'forum',
         element: (
           <ProtectedRoute>
@@ -85,12 +94,17 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'purchase_orders',
+        path: 'purchase_requests',
         element: (
           <ProtectedRoute>
-            <PurchaseOrders />
+            <PurchaseRequests />
           </ProtectedRoute>
         ),
+      },
+      {
+        // Bookmark from the old name of this page ("Satın Alma Siparişleri").
+        path: 'purchase_orders',
+        element: <Navigate to="/purchase_requests" replace />,
       },
       {
         path: 'notifications',

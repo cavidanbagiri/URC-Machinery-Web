@@ -109,6 +109,7 @@ export default function RepairTable({
               <th className="px-4 py-2.5 text-left font-medium">Durum</th>
               <th className="px-4 py-2.5 text-left font-medium">Makine</th>
               <th className="px-4 py-2.5 text-left font-medium">Tamir Tipi</th>
+              <th className="px-4 py-2.5 text-left font-medium">Garaj Servisi</th>
               <th className="px-4 py-2.5 text-left font-medium">Arıza Yeri</th>
               <th className="px-4 py-2.5 text-left font-medium">Giriş</th>
               <th className="px-4 py-2.5 text-left font-medium">Tahmini Çıkış</th>
@@ -140,6 +141,10 @@ export default function RepairTable({
 
                   <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
                     {item.repair_type_name || '—'}
+                  </td>
+
+                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                    {item.garage_service_name || '—'}
                   </td>
 
                   <td className="max-w-[220px] px-4 py-2.5 text-[12px] text-gray-700">

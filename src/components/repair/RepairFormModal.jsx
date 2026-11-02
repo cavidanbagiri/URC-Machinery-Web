@@ -27,6 +27,7 @@ function emptyForm() {
   return {
     machine_id: '',
     repair_type_id: '',
+    garage_service_id: '',
     fault_location: '',
     notes: '',
     entry_date: todayISO(),
@@ -49,6 +50,9 @@ function formFromRecord(record) {
   return {
     machine_id: record.machine_id,
     repair_type_id: String(record.repair_type_id),
+    garage_service_id: record.garage_service_id
+      ? String(record.garage_service_id)
+      : '',
     fault_location: record.fault_location || '',
     notes: record.notes || '',
     entry_date: record.entry_date || todayISO(),
@@ -62,6 +66,7 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
   const machineOptions = useSelector((s) => s.repair.machineOptions);
   const estimate = useSelector((s) => s.repair.estimate);
   const repairTypes = useSelector((s) => s.lookup.data.repair_type || []);
+  const garageServices = useSelector((s) => s.lookup.data.garage_service || []);
 
   const [form, setForm] = useState(() => formFromRecord(record));
   const [errors, setErrors] = useState({});
@@ -73,6 +78,10 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
 
   useEffect(() => {
     if (open) dispatch(fetchLookupIfNeeded('repair_type'));
+  }, [open, dispatch]);
+
+  useEffect(() => {
+    if (open) dispatch(fetchLookupIfNeeded('garage_service'));
   }, [open, dispatch]);
 
   useEffect(() => {
@@ -137,6 +146,9 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
     if (!form.repair_type_id) {
       nextErrors.repair_type_id = 'Tamir tipi seçin';
     }
+    if (!form.garage_service_id) {
+      nextErrors.garage_service_id = 'Garaj servisi seçin';
+    }
     if (!form.entry_date) {
       nextErrors.entry_date = 'Giriş tarihi zorunludur';
     }
@@ -158,6 +170,9 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
 
     const payload = {
       repair_type_id: Number(form.repair_type_id),
+      garage_service_id: form.garage_service_id
+        ? Number(form.garage_service_id)
+        : null,
       fault_location: toNullableText(form.fault_location),
       notes: toNullableText(form.notes),
       entry_date: form.entry_date,
@@ -354,6 +369,31 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
                 maxLength={255}
               />
             </ModalField>
+
+            <div className="md:col-span-2">
+              <ModalField
+                label="Garaj Servisi *"
+                hint="Tamirin yapılacağı garaj / servis"
+                error={errors.garage_service_id}
+              >
+                <select
+                  value={form.garage_service_id}
+                  onChange={(e) =>
+                    handleChange('garage_service_id', e.target.value)
+                  }
+                  className={
+                    errors.garage_service_id ? errorInputClass : inputClass
+                  }
+                >
+                  <option value="">Seçin</option>
+                  {garageServices.map((service) => (
+                    <option key={service.id} value={service.id}>
+                      {service.name}
+                    </option>
+                  ))}
+                </select>
+              </ModalField>
+            </div>
 
             <ModalField label="Giriş Tarihi *" error={errors.entry_date}>
               <input

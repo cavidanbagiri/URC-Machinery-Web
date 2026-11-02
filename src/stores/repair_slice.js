@@ -12,6 +12,7 @@ const initialFilters = {
   search: '',
   status: '',
   repair_type_id: '',
+  garage_service_id: '',
   territory_id: '',
   type_id: '',
   company_id: '',

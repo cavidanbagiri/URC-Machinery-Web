@@ -1,7 +1,43 @@
 // src/components/repair/RepairSummaryCards.jsx
-import { AlertTriangle, CheckCircle2, Clock, ClipboardList, Wrench } from 'lucide-react';
+import {
+  CalendarDays,
+  CheckCircle2,
+  ClipboardList,
+  Gauge,
+  Timer,
+  Warehouse,
+} from 'lucide-react';
 
-function SummaryCard({ label, value, hint, icon: Icon, tone, onClick }) {
+const CARD_GRID =
+  'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6';
+
+const EMPTY_SUMMARY = {
+  total: 0,
+  active: 0,
+  active_ratio: null,
+  total_machines: 0,
+  active_machines: 0,
+  broken_machines: 0,
+  opened_today: 0,
+  completed_today: 0,
+  completed: 0,
+  cancelled: 0,
+  overdue: 0,
+  due_soon: 0,
+  completed_this_month: 0,
+  average_repair_days: null,
+  by_garage_service: [],
+};
+
+function SummaryCard({
+  label,
+  value,
+  hint,
+  icon: Icon,
+  tone,
+  onClick,
+  valueClassName = 'text-2xl font-semibold leading-tight',
+}) {
   const tones = {
     gray: {
       wrap: 'border-gray-200 bg-white hover:border-gray-300',
@@ -12,6 +48,16 @@ function SummaryCard({ label, value, hint, icon: Icon, tone, onClick }) {
       wrap: 'border-blue-100 bg-blue-50/50 hover:border-blue-200',
       icon: 'bg-blue-100 text-blue-700',
       value: 'text-blue-700',
+    },
+    sky: {
+      wrap: 'border-sky-100 bg-sky-50/60 hover:border-sky-200',
+      icon: 'bg-sky-100 text-sky-700',
+      value: 'text-sky-700',
+    },
+    indigo: {
+      wrap: 'border-indigo-100 bg-indigo-50/60 hover:border-indigo-200',
+      icon: 'bg-indigo-100 text-indigo-700',
+      value: 'text-indigo-700',
     },
     red: {
       wrap: 'border-red-100 bg-red-50/60 hover:border-red-200',
@@ -49,7 +95,7 @@ function SummaryCard({ label, value, hint, icon: Icon, tone, onClick }) {
         <span className="block text-[11px] font-medium uppercase tracking-wide text-gray-500">
           {label}
         </span>
-        <span className={`block text-2xl font-semibold leading-tight ${c.value}`}>
+        <span className={`block ${valueClassName} ${c.value}`}>
           {value}
         </span>
         {hint && <span className="block text-[11px] text-gray-500">{hint}</span>}
@@ -66,8 +112,8 @@ export default function RepairSummaryCards({
 }) {
   if (loading && !summary) {
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, index) => (
+      <div className={CARD_GRID}>
+        {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
             className="h-[74px] animate-pulse rounded-xl bg-gray-100 ring-1 ring-gray-200/60"
@@ -77,22 +123,15 @@ export default function RepairSummaryCards({
     );
   }
 
-  const data = summary || {
-    total: 0,
-    active: 0,
-    completed: 0,
-    cancelled: 0,
-    overdue: 0,
-    due_soon: 0,
-    completed_this_month: 0,
-    average_repair_days: null,
-  };
+  const data = { ...EMPTY_SUMMARY, ...(summary || {}) };
+  const garageBreakdown = (data.by_garage_service || []).filter(
+    (service) => Number(service.active_count) > 0
+  );
 
   return (
-    <div 
-    className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div className={CARD_GRID}>
       <SummaryCard
-        label="Arızalı Ekipman Sayısı"
+        label="Arızalı Ekipman"
         value={data.total}
         hint={`${data.cancelled} iptal edildi`}
         icon={ClipboardList}
@@ -100,40 +139,73 @@ export default function RepairSummaryCards({
         onClick={onResetFilters}
       />
       <SummaryCard
-        label="Tamirde"
-        value={data.active}
-        hint="Açık tamir kaydı"
-        icon={Wrench}
-        tone="amber"
+        label="Aktif Ekipman"
+        value={
+          data.active_ratio === null || data.active_ratio === undefined
+            ? '—'
+            : `${Math.round(data.active_ratio)}%`
+        }
+        hint={
+          data.total_machines > 0
+            ? `${data.active_machines} / ${data.total_machines} ekipman aktif`
+            : 'Makine verisi alınamadı'
+        }
+        icon={Gauge}
+        tone="blue"
         onClick={() => onSelectFilters?.({ status: 'tamirde' })}
       />
       <SummaryCard
-        label="Gecikmiş"
-        value={data.overdue}
-        hint="Tahmini tarihi geçti"
-        icon={AlertTriangle}
-        tone="red"
-        onClick={() => onSelectFilters?.({ status: 'tamirde', overdue: true })}
-      />
-      <SummaryCard
-        label="Yaklaşan"
-        value={data.due_soon}
-        hint="3 gün içinde çıkış"
-        icon={Clock}
-        tone="blue"
-        onClick={() => onSelectFilters?.({ status: 'tamirde', due_soon: true })}
-      />
-      <SummaryCard
-        label="Tamamlanan"
-        value={data.completed}
-        hint={
-          data.average_repair_days !== null
-            ? `Ortalama ${data.average_repair_days} gün`
-            : `${data.completed_this_month} bu ay`
+        label="Garaj / Servis"
+        value={
+          garageBreakdown.length ? (
+            <span className="flex flex-wrap items-center gap-1">
+              {garageBreakdown.map((service) => (
+                <span
+                  key={service.garage_service_id ?? 'unassigned'}
+                  title={`${service.name}: ${service.active_count} tamirde`}
+                  className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[11px] font-semibold text-sky-800"
+                >
+                  {service.name} · {service.active_count}
+                </span>
+              ))}
+            </span>
+          ) : (
+            '—'
+          )
         }
+        hint="Tamirdeki ekipmanın garaj/servis dağılımı"
+        icon={Warehouse}
+        tone="sky"
+        valueClassName="text-[13px] font-semibold leading-snug"
+        onClick={() => onSelectFilters?.({ status: 'tamirde' })}
+      />
+      <SummaryCard
+        label="Toplam Tamir"
+        value={data.completed}
+        hint="Şimdiye kadar tamamlanan"
         icon={CheckCircle2}
         tone="green"
         onClick={() => onSelectFilters?.({ status: 'tamamlandi' })}
+      />
+      <SummaryCard
+        label="Günlük Tamir"
+        value={data.completed_today}
+        hint={`${data.opened_today} bugün açılan kayıt`}
+        icon={CalendarDays}
+        tone="amber"
+        onClick={() => onSelectFilters?.({ status: 'tamamlandi' })}
+      />
+      <SummaryCard
+        label="Ortalama Arızada Kalma"
+        value={
+          data.average_repair_days !== null &&
+          data.average_repair_days !== undefined
+            ? `${data.average_repair_days} gün`
+            : '—'
+        }
+        hint="Tamamlanan kayıtların ortalaması"
+        icon={Timer}
+        tone="indigo"
       />
     </div>
   );

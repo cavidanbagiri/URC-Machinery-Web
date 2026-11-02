@@ -90,6 +90,13 @@ export default function RepairFilters({ open, onClose, onFilterChange }) {
           />
 
           <FilterSelect
+            label="Garaj Servisi"
+            value={filters.garage_service_id}
+            onChange={(value) => handleChange('garage_service_id', value)}
+            options={lookups.garage_service || []}
+          />
+
+          <FilterSelect
             label="Bölge"
             value={filters.territory_id}
             onChange={(value) => handleChange('territory_id', value)}

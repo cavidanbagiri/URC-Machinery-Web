@@ -28,7 +28,6 @@ export const fetchLookupIfNeeded = createAsyncThunk(
   async (key, { getState, rejectWithValue }) => {
     const state = getState().lookup;
 
-    // Əgər artıq yüklənibsə — fetch etmə
     if (state.loaded[key]) {
       return { key, data: state.data[key], cached: true };
     }
