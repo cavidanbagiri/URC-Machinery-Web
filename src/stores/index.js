@@ -7,6 +7,7 @@ import maintenanceReducer from './maintenance_slice';
 import repairReducer from './repair_slice';
 import dailyFaultReducer from './daily_fault_slice';
 import purchaseRequestReducer from './purchase_request_slice';
+import warehouseReducer from './warehouse_slice';
 import dashboardReducer from './dashboard_slice';
 
 const store = configureStore({
@@ -19,6 +20,7 @@ const store = configureStore({
     repair: repairReducer,
     dailyFault: dailyFaultReducer,
     purchaseRequest: purchaseRequestReducer,
+    warehouse: warehouseReducer,
     dashboard: dashboardReducer,
   },
 });
