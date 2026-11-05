@@ -33,8 +33,8 @@ const NAV_ITEMS = [
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },
   { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
   { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },
-  { to: '/notifications', label: 'Bildirimler', icon: BsBell },
   { to: '/forum', label: 'Forum', icon: BsChatDots },
+  { to: '/notifications', label: 'Bildirimler', icon: BsBell },
 ];
 
 function NavItem({ item, onShowTooltip, onHideTooltip }) {

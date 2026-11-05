@@ -9,6 +9,7 @@ import dailyFaultReducer from './daily_fault_slice';
 import purchaseRequestReducer from './purchase_request_slice';
 import warehouseReducer from './warehouse_slice';
 import dashboardReducer from './dashboard_slice';
+import forumReducer from './forum_slice';
 
 const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ const store = configureStore({
     purchaseRequest: purchaseRequestReducer,
     warehouse: warehouseReducer,
     dashboard: dashboardReducer,
+    forum: forumReducer,
   },
 });
 
