@@ -1,4 +1,6 @@
 // src/components/repair/RepairTable.jsx
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowPathIcon,
@@ -19,6 +21,37 @@ import {
 import { durationLabel, formatDate, remainingLabel } from '../../utils/repair';
 
 const COLUMN_COUNT = 9;
+
+// Hover kartı tablonun `overflow-x-auto` kabuğu tarafından kırpılmasın diye
+// body'ye portal ile, tetikleyici hücrenin ekran koordinatlarına göre çizilir.
+const NOTE_PREVIEW_WIDTH = 288;
+const NOTE_PREVIEW_ESTIMATED_HEIGHT = 120;
+
+function NotePreview({ preview }) {
+  if (!preview) return null;
+
+  return createPortal(
+    <div
+      role="tooltip"
+      style={{
+        position: 'fixed',
+        top: preview.top,
+        left: preview.left,
+        width: preview.width,
+        transform: preview.placement === 'top' ? 'translateY(-100%)' : undefined,
+      }}
+      className="pointer-events-none z-50 rounded-xl border border-gray-200 bg-white p-3 shadow-xl"
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+        Güncel durum / not
+      </p>
+      <p className="mt-1 whitespace-pre-line break-words text-[12px] leading-snug text-gray-700">
+        {preview.text}
+      </p>
+    </div>,
+    document.body
+  );
+}
 
 function ActionButton({ title, onClick, tone = 'blue', children }) {
   const tones = {
@@ -76,6 +109,40 @@ export default function RepairTable({
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.repair.filters);
   const lookups = useSelector((s) => s.lookup.data);
+  const [notePreview, setNotePreview] = useState(null);
+
+  const showNotePreview = (event, text) => {
+    if (!text) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const width = Math.min(NOTE_PREVIEW_WIDTH, window.innerWidth - 16);
+    const placeOnTop =
+      rect.bottom + NOTE_PREVIEW_ESTIMATED_HEIGHT > window.innerHeight;
+
+    setNotePreview({
+      text,
+      width,
+      top: placeOnTop ? rect.top - 8 : rect.bottom + 8,
+      left: Math.max(8, Math.min(rect.left, window.innerWidth - width - 8)),
+      placement: placeOnTop ? 'top' : 'bottom',
+    });
+  };
+
+  const hideNotePreview = () => setNotePreview(null);
+
+  // Kart `position: fixed` olduğu için sayfa/havuz kayınca eski yerinde kalmamalı.
+  useEffect(() => {
+    if (!notePreview) return undefined;
+
+    const hide = () => setNotePreview(null);
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+    };
+  }, [notePreview]);
 
   // "Gecikmiş" / "Yaklaşan" are shortcuts that always imply status=tamirde.
   const statusFilterValue = filters.overdue
@@ -284,12 +351,18 @@ export default function RepairTable({
                   </td>
 
                     {/* Makinelerin guncel ariza ariza yerinden cikip guncel durum isimli yeni column asagisinda gonderildi */}
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700 max-w-24">
+                  <td className="min-w-[150px] max-w-[200px] px-4 py-2.5 align-top text-[12px] text-gray-700">
                     {/* {formatDate(item.exit_date)} */}
-                    {item.notes && (
-                      <p className="truncate text-[12px] text-gray-800">
+                    {item.notes ? (
+                      <p
+                        className="line-clamp-2 whitespace-pre-line break-words text-gray-800"
+                        onMouseEnter={(event) => showNotePreview(event, item.notes)}
+                        onMouseLeave={hideNotePreview}
+                      >
                         {item.notes}
                       </p>
+                    ) : (
+                      <span className="text-gray-400">—</span>
                     )}
                   </td>
 
@@ -359,6 +432,8 @@ export default function RepairTable({
           </tbody>
         </table>
       </div>
+
+      <NotePreview preview={notePreview} />
     </div>
   );
 }
