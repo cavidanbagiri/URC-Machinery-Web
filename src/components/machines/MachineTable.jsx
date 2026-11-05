@@ -1,11 +1,20 @@
 // src/components/machines/MachineTable.jsx
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import FlaticonIcon from '../ui/FlaticonIcon';
+import FilterRow from '../ui/FilterRow';
 import MachineSkeleton from './MachineSkeleton';
 import StatusBadge from './StatusBadge';
+import { setFilter } from '../../stores/machine_slice';
 
+const COLUMN_COUNT = 11;
 
-
+// Üretim yılı backend'de int olarak beklenir; serbest metin 422 üretmesin diye
+// seçilebilir yıl listesi kullanılır.
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from(
+  { length: CURRENT_YEAR + 1 - 1980 + 1 },
+  (_, index) => CURRENT_YEAR + 1 - index
+);
 
 export default function MachineTable({
   selectedId,
@@ -15,8 +24,13 @@ export default function MachineTable({
   hasActiveFilters,
   handleDetail
 }) {
-  const { items, loading } = useSelector((s) => s.machine);
+  const dispatch = useDispatch();
+  const { items, loading, filters } = useSelector((s) => s.machine);
   const lookups = useSelector((s) => s.lookup.data);
+
+  const handleFilterChange = (key, value) => {
+    dispatch(setFilter({ key, value }));
+  };
 
   // List rows already carry their photos (with a presigned `url`); prefer the
   // primary one and fall back to the first uploaded photo.
@@ -56,29 +70,56 @@ export default function MachineTable({
     return lookups.car_status?.find((s) => s.id === statusId);
   };
 
-  // Boş nəticə
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-900">
-          Sonuç bulunamadı
-        </p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Filtreleri değiştirin veya temizleyin'
-            : 'Henüz hiçbir makine eklenmemiş'}
-        </p>
-        {hasActiveFilters && (
-          <button
-            onClick={onOpenFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-          >
-            Filtreleri aç
-          </button>
-        )}
-      </div>
-    );
-  }
+  // Kolon filtre satırı — her başlık hücresi için bir giriş (null = boş hücre).
+  const columnFilters = [
+    { kind: 'actions' },
+    null,
+    {
+      kind: 'select',
+      key: 'status_id',
+      label: 'Durum',
+      placeholder: 'Durum',
+      options: lookups.car_status || [],
+    },
+    { kind: 'text', key: 'identification_no', label: 'Kimlik No', placeholder: 'TRK-001' },
+    { kind: 'text', key: 'plate_no', label: 'Plaka No', placeholder: '90 AB 123' },
+    {
+      kind: 'select',
+      key: 'territory_id',
+      label: 'Bölge',
+      placeholder: 'Bölge',
+      options: lookups.territory || [],
+    },
+    {
+      kind: 'select',
+      key: 'car_mark_id',
+      label: 'Marka',
+      placeholder: 'Marka',
+      options: lookups.car_mark || [],
+    },
+    {
+      kind: 'select',
+      key: 'car_model_id',
+      label: 'Model',
+      placeholder: 'Model',
+      options: lookups.car_model || [],
+    },
+    { kind: 'text', key: 'vin_no', label: 'VIN No', placeholder: 'WDB963...' },
+    {
+      kind: 'select',
+      key: 'production_year',
+      label: 'Yıl',
+      placeholder: 'Yıl',
+      options: YEAR_OPTIONS,
+    },
+    {
+      kind: 'select',
+      key: 'company_id',
+      label: 'Şirket',
+      placeholder: 'Şirket',
+      options: lookups.company || [],
+    },
+  ];
 
   return (
     <div className=" bg-white">
@@ -109,8 +150,36 @@ export default function MachineTable({
               <th className="px-6 py-2 text-left font-medium">Yıl</th>
               <th className="px-6 py-2 text-left font-medium">Şirket</th>
             </tr>
+            <FilterRow
+              columns={columnFilters}
+              values={filters}
+              onChange={handleFilterChange}
+            />
           </thead>
           <tbody className="divide-y divide-gray-100" >
+            {!loading && items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
+                  <p className="text-sm font-medium text-gray-900">
+                    Sonuç bulunamadı
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {hasActiveFilters
+                      ? 'Filtreleri değiştirin veya temizleyin'
+                      : 'Henüz hiçbir makine eklenmemiş'}
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={onOpenFilters}
+                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      Filtreleri temizle
+                    </button>
+                  )}
+                </td>
+              </tr>
+            )}
             {items.map((machine) => {
               const photo = primaryPhotoOf(machine);
               const photoCount = machine.photos?.length || 0;

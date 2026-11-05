@@ -5,8 +5,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import {
   ArrowPathIcon,
   ExclamationTriangleIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import { BsCartCheck } from 'react-icons/bs';
@@ -23,8 +21,6 @@ import {
   resetServiceFilters,
   resetSpareFilters,
   setActiveTab,
-  setServiceFilter,
-  setSpareFilter,
   updateSparePartStatus,
 } from '../stores/purchase_request_slice';
 import { nextSpareStatus } from '../utils/purchaseRequest';
@@ -37,22 +33,16 @@ import SparePartDetailModal from '../components/purchaserequest/SparePartDetailM
 
 const LOOKUPS_NEEDED = ['territory'];
 
-const filterInputClass =
-  'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
-
 export default function PurchaseRequests() {
   const dispatch = useDispatch();
   const { activeTab, spareParts, serviceRequests, rowBusy } = useSelector(
     (s) => s.purchaseRequest
   );
-  const territories = useSelector((s) => s.lookup.data.territory || []);
-  const requestTypes = useSelector((s) => s.purchaseRequest.requestTypes.items);
 
   const isSpare = activeTab === SPARE_TAB;
   const active = isSpare ? spareParts : serviceRequests;
   const { items, loading, error, filters, offset, limit } = active;
 
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [spareFormOpen, setSpareFormOpen] = useState(false);
   const [serviceFormOpen, setServiceFormOpen] = useState(false);
   const [detailId, setDetailId] = useState(null);
@@ -87,12 +77,6 @@ export default function PurchaseRequests() {
     (value) => value !== '' && value !== null && value !== undefined
   ).length;
   const hasActiveFilters = activeFilterCount > 0;
-
-  const setFilter = (key, value) => {
-    dispatch(
-      isSpare ? setSpareFilter({ key, value }) : setServiceFilter({ key, value })
-    );
-  };
 
   const handleResetFilters = () => {
     dispatch(isSpare ? resetSpareFilters() : resetServiceFilters());
@@ -204,42 +188,12 @@ export default function PurchaseRequests() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
-          <div className="relative w-full md:max-w-md">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={filters.search}
-              onChange={(event) => setFilter('search', event.target.value)}
-              placeholder={
-                isSpare
-                  ? 'Talep başlığı, STF/HTF no veya makine ara...'
-                  : 'Servis form no, firma veya makine ara...'
-              }
-              className={`${filterInputClass} pl-9`}
-            />
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <p className="text-[11px] text-gray-400">
+          Sütun başlıklarının altındaki alanlardan filtreleyebilirsiniz
+        </p>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setFiltersOpen((value) => !value)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-                filtersOpen || hasActiveFilters
-                  ? 'border-blue-200 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <FunnelIcon className="h-4 w-4" />
-              Filtreler
-              {hasActiveFilters && (
-                <span className="rounded-full bg-blue-600 px-1.5 text-[11px] font-semibold text-white">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-
+        <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() =>
@@ -261,118 +215,10 @@ export default function PurchaseRequests() {
                 onClick={handleResetFilters}
                 className="text-sm font-medium text-blue-600 hover:underline"
               >
-                Temizle
+                Filtreleri temizle ({activeFilterCount})
               </button>
             )}
-          </div>
         </div>
-
-        {filtersOpen && (
-          <div className="grid grid-cols-1 gap-3 border-t border-gray-100 bg-gray-50/60 p-4 sm:grid-cols-2 lg:grid-cols-4">
-            {isSpare && (
-              <>
-                <div>
-                  <label
-                    htmlFor="purchase-request-status"
-                    className="mb-1 block text-xs font-medium text-gray-600"
-                  >
-                    Durum
-                  </label>
-                  <select
-                    id="purchase-request-status"
-                    value={filters.status}
-                    onChange={(event) => setFilter('status', event.target.value)}
-                    className={filterInputClass}
-                  >
-                    <option value="">Tümü</option>
-                    <option value="bekleniyor">Bekleniyor</option>
-                    <option value="geldi">Geldi</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="purchase-request-territory"
-                    className="mb-1 block text-xs font-medium text-gray-600"
-                  >
-                    Bölge
-                  </label>
-                  <select
-                    id="purchase-request-territory"
-                    value={filters.territory_id}
-                    onChange={(event) =>
-                      setFilter('territory_id', event.target.value)
-                    }
-                    className={filterInputClass}
-                  >
-                    <option value="">Tümü</option>
-                    {territories.map((territory) => (
-                      <option key={territory.id} value={territory.id}>
-                        {territory.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="purchase-request-type"
-                    className="mb-1 block text-xs font-medium text-gray-600"
-                  >
-                    Talep Türü
-                  </label>
-                  <select
-                    id="purchase-request-type"
-                    value={filters.request_type_id}
-                    onChange={(event) =>
-                      setFilter('request_type_id', event.target.value)
-                    }
-                    className={filterInputClass}
-                  >
-                    <option value="">Tümü</option>
-                    {requestTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            )}
-
-            <div>
-              <label
-                htmlFor="purchase-request-date-from"
-                className="mb-1 block text-xs font-medium text-gray-600"
-              >
-                Başlangıç Tarihi
-              </label>
-              <input
-                id="purchase-request-date-from"
-                type="date"
-                value={filters.date_from}
-                onChange={(event) => setFilter('date_from', event.target.value)}
-                className={filterInputClass}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="purchase-request-date-to"
-                className="mb-1 block text-xs font-medium text-gray-600"
-              >
-                Bitiş Tarihi
-              </label>
-              <input
-                id="purchase-request-date-to"
-                type="date"
-                value={filters.date_to}
-                onChange={(event) => setFilter('date_to', event.target.value)}
-                className={filterInputClass}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
       {error && (

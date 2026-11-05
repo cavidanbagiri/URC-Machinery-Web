@@ -3,11 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { BsTools } from 'react-icons/bs';
-import {
-  ArrowPathIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import {
@@ -15,13 +11,12 @@ import {
   fetchMaintenanceSummary,
   resetFilters,
   resetSort,
-  setFilter,
   setFilters,
   setSort,
 } from '../stores/maintenance_slice';
 
 import MaintenanceSummaryCards from '../components/maintenance/MaintenanceSummaryCards';
-import MaintenanceFilters from '../components/maintenance/MaintenanceFilters';
+import MaintenanceAdvancedFilters from '../components/maintenance/MaintenanceAdvancedFilters';
 import MaintenanceTable from '../components/maintenance/MaintenanceTable';
 import MaintenancePagination from '../components/maintenance/MaintenancePagination';
 import MaintenancePlanModal from '../components/maintenance/MaintenancePlanModal';
@@ -46,8 +41,6 @@ export default function Maintenance() {
     summary,
     summaryLoading,
   } = useSelector((s) => s.maintenance);
-
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [planOpen, setPlanOpen] = useState(false);
   const [planMachine, setPlanMachine] = useState(null);
@@ -123,13 +116,11 @@ export default function Maintenance() {
         ...(nextFilters.has_plan === 'true' ? { include_inactive: false } : {}),
       })
     );
-    setFiltersOpen(false);
   };
 
   const handleResetFilters = () => {
     dispatch(resetFilters());
     dispatch(resetSort());
-    setFiltersOpen(false);
   };
 
   // "Kalan" kolonuna tıklayınca artan/azalan sıralama arasında geçiş yap.
@@ -214,55 +205,23 @@ export default function Maintenance() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 px-2">
-        <div className="relative w-full max-w-sm">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={filters.search}
-            onChange={(e) =>
-              dispatch(setFilter({ key: 'search', value: e.target.value }))
-            }
-            placeholder="Kimlik no, plaka veya VIN ara..."
-            className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
         <div className="flex items-center gap-2">
+          <MaintenanceAdvancedFilters />
+
           {hasActiveFilters && (
             <button
               type="button"
               onClick={handleResetFilters}
               className="text-xs font-medium text-red-600 hover:underline"
             >
-              Filtreleri temizle
+              Filtreleri temizle ({activeFilterCount})
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((prev) => !prev)}
-            className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-              filtersOpen || activeFilterCount > 0
-                ? 'border-blue-200 bg-blue-50 text-blue-700'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <FunnelIcon className="h-4 w-4" />
-            Filtreler
-            {activeFilterCount > 0 && (
-              <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
         </div>
-      </div>
 
-      <div className="px-1">
-        <MaintenanceFilters
-          open={filtersOpen}
-          onClose={() => setFiltersOpen(false)}
-        />
+        <p className="text-[11px] text-gray-400">
+          Sütun başlıklarının altındaki alanlardan filtreleyebilirsiniz
+        </p>
       </div>
 
       {error && (
@@ -276,7 +235,7 @@ export default function Maintenance() {
           items={items}
           loading={loading}
           hasActiveFilters={hasActiveFilters}
-          onOpenFilters={() => setFiltersOpen(true)}
+          onOpenFilters={handleResetFilters}
           onResetFilters={handleResetFilters}
           onEditPlan={openPlan}
           onReading={openReading}

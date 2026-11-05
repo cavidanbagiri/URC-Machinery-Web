@@ -212,6 +212,11 @@ const purchaseRequestSlice = createSlice({
       state.spareParts.filters[key] = value;
       state.spareParts.offset = 0;
     },
+    // Kolon filtre satırı bir hadisədə bir neçə açarı dəyişə bilər.
+    setSpareFilters(state, action) {
+      Object.assign(state.spareParts.filters, action.payload);
+      state.spareParts.offset = 0;
+    },
     resetSpareFilters(state) {
       state.spareParts.filters = { ...initialSpareFilters };
       state.spareParts.offset = 0;
@@ -226,6 +231,10 @@ const purchaseRequestSlice = createSlice({
     setServiceFilter(state, action) {
       const { key, value } = action.payload;
       state.serviceRequests.filters[key] = value;
+      state.serviceRequests.offset = 0;
+    },
+    setServiceFilters(state, action) {
+      Object.assign(state.serviceRequests.filters, action.payload);
       state.serviceRequests.offset = 0;
     },
     resetServiceFilters(state) {
@@ -387,10 +396,12 @@ const purchaseRequestSlice = createSlice({
 export const {
   setActiveTab,
   setSpareFilter,
+  setSpareFilters,
   resetSpareFilters,
   setSpareLimit,
   setSpareOffset,
   setServiceFilter,
+  setServiceFilters,
   resetServiceFilters,
   setServiceLimit,
   setServiceOffset,

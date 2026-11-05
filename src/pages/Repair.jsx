@@ -3,24 +3,18 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { BsWrench } from 'react-icons/bs';
-import {
-  ArrowPathIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowPathIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import {
   fetchRepairSummary,
   fetchRepairs,
   resetFilters,
-  setFilter,
   setFilters,
 } from '../stores/repair_slice';
 
 import RepairSummaryCards from '../components/repair/RepairSummaryCards';
-import RepairFilters from '../components/repair/RepairFilters';
+import RepairAdvancedFilters from '../components/repair/RepairAdvancedFilters';
 import RepairTable from '../components/repair/RepairTable';
 import RepairPagination from '../components/repair/RepairPagination';
 import RepairFormModal from '../components/repair/RepairFormModal';
@@ -52,8 +46,6 @@ export default function Repair() {
     summary,
     summaryLoading,
   } = useSelector((s) => s.repair);
-
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formRecord, setFormRecord] = useState(null);
@@ -124,12 +116,10 @@ export default function Repair() {
   const handleSelectSummaryFilters = (nextFilters) => {
     dispatch(resetFilters());
     dispatch(setFilters(nextFilters));
-    setFiltersOpen(false);
   };
 
   const handleResetFilters = () => {
     dispatch(resetFilters());
-    setFiltersOpen(false);
   };
 
   const openCreate = () => {
@@ -231,55 +221,23 @@ export default function Repair() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 px-2">
-        <div className="relative w-full max-w-sm">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={filters.search}
-            onChange={(e) =>
-              dispatch(setFilter({ key: 'search', value: e.target.value }))
-            }
-            placeholder="Makine, arıza yeri veya not ara..."
-            className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
         <div className="flex items-center gap-2">
+          <RepairAdvancedFilters />
+
           {hasActiveFilters && (
             <button
               type="button"
               onClick={handleResetFilters}
               className="text-xs font-medium text-red-600 hover:underline"
             >
-              Filtreleri temizle
+              Filtreleri temizle ({activeFilterCount})
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((prev) => !prev)}
-            className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-              filtersOpen || activeFilterCount > 0
-                ? 'border-blue-200 bg-blue-50 text-blue-700'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <FunnelIcon className="h-4 w-4" />
-            Filtreler
-            {activeFilterCount > 0 && (
-              <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
         </div>
-      </div>
 
-      <div className="px-1">
-        <RepairFilters
-          open={filtersOpen}
-          onClose={() => setFiltersOpen(false)}
-        />
+        <p className="text-[11px] text-gray-400">
+          Sütun başlıklarının altındaki alanlardan filtreleyebilirsiniz
+        </p>
       </div>
 
       {error && (
@@ -293,7 +251,6 @@ export default function Repair() {
           items={items}
           loading={loading}
           hasActiveFilters={hasActiveFilters}
-          onOpenFilters={() => setFiltersOpen(true)}
           onResetFilters={handleResetFilters}
           onEdit={openEdit}
           onCloseRepair={openClose}

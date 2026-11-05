@@ -1,7 +1,12 @@
 // src/components/purchaserequest/ServiceRequestTable.jsx
+import { useDispatch, useSelector } from 'react-redux';
 import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
 
+import FilterRow from '../ui/FilterRow';
+import { setServiceFilter } from '../../stores/purchase_request_slice';
 import { formatDate, machineLabel } from '../../utils/repair';
+
+const COLUMN_COUNT = 7;
 
 function Skeleton() {
   return (
@@ -26,36 +31,33 @@ export default function ServiceRequestTable({
   onDelete,
   rowBusy,
 }) {
+  const dispatch = useDispatch();
+  const filters = useSelector((s) => s.purchaseRequest.serviceRequests.filters);
+
+  const handleFilterChange = (key, value) => {
+    dispatch(setServiceFilter({ key, value }));
+  };
+
+  // One entry per header cell — `null` renders an empty cell.
+  const columnFilters = [
+    { kind: 'text', key: 'search', label: 'Servis Form', placeholder: 'Başlık / form no' },
+    { kind: 'text', key: 'identification_no', label: 'ID No', placeholder: 'Kimlik no' },
+    { kind: 'text', key: 'company_name', label: 'Firma', placeholder: 'Firma' },
+    {
+      kind: 'text',
+      key: 'service_description',
+      label: 'Hizmet Tanımı',
+      placeholder: 'Hizmet tanımı',
+    },
+    { kind: 'dateRange', keys: ['date_from', 'date_to'], label: 'Tarih' },
+    null,
+    { kind: 'actions' },
+  ];
+
   if (loading && items.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <Skeleton />
-      </div>
-    );
-  }
-
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-900">Sonuç bulunamadı</p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Filtreleri değiştirin veya temizleyin'
-            : 'Henüz servis/hizmet talebi bulunmuyor'}
-        </p>
-        {hasActiveFilters ? (
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-          >
-            Filtreleri temizle
-          </button>
-        ) : (
-          <p className="mt-2 text-xs text-gray-400">
-            Servis form no, firma veya makine ile arama yapabilirsiniz
-          </p>
-        )}
       </div>
     );
   }
@@ -80,9 +82,37 @@ export default function ServiceRequestTable({
               <th className="px-4 py-2.5 text-left font-medium">Kayıt</th>
               <th className="px-4 py-2.5 text-right font-medium">İşlem</th>
             </tr>
+            <FilterRow
+              columns={columnFilters}
+              values={filters}
+              onChange={handleFilterChange}
+            />
           </thead>
 
           <tbody className="text-sm text-gray-800">
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
+                  <p className="text-sm font-medium text-gray-900">
+                    Sonuç bulunamadı
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {hasActiveFilters
+                      ? 'Filtreleri değiştirin veya temizleyin'
+                      : 'Henüz servis/hizmet talebi bulunmuyor'}
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={onResetFilters}
+                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      Filtreleri temizle
+                    </button>
+                  )}
+                </td>
+              </tr>
+            )}
             {items.map((item) => {
               const deleting =
                 rowBusy?.scope === 'serviceRequests' &&

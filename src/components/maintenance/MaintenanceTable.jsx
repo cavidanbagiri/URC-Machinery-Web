@@ -1,4 +1,5 @@
 // src/components/maintenance/MaintenanceTable.jsx
+import { useDispatch, useSelector } from 'react-redux';
 import {
   CheckCircleIcon,
   ClockIcon,
@@ -7,13 +8,26 @@ import {
 } from '@heroicons/react/24/outline';
 
 import FlaticonIcon from '../ui/FlaticonIcon';
+import FilterRow from '../ui/FilterRow';
 import StatusBadge from '../machines/StatusBadge';
+import {
+  MAINTENANCE_STATUS_OPTIONS,
+  setFilter,
+  setFilters,
+} from '../../stores/maintenance_slice';
 import {
   formatCounter,
   formatDate,
   formatNumber,
   unitLabel,
 } from '../../utils/maintenance';
+
+const COLUMN_COUNT = 10;
+
+const HAS_PLAN_OPTIONS = [
+  { value: 'true', label: 'Planlı' },
+  { value: 'false', label: 'Plan yok' },
+];
 
 function ActionButton({ title, onClick, disabled, tone = 'blue', children }) {
   const tones = {
@@ -83,32 +97,83 @@ export default function MaintenanceTable({
   sortOrder,
   onSortChange,
 }) {
+  const dispatch = useDispatch();
+  const filters = useSelector((s) => s.maintenance.filters);
+  const lookups = useSelector((s) => s.lookup.data);
+
+  const handleFilterChange = (key, value) => {
+    if (key === 'status') {
+      // "Pasif" durumu, varsayılan olarak gizlenen pasif planları da getirir;
+      // bu durumdan çıkıldığında include_inactive tekrar kapatılır.
+      const next = { status: value };
+      if (value === 'pasif') next.include_inactive = true;
+      else if (filters.status === 'pasif') next.include_inactive = false;
+      dispatch(setFilters(next));
+      return;
+    }
+    dispatch(setFilter({ key, value }));
+  };
+
+  // One entry per header cell — `null` renders an empty cell.
+  const columnFilters = [
+    {
+      kind: 'select',
+      key: 'status',
+      label: 'Durum',
+      options: MAINTENANCE_STATUS_OPTIONS.map((option) => ({
+        value: option.code,
+        label: option.name,
+      })),
+    },
+    { kind: 'text', key: 'search', label: 'Makine', placeholder: 'Kimlik / plaka / VIN' },
+    {
+      kind: 'select',
+      key: 'territory_id',
+      label: 'Bölge',
+      placeholder: 'Bölge',
+      options: lookups.territory || [],
+    },
+    {
+      kind: 'select',
+      key: 'type_id',
+      label: 'Tip',
+      placeholder: 'Tip',
+      options: lookups.type_transport || [],
+    },
+    {
+      kind: 'stack',
+      fields: [
+        {
+          key: 'car_mark_id',
+          kind: 'select',
+          placeholder: 'Marka',
+          options: lookups.car_mark || [],
+        },
+        {
+          key: 'car_model_id',
+          kind: 'select',
+          placeholder: 'Model',
+          options: lookups.car_model || [],
+        },
+      ],
+    },
+    {
+      kind: 'select',
+      key: 'has_plan',
+      label: 'Plan',
+      placeholder: 'Plan',
+      options: HAS_PLAN_OPTIONS,
+    },
+    null,
+    null,
+    null,
+    { kind: 'actions' },
+  ];
+
   if (loading && items.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <Skeleton />
-      </div>
-    );
-  }
-
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-900">Sonuç bulunamadı</p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Filtreleri değiştirin veya temizleyin'
-            : 'Bakım kaydı olan makine bulunmuyor'}
-        </p>
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={onResetFilters || onOpenFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-          >
-            Filtreleri temizle
-          </button>
-        )}
       </div>
     );
   }
@@ -164,8 +229,36 @@ export default function MaintenanceTable({
               </th>
               <th className="px-4 py-2.5 text-right font-medium">İşlemler</th>
             </tr>
+            <FilterRow
+              columns={columnFilters}
+              values={filters}
+              onChange={handleFilterChange}
+            />
           </thead>
           <tbody className="divide-y divide-gray-100">
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
+                  <p className="text-sm font-medium text-gray-900">
+                    Sonuç bulunamadı
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {hasActiveFilters
+                      ? 'Filtreleri değiştirin veya temizleyin'
+                      : 'Bakım kaydı olan makine bulunmuyor'}
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={onResetFilters || onOpenFilters}
+                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      Filtreleri temizle
+                    </button>
+                  )}
+                </td>
+              </tr>
+            )}
             {items.map((item) => {
               const actionDisabled = !item.has_plan || !item.is_active;
 

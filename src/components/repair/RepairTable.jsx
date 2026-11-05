@@ -1,4 +1,5 @@
 // src/components/repair/RepairTable.jsx
+import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowPathIcon,
   ChatBubbleLeftEllipsisIcon,
@@ -9,7 +10,15 @@ import {
 } from '@heroicons/react/24/outline';
 
 import StatusBadge from '../machines/StatusBadge';
+import FilterRow from '../ui/FilterRow';
+import {
+  REPAIR_STATUS_OPTIONS,
+  setFilter,
+  setFilters,
+} from '../../stores/repair_slice';
 import { durationLabel, formatDate, remainingLabel } from '../../utils/repair';
+
+const COLUMN_COUNT = 9;
 
 function ActionButton({ title, onClick, tone = 'blue', children }) {
   const tones = {
@@ -64,32 +73,92 @@ export default function RepairTable({
   onNote,
   onHistory,
 }) {
+  const dispatch = useDispatch();
+  const filters = useSelector((s) => s.repair.filters);
+  const lookups = useSelector((s) => s.lookup.data);
+
+  // "Gecikmiş" / "Yaklaşan" are shortcuts that always imply status=tamirde.
+  const statusFilterValue = filters.overdue
+    ? 'overdue'
+    : filters.due_soon
+      ? 'due_soon'
+      : filters.status;
+
+  const handleFilterChange = (key, value) => {
+    if (key === 'status') {
+      if (value === 'overdue' || value === 'due_soon') {
+        dispatch(
+          setFilters({
+            status: 'tamirde',
+            overdue: value === 'overdue',
+            due_soon: value === 'due_soon',
+          })
+        );
+        return;
+      }
+      dispatch(setFilters({ status: value, overdue: false, due_soon: false }));
+      return;
+    }
+    dispatch(setFilter({ key, value }));
+  };
+
+  // One entry per header cell — `null` renders an empty cell.
+  const columnFilters = [
+    {
+      kind: 'select',
+      key: 'status',
+      value: statusFilterValue,
+      label: 'Durum',
+      options: REPAIR_STATUS_OPTIONS.map((option) => ({
+        value: option.code,
+        label: option.name,
+      })),
+      extraOptions: [
+        { value: 'overdue', label: 'Yalnızca gecikmiş' },
+        { value: 'due_soon', label: 'Yaklaşan (≤3 gün)' },
+      ],
+    },
+    {
+      kind: 'stack',
+      fields: [
+        { key: 'identification_no', placeholder: 'Kimlik No' },
+        { key: 'plate_no', placeholder: 'Plaka No' },
+      ],
+    },
+    {
+      kind: 'select',
+      key: 'repair_type_id',
+      label: 'Tamir Tipi',
+      placeholder: 'Tamir tipi',
+      options: lookups.repair_type || [],
+    },
+    {
+      kind: 'select',
+      key: 'garage_service_id',
+      label: 'Garaj Servisi',
+      placeholder: 'Garaj servisi',
+      options: lookups.garage_service || [],
+    },
+    {
+      kind: 'text',
+      key: 'fault_location',
+      label: 'Arıza Yeri',
+      placeholder: 'Arıza yeri',
+    },
+    { kind: 'dateRange', keys: ['date_from', 'date_to'], label: 'Giriş tarihi' },
+    {
+      kind: 'dateRange',
+      keys: ['exit_date_from', 'exit_date_to'],
+      label: 'Tahmini çıkış',
+    },
+    { kind: 'text', key: 'notes', label: 'Güncel durum / not', placeholder: 'Not' },
+    { kind: 'actions' },
+  ];
+
   if (loading && items.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <Skeleton />
-      </div>
-    );
-  }
-
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-900">Sonuç bulunamadı</p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Filtreleri değiştirin veya temizleyin'
-            : 'Henüz tamir kaydı bulunmuyor'}
-        </p>
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={onResetFilters || onOpenFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-          >
-            Filtreleri temizle
-          </button>
-        )}
       </div>
     );
   }
@@ -116,8 +185,36 @@ export default function RepairTable({
               <th className="px-4 py-2.5 text-left font-medium">Güncel Durum</th>
               <th className="px-4 py-2.5 text-right font-medium">İşlemler</th>
             </tr>
+            <FilterRow
+              columns={columnFilters}
+              values={filters}
+              onChange={handleFilterChange}
+            />
           </thead>
           <tbody className="divide-y divide-gray-100">
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
+                  <p className="text-sm font-medium text-gray-900">
+                    Sonuç bulunamadı
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {hasActiveFilters
+                      ? 'Filtreleri değiştirin veya temizleyin'
+                      : 'Henüz tamir kaydı bulunmuyor'}
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={onResetFilters || onOpenFilters}
+                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      Filtreleri temizle
+                    </button>
+                  )}
+                </td>
+              </tr>
+            )}
             {items.map((item) => {
               const isActive = item.status === 'tamirde';
               const remaining = remainingLabel(item);
@@ -139,11 +236,11 @@ export default function RepairTable({
                     </p>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700 min-w-32">
                     {item.repair_type_name || '—'}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700 min-w-32">
                     {item.garage_service_name || '—'}
                   </td>
 
@@ -187,7 +284,7 @@ export default function RepairTable({
                   </td>
 
                     {/* Makinelerin guncel ariza ariza yerinden cikip guncel durum isimli yeni column asagisinda gonderildi */}
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700 max-w-24">
                     {/* {formatDate(item.exit_date)} */}
                     {item.notes && (
                       <p className="truncate text-[12px] text-gray-800">

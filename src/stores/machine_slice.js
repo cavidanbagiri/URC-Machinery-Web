@@ -234,6 +234,11 @@ const machineSlice = createSlice({
       state.filters[key] = value;
       state.offset = 0;   // filter dəyişdikdə 1-ci səhifəyə qaytar
     },
+    // Bir neçə filtri tək addımda dəyişmək üçün (məs. status + bayraqlar).
+    setFilters(state, action) {
+      Object.assign(state.filters, action.payload);
+      state.offset = 0;
+    },
     resetFilters(state) {
       state.filters = { ...initialFilters };
       state.offset = 0;
@@ -332,6 +337,7 @@ const machineSlice = createSlice({
 
 export const {
   setFilter,
+  setFilters,
   resetFilters,
   setLimit,
   setOffset,

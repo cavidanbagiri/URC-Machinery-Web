@@ -1,12 +1,22 @@
 // src/components/purchaserequest/SparePartRequestTable.jsx
+import { useDispatch, useSelector } from 'react-redux';
 import { ArrowPathIcon, EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 
+import FilterRow from '../ui/FilterRow';
 import { formatDate } from '../../utils/repair';
+import { setSpareFilter } from '../../stores/purchase_request_slice';
 import {
+  SPARE_STATUS_LABELS,
   nextSpareStatus,
   spareStatusBadgeClass,
   spareStatusLabel,
 } from '../../utils/purchaseRequest';
+
+const COLUMN_COUNT = 8;
+
+const STATUS_OPTIONS = Object.entries(SPARE_STATUS_LABELS).map(
+  ([value, label]) => ({ value, label })
+);
 
 function MachineLabels({ labels = [] }) {
   if (labels.length === 0) return <span className="text-gray-400">—</span>;
@@ -83,36 +93,49 @@ export default function SparePartRequestTable({
   onDelete,
   rowBusy,
 }) {
+  const dispatch = useDispatch();
+  const filters = useSelector((s) => s.purchaseRequest.spareParts.filters);
+  const requestTypes = useSelector((s) => s.purchaseRequest.requestTypes.items);
+  const territories = useSelector((s) => s.lookup.data.territory || []);
+
+  const handleFilterChange = (key, value) => {
+    dispatch(setSpareFilter({ key, value }));
+  };
+
+  // One entry per header cell — `null` renders an empty cell.
+  const columnFilters = [
+    { kind: 'text', key: 'search', label: 'Talep', placeholder: 'Başlık / STF no' },
+    { kind: 'text', key: 'identification_no', label: 'ID No', placeholder: 'Kimlik no' },
+    {
+      kind: 'select',
+      key: 'territory_id',
+      label: 'Bölge',
+      placeholder: 'Bölge',
+      options: territories,
+    },
+    {
+      kind: 'select',
+      key: 'request_type_id',
+      label: 'Talep Türü',
+      placeholder: 'Talep türü',
+      options: requestTypes,
+    },
+    null,
+    { kind: 'dateRange', keys: ['date_from', 'date_to'], label: 'Tarih' },
+    {
+      kind: 'select',
+      key: 'status',
+      label: 'Durum',
+      placeholder: 'Durum',
+      options: STATUS_OPTIONS,
+    },
+    { kind: 'actions' },
+  ];
+
   if (loading && items.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <Skeleton />
-      </div>
-    );
-  }
-
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-900">Sonuç bulunamadı</p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Filtreleri değiştirin veya temizleyin'
-            : 'Henüz yedek parça talebi bulunmuyor'}
-        </p>
-        {hasActiveFilters ? (
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-          >
-            Filtreleri temizle
-          </button>
-        ) : (
-          <p className="mt-2 text-xs text-gray-400">
-            Talep başlığı, STF/HTF no veya makine ile arama yapabilirsiniz
-          </p>
-        )}
       </div>
     );
   }
@@ -138,9 +161,37 @@ export default function SparePartRequestTable({
               <th className="px-4 py-2.5 text-left font-medium">Durum</th>
               <th className="px-4 py-2.5 text-right font-medium">İşlem</th>
             </tr>
+            <FilterRow
+              columns={columnFilters}
+              values={filters}
+              onChange={handleFilterChange}
+            />
           </thead>
 
           <tbody className="text-sm text-gray-800">
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
+                  <p className="text-sm font-medium text-gray-900">
+                    Sonuç bulunamadı
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {hasActiveFilters
+                      ? 'Filtreleri değiştirin veya temizleyin'
+                      : 'Henüz yedek parça talebi bulunmuyor'}
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={onResetFilters}
+                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      Filtreleri temizle
+                    </button>
+                  )}
+                </td>
+              </tr>
+            )}
             {items.map((item) => {
               const deleting =
                 rowBusy?.scope === 'spareParts' &&

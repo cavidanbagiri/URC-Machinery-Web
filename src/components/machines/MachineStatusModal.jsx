@@ -2,6 +2,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
 import FlaticonIcon from '../ui/FlaticonIcon';
+import { isRepairStatusName } from '../../utils/machineStatus';
 
 const colorClasses = {
   gray: {
@@ -68,8 +69,7 @@ export default function MachineStatusModal({
   if (!machine) return null;
 
   const selectedStatus = statuses.find((status) => status.id === selected);
-  const isRepairStatus =
-    selectedStatus?.name?.trim().toLocaleLowerCase('tr-TR') === 'tamirde';
+  const isRepairStatus = isRepairStatusName(selectedStatus?.name);
 
   const handleSubmit = () => {
     if (selected == null) return;

@@ -10,7 +10,7 @@ import { fetchPivotStatistics } from '../stores/dashboard_slice';
 
 import FlaticonIcon from '../components/ui/FlaticonIcon';
 
-import MachineFilters from '../components/machines/MachineFilters';
+import MachineAdvancedFilters from '../components/machines/MachineAdvancedFilters';
 import MachineTable from '../components/machines/MachineTable';
 import MachinePagination from '../components/machines/MachinePagination';
 import MachineFormModal from '../components/machines/MachineFormModal';
@@ -19,9 +19,10 @@ import MachineDetailModal from '../components/machines/MachineDetailModal';
 import MachineStatusModal from '../components/machines/MachineStatusModal';
 import ExportButton from '../components/machines/ExportButton';
 import ConfirmDialog from '../components/settings/ConfirmDialog'
-import { updateMachineStatus, setFilter } from '../stores/machine_slice';
+import { updateMachineStatus, setFilter, resetFilters } from '../stores/machine_slice';
 import { deleteMachine } from '../stores/machine_slice';
 import { quickOpenRepair } from '../stores/repair_slice';
+import { isRepairStatusName } from '../utils/machineStatus';
 
 
 
@@ -59,10 +60,6 @@ export default function CommonCarsPage() {
     ? items.find((m) => m.id === selectedId) || null
     : null;
 
-  // const [filtersOpen, setFiltersOpen] = useState(false);
-
-  // Filter panel state
-  const [filtersOpen, setFiltersOpen] = useState(false);
   // Kategori paneli (Gizle/Göster)
   const [categoriesOpen, setCategoriesOpen] = useState(true);
 
@@ -139,6 +136,11 @@ export default function CommonCarsPage() {
 
   // ---------- HANDLERS ----------
   const clearSelection = () => setSelection(null);
+
+  const handleResetFilters = () => {
+    clearSelection();
+    dispatch(resetFilters());
+  };
 
   const refreshPivot = () => {
     dispatch(fetchPivotStatistics());
@@ -231,8 +233,7 @@ export default function CommonCarsPage() {
     if (!machineId) return;
 
     const status = lookups.car_status?.find((s) => s.id === statusId);
-    const isRepairStatus =
-      status?.name?.trim().toLocaleLowerCase('tr-TR') === 'tamirde';
+    const isRepairStatus = isRepairStatusName(status?.name);
 
     try {
       if (isRepairStatus) {
@@ -378,6 +379,9 @@ export default function CommonCarsPage() {
             1 makine seçildi
           </span>
         )}
+          <p className="text-[11px] text-gray-400">
+            Sütun başlıklarının altındaki alanlardan filtreleyebilirsiniz
+          </p>
         </div>
 
 
@@ -425,25 +429,17 @@ export default function CommonCarsPage() {
 
           
 
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((v) => !v)}
-            className={`${ACTION_BUTTON_CLASS} ${filtersOpen || activeFilterCount > 0 ? 'bg-blue-50' : ''
-              }`}
-          >
-            <FlaticonIcon name="filters" size="md" />
-            Filtreler
-            {activeFilterCount > 0 && (
-              <span className="rounded-xs bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-            <FlaticonIcon
-              name="angle-down"
-              size="md"
-              className={`transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
+          <MachineAdvancedFilters />
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="cursor-pointer rounded-xs px-3 py-1 text-sm font-thin text-red-600 transition hover:bg-red-50"
+            >
+              Filtreleri temizle ({activeFilterCount})
+            </button>
+          )}
 
           <span className="mx-2 h-5 w-px bg-gray-300" aria-hidden="true" />
 
@@ -452,13 +448,6 @@ export default function CommonCarsPage() {
 
       </div>
 
-
-      {/* Filter panel */}
-      <MachineFilters
-        open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        onFilterChange={clearSelection}
-      />
 
       {/* Delete Confirm — YENİ */}
       <ConfirmDialog
@@ -482,7 +471,7 @@ export default function CommonCarsPage() {
         selectedId={selectedId}
         onSelect={handleSelect}
         onOpenDetail={handleDetail}
-        onOpenFilters={() => setFiltersOpen(true)}
+        onOpenFilters={handleResetFilters}
         hasActiveFilters={hasActiveFilters}
         handleDetail={handleDetail}
       />
