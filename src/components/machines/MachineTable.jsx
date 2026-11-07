@@ -1,7 +1,10 @@
 // src/components/machines/MachineTable.jsx
 import { useDispatch, useSelector } from 'react-redux';
 import FlaticonIcon from '../ui/FlaticonIcon';
-import FilterRow from '../ui/FilterRow';
+import ColumnFilter, {
+  ColumnFilterOptions,
+  ColumnFilterText,
+} from '../ui/ColumnFilter';
 import MachineSkeleton from './MachineSkeleton';
 import StatusBadge from './StatusBadge';
 import { setFilter } from '../../stores/machine_slice';
@@ -31,6 +34,10 @@ export default function MachineTable({
   const handleFilterChange = (key, value) => {
     dispatch(setFilter({ key, value }));
   };
+
+  // Bir filtre gerçekten dolu mu? (boş string = filtre yok)
+  const isFilled = (value) =>
+    value !== '' && value !== null && value !== undefined;
 
   // List rows already carry their photos (with a presigned `url`); prefer the
   // primary one and fall back to the first uploaded photo.
@@ -70,56 +77,81 @@ export default function MachineTable({
     return lookups.car_status?.find((s) => s.id === statusId);
   };
 
-  // Kolon filtre satırı — her başlık hücresi için bir giriş (null = boş hücre).
-  const columnFilters = [
-    { kind: 'actions' },
-    null,
+  // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
+  const headerColumns = [
+    { label: 'Fotoğraf' },
     {
-      kind: 'select',
-      key: 'status_id',
       label: 'Durum',
-      placeholder: 'Durum',
-      options: lookups.car_status || [],
+      filter: { kind: 'select', key: 'status_id', options: lookups.car_status },
     },
-    { kind: 'text', key: 'identification_no', label: 'Kimlik No', placeholder: 'TRK-001' },
-    { kind: 'text', key: 'plate_no', label: 'Plaka No', placeholder: '90 AB 123' },
     {
-      kind: 'select',
-      key: 'territory_id',
+      label: 'Kimlik No',
+      filter: {
+        kind: 'text',
+        key: 'identification_no',
+        placeholder: 'TRK-001',
+      },
+    },
+    {
+      label: 'Plaka No',
+      filter: { kind: 'text', key: 'plate_no', placeholder: '90 AB 123' },
+    },
+    {
       label: 'Bölge',
-      placeholder: 'Bölge',
-      options: lookups.territory || [],
+      filter: {
+        kind: 'select',
+        key: 'territory_id',
+        options: lookups.territory,
+      },
     },
     {
-      kind: 'select',
-      key: 'car_mark_id',
       label: 'Marka',
-      placeholder: 'Marka',
-      options: lookups.car_mark || [],
+      filter: { kind: 'select', key: 'car_mark_id', options: lookups.car_mark },
     },
     {
-      kind: 'select',
-      key: 'car_model_id',
       label: 'Model',
-      placeholder: 'Model',
-      options: lookups.car_model || [],
+      filter: {
+        kind: 'select',
+        key: 'car_model_id',
+        options: lookups.car_model,
+      },
     },
-    { kind: 'text', key: 'vin_no', label: 'VIN No', placeholder: 'WDB963...' },
     {
-      kind: 'select',
-      key: 'production_year',
+      label: 'VIN No',
+      filter: { kind: 'text', key: 'vin_no', placeholder: 'WDB963...' },
+    },
+    {
       label: 'Yıl',
-      placeholder: 'Yıl',
-      options: YEAR_OPTIONS,
+      filter: {
+        kind: 'select',
+        key: 'production_year',
+        options: YEAR_OPTIONS,
+      },
     },
     {
-      kind: 'select',
-      key: 'company_id',
       label: 'Şirket',
-      placeholder: 'Şirket',
-      options: lookups.company || [],
+      filter: { kind: 'select', key: 'company_id', options: lookups.company },
     },
   ];
+
+  // Menü içeriği: metin kolonlarında "içerir", diğerlerinde değer listesi.
+  const renderFilterMenu = (filter, close) =>
+    filter.kind === 'text' ? (
+      <ColumnFilterText
+        value={filters[filter.key]}
+        placeholder={filter.placeholder}
+        onChange={(value) => handleFilterChange(filter.key, value)}
+      />
+    ) : (
+      <ColumnFilterOptions
+        options={filter.options || []}
+        value={filters[filter.key]}
+        onChange={(value) => {
+          handleFilterChange(filter.key, value);
+          close();
+        }}
+      />
+    );
 
   return (
     <div className=" bg-white">
@@ -139,22 +171,25 @@ export default function MachineTable({
               <th className="w-10 px-4 py-2 text-left font-medium">
                 <span className="sr-only">Seç</span>
               </th>
-              <th className="px-6 py-2 text-left font-medium">Fotoğraf</th>
-              <th className="px-6 py-2 text-left font-medium">Durum</th>
-              <th className="px-6 py-2 text-left font-medium">Kimlik No</th>
-              <th className="px-6 py-2 text-left font-medium">Plaka No</th>       {/* ← YENİ */}
-              <th className="px-6 py-2 text-left font-medium">Bölge</th>
-              <th className="px-6 py-2 text-left font-medium">Marka</th>
-              <th className="px-6 py-2 text-left font-medium">Model</th>
-              <th className="px-6 py-2 text-left font-medium">VIN No</th>
-              <th className="px-6 py-2 text-left font-medium">Yıl</th>
-              <th className="px-6 py-2 text-left font-medium">Şirket</th>
+
+              {headerColumns.map((column) => (
+                <th
+                  key={column.label}
+                  className="whitespace-nowrap px-6 py-2 text-left font-medium"
+                >
+                  {column.filter ? (
+                    <ColumnFilter
+                      label={column.label}
+                      active={isFilled(filters[column.filter.key])}
+                    >
+                      {({ close }) => renderFilterMenu(column.filter, close)}
+                    </ColumnFilter>
+                  ) : (
+                    column.label
+                  )}
+                </th>
+              ))}
             </tr>
-            <FilterRow
-              columns={columnFilters}
-              values={filters}
-              onChange={handleFilterChange}
-            />
           </thead>
           <tbody className="divide-y divide-gray-100" >
             {!loading && items.length === 0 && (

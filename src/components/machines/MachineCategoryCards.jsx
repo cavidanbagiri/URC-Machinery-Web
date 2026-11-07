@@ -23,6 +23,7 @@ import vidanjor from '../../assets/icons/vidanjor.png'
 import excavator from '../../assets/icons/excavator2-transparent.png'
 import kamyonet from '../../assets/icons/kamyonet.png'
 import lighttower from '../../assets/icons/light-tower.png'
+import tir_dorse_main from '../../assets/icons/tir-dorse-main.png'
 
 
 
@@ -44,6 +45,7 @@ const TYPE_ICONS = {
   'mobil vinc': 'truck-tow',
   vidanjor: 'waste-pollution',
   kamyonet: 'truck-pickup',
+  tir_dorse_main: 'tir_dorse_main'
 };
 
 const TONES = [
@@ -112,7 +114,8 @@ lighttower,
   , tir
   , traktor
   , vidanjor,
-  excavator
+  excavator,
+  tir_dorse_main
 };
 
 const normalizeTypeName = (name) =>
@@ -206,6 +209,7 @@ function CategoryCard({ category, active, onClick }) {
   if (type_name === 'Su Tankeri') { image = sutankeri }
   if (type_name === 'Işıldaklı Jeneratör') { image = lighttower }
   if (type_name === 'Lastikli Excavatör') { image = excavator }
+  if (type_name === 'Tır Dorse') { image = tir_dorse_main }
 
   return (
     <Element
