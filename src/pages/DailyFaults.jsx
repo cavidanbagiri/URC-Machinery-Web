@@ -5,10 +5,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import { HiOutlineClipboardDocumentList } from 'react-icons/hi2';
 import {
   ArrowPathIcon,
-  FunnelIcon,
   MagnifyingGlassIcon,
   PlusIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 import DailyFaultService from '../services/DailyFaultService';
@@ -27,19 +25,13 @@ import DailyFaultFormModal from '../components/dailyfault/DailyFaultFormModal';
 
 const LOOKUPS_NEEDED = ['territory', 'repair_type'];
 
-const filterSelectClass =
-  'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
-
 export default function DailyFaults() {
   const dispatch = useDispatch();
   const { items, total, limit, offset, filters, loading, error, documentBusy } =
     useSelector((s) => s.dailyFault);
-  const territories = useSelector((s) => s.lookup.data.territory || []);
-  const repairTypes = useSelector((s) => s.lookup.data.repair_type || []);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formNonce, setFormNonce] = useState(0);
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const isFirstRender = useRef(true);
 
@@ -216,143 +208,22 @@ export default function DailyFaults() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <p className="text-[11px] text-gray-400">
+            Filtrelemek için sütun başlığına tıklayın
+          </p>
+
           {hasActiveFilters && (
             <button
               type="button"
               onClick={handleResetFilters}
               className="text-xs font-medium text-red-600 hover:underline"
             >
-              Filtreleri temizle
+              Filtreleri temizle ({activeFilterCount})
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((prev) => !prev)}
-            className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-              filtersOpen || activeFilterCount > 0
-                ? 'border-blue-200 bg-blue-50 text-blue-700'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <FunnelIcon className="h-4 w-4" />
-            Filtreler
-            {activeFilterCount > 0 && (
-              <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
         </div>
       </div>
-
-      {filtersOpen && (
-        <div className="mx-1 rounded-xl border border-gray-200 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">Filtreler</h3>
-            <button
-              type="button"
-              onClick={() => setFiltersOpen(false)}
-              className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-              aria-label="Filtreleri kapat"
-            >
-              <XMarkIcon className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">
-                Şantiye
-              </label>
-              <select
-                value={filters.territory_id}
-                onChange={(e) =>
-                  dispatch(
-                    setFilter({ key: 'territory_id', value: e.target.value })
-                  )
-                }
-                className={filterSelectClass}
-              >
-                <option value="">Tümü</option>
-                {territories.map((territory) => (
-                  <option key={territory.id} value={territory.id}>
-                    {territory.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">
-                Arıza Tipi
-              </label>
-              <select
-                value={filters.repair_type_id}
-                onChange={(e) =>
-                  dispatch(
-                    setFilter({ key: 'repair_type_id', value: e.target.value })
-                  )
-                }
-                className={filterSelectClass}
-              >
-                <option value="">Tümü</option>
-                {repairTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">
-                Tarih (Başlangıç)
-              </label>
-              <input
-                type="date"
-                value={filters.date_from}
-                onChange={(e) =>
-                  dispatch(
-                    setFilter({ key: 'date_from', value: e.target.value })
-                  )
-                }
-                className={filterSelectClass}
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">
-                Tarih (Bitiş)
-              </label>
-              <input
-                type="date"
-                value={filters.date_to}
-                onChange={(e) =>
-                  dispatch(
-                    setFilter({ key: 'date_to', value: e.target.value })
-                  )
-                }
-                className={filterSelectClass}
-              />
-            </div>
-          </div>
-
-          {activeFilterCount > 0 && (
-            <div className="mt-4 flex justify-end border-t border-gray-100 pt-4">
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-              >
-                <XMarkIcon className="h-3 w-3" />
-                Filtreleri temizle ({activeFilterCount})
-              </button>
-            </div>
-          )}
-        </div>
-      )}
 
       {error && (
         <div className="mx-1 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">

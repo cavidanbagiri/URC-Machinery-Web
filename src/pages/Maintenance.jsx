@@ -220,7 +220,7 @@ export default function Maintenance() {
         </div>
 
         <p className="text-[11px] text-gray-400">
-          Sütun başlıklarının altındaki alanlardan filtreleyebilirsiniz
+          Filtrelemek için sütun başlığına tıklayın
         </p>
       </div>
 
