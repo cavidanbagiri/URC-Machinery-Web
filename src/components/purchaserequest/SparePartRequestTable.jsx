@@ -2,7 +2,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { ArrowPathIcon, EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-import FilterRow from '../ui/FilterRow';
+import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import { formatDate } from '../../utils/repair';
 import { setSpareFilter } from '../../stores/purchase_request_slice';
 import {
@@ -102,34 +102,42 @@ export default function SparePartRequestTable({
     dispatch(setSpareFilter({ key, value }));
   };
 
-  // One entry per header cell — `null` renders an empty cell.
-  const columnFilters = [
-    { kind: 'text', key: 'search', label: 'Talep', placeholder: 'Başlık / STF no' },
-    { kind: 'text', key: 'identification_no', label: 'ID No', placeholder: 'Kimlik no' },
+  // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
+  const headerColumns = [
     {
-      kind: 'select',
-      key: 'territory_id',
+      label: 'Talep',
+      filter: { kind: 'text', key: 'search', placeholder: 'Başlık / STF no' },
+    },
+    {
+      label: 'ID No',
+      filter: {
+        kind: 'text',
+        key: 'identification_no',
+        placeholder: 'Kimlik no',
+      },
+    },
+    {
       label: 'Bölge',
-      placeholder: 'Bölge',
-      options: territories,
+      filter: { kind: 'select', key: 'territory_id', options: territories },
     },
     {
-      kind: 'select',
-      key: 'request_type_id',
       label: 'Talep Türü',
-      placeholder: 'Talep türü',
-      options: requestTypes,
+      filter: {
+        kind: 'select',
+        key: 'request_type_id',
+        options: requestTypes,
+      },
     },
-    null,
-    { kind: 'dateRange', keys: ['date_from', 'date_to'], label: 'Tarih' },
+    { label: 'Parça' },
     {
-      kind: 'select',
-      key: 'status',
-      label: 'Durum',
-      placeholder: 'Durum',
-      options: STATUS_OPTIONS,
+      label: 'Tarih',
+      filter: { kind: 'dateRange', keys: ['date_from', 'date_to'] },
     },
-    { kind: 'actions' },
+    {
+      label: 'Durum',
+      filter: { kind: 'select', key: 'status', options: STATUS_OPTIONS },
+    },
+    { label: 'İşlem', align: 'right' },
   ];
 
   if (loading && items.length === 0) {
@@ -152,20 +160,27 @@ export default function SparePartRequestTable({
         <table className="w-full" style={{ fontFamily: 'Inter' }}>
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
-              <th className="px-4 py-2.5 text-left font-medium">Talep</th>
-              <th className="px-4 py-2.5 text-left font-medium">ID No</th>
-              <th className="px-4 py-2.5 text-left font-medium">Bölge</th>
-              <th className="px-4 py-2.5 text-left font-medium">Talep Türü</th>
-              <th className="px-4 py-2.5 text-left font-medium">Parça</th>
-              <th className="px-4 py-2.5 text-left font-medium">Tarih</th>
-              <th className="px-4 py-2.5 text-left font-medium">Durum</th>
-              <th className="px-4 py-2.5 text-right font-medium">İşlem</th>
+              {headerColumns.map((column) => (
+                <th
+                  key={column.label}
+                  className={`px-4 py-2.5 font-medium ${
+                    column.align === 'right' ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  {column.filter ? (
+                    <ColumnFilterHeader
+                      label={column.label}
+                      filter={column.filter}
+                      values={filters}
+                      onChange={handleFilterChange}
+                      align={column.align}
+                    />
+                  ) : (
+                    column.label
+                  )}
+                </th>
+              ))}
             </tr>
-            <FilterRow
-              columns={columnFilters}
-              values={filters}
-              onChange={handleFilterChange}
-            />
           </thead>
 
           <tbody className="text-sm text-gray-800">

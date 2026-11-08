@@ -1,4 +1,5 @@
 // src/components/dailyfault/DailyFaultTable.jsx
+import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
@@ -6,6 +7,8 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
+import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import { setFilter } from '../../stores/daily_fault_slice';
 import { formatDate } from '../../utils/repair';
 import { formatFileSize } from '../../utils/dailyFault';
 
@@ -128,6 +131,50 @@ export default function DailyFaultTable({
   onDeleteDocument,
   documentBusy,
 }) {
+  const dispatch = useDispatch();
+  const filters = useSelector((s) => s.dailyFault.filters);
+  const lookups = useSelector((s) => s.lookup.data);
+
+  const handleFilterChange = (key, value) => {
+    dispatch(setFilter({ key, value }));
+  };
+
+  // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
+  const headerColumns = [
+    {
+      label: 'Tarih',
+      filter: { kind: 'dateRange', keys: ['date_from', 'date_to'] },
+    },
+    {
+      label: 'Makine',
+      filter: {
+        kind: 'text',
+        key: 'search',
+        placeholder: 'Kimlik / plaka / not',
+      },
+    },
+    { label: 'KM / Saat' },
+    {
+      label: 'Şantiye',
+      filter: {
+        kind: 'select',
+        key: 'territory_id',
+        options: lookups.territory || [],
+      },
+    },
+    {
+      label: 'Arıza Tipi',
+      filter: {
+        kind: 'select',
+        key: 'repair_type_id',
+        options: lookups.repair_type || [],
+      },
+    },
+    { label: 'Arıza Ataması' },
+    { label: 'Değişen Parça' },
+    { label: 'Evrak' },
+  ];
+
   if (loading && items.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -172,18 +219,23 @@ export default function DailyFaultTable({
         <table className="w-full" style={{ fontFamily: 'Inter' }}>
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
-              <th className="px-4 py-2.5 text-left font-medium">Tarih</th>
-              <th className="px-4 py-2.5 text-left font-medium">Makine</th>
-              <th className="px-4 py-2.5 text-left font-medium">KM / Saat</th>
-              <th className="px-4 py-2.5 text-left font-medium">Şantiye</th>
-              <th className="px-4 py-2.5 text-left font-medium">Arıza Tipi</th>
-              <th className="px-4 py-2.5 text-left font-medium">
-                Arıza Ataması
-              </th>
-              <th className="px-4 py-2.5 text-left font-medium">
-                Değişen Parça
-              </th>
-              <th className="px-4 py-2.5 text-left font-medium">Evrak</th>
+              {headerColumns.map((column) => (
+                <th
+                  key={column.label}
+                  className="px-4 py-2.5 text-left font-medium"
+                >
+                  {column.filter ? (
+                    <ColumnFilterHeader
+                      label={column.label}
+                      filter={column.filter}
+                      values={filters}
+                      onChange={handleFilterChange}
+                    />
+                  ) : (
+                    column.label
+                  )}
+                </th>
+              ))}
             </tr>
           </thead>
 

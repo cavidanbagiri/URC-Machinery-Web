@@ -16,6 +16,7 @@ class MachineService {
     const res = await $api.get('/machines/fetch_machines', {
       params: cleanParams,
     });
+    console.log('data ', res.data)
     return res.data;
   }
 

@@ -6,7 +6,7 @@ class DashboardService {
     const res = await $api.get('/machines/statistics/status');
     return res.data;
   }
-  // YENİ
+
   async fetchPivotStatistics() {
     const res = await $api.get('/machines/statistics/pivot');
     return res.data;

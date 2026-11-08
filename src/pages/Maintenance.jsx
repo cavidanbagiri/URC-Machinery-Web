@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { BsTools } from 'react-icons/bs';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { useSearchParams } from 'react-router-dom';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import {
@@ -74,6 +75,17 @@ export default function Maintenance() {
     dispatch(fetchMaintenance());
     dispatch(fetchMaintenanceSummary());
   }, [dispatch]);
+
+  // Dashboard kartlarından gelen derin bağlantı: /maintenance?status=gecikmis
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (!status) return;
+
+    dispatch(resetFilters());
+    dispatch(setFilters({ status }));
+  }, [dispatch, searchParams]);
 
   // Filtre değişince (debounce)
   useEffect(() => {

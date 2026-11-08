@@ -1,10 +1,7 @@
 // src/components/machines/MachineTable.jsx
 import { useDispatch, useSelector } from 'react-redux';
 import FlaticonIcon from '../ui/FlaticonIcon';
-import ColumnFilter, {
-  ColumnFilterOptions,
-  ColumnFilterText,
-} from '../ui/ColumnFilter';
+import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import MachineSkeleton from './MachineSkeleton';
 import StatusBadge from './StatusBadge';
 import { setFilter } from '../../stores/machine_slice';
@@ -34,10 +31,6 @@ export default function MachineTable({
   const handleFilterChange = (key, value) => {
     dispatch(setFilter({ key, value }));
   };
-
-  // Bir filtre gerçekten dolu mu? (boş string = filtre yok)
-  const isFilled = (value) =>
-    value !== '' && value !== null && value !== undefined;
 
   // List rows already carry their photos (with a presigned `url`); prefer the
   // primary one and fall back to the first uploaded photo.
@@ -134,25 +127,7 @@ export default function MachineTable({
     },
   ];
 
-  // Menü içeriği: metin kolonlarında "içerir", diğerlerinde değer listesi.
-  const renderFilterMenu = (filter, close) =>
-    filter.kind === 'text' ? (
-      <ColumnFilterText
-        value={filters[filter.key]}
-        placeholder={filter.placeholder}
-        onChange={(value) => handleFilterChange(filter.key, value)}
-      />
-    ) : (
-      <ColumnFilterOptions
-        options={filter.options || []}
-        value={filters[filter.key]}
-        onChange={(value) => {
-          handleFilterChange(filter.key, value);
-          close();
-        }}
-      />
-    );
-
+  // Menü içeriği `filter.kind` ile belirlenir (select / text).
   return (
     <div className=" bg-white">
       {/* Header */}
@@ -178,12 +153,12 @@ export default function MachineTable({
                   className="whitespace-nowrap px-6 py-2 text-left font-medium"
                 >
                   {column.filter ? (
-                    <ColumnFilter
+                    <ColumnFilterHeader
                       label={column.label}
-                      active={isFilled(filters[column.filter.key])}
-                    >
-                      {({ close }) => renderFilterMenu(column.filter, close)}
-                    </ColumnFilter>
+                      filter={column.filter}
+                      values={filters}
+                      onChange={handleFilterChange}
+                    />
                   ) : (
                     column.label
                   )}

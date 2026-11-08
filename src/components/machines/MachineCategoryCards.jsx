@@ -141,27 +141,40 @@ export default function MachineCategoryCards({
 }) {
   const rows = Array.isArray(pivot?.rows) ? pivot.rows : [];
 
+  
   const categories = rows
-    .filter((row) => Number(row.total) > 0)
-    .sort((a, b) => Number(b.total) - Number(a.total))
-    .map((row, index) => ({
-      type_id: row.type_id,
-      type_name: String(row.type_name ?? '').trim() || 'Bilinmeyen tip',
-      total: Number(row.total) || 0,
-      icon: getTypeIcon(row.type_name),
-      tone: TONES[Math.abs(Number(row.type_id) || index) % TONES.length],
-    }));
-
+  .filter((row) => Number(row.total) > 0)
+  .sort((a, b) => Number(b.total) - Number(a.total))
+  .map((row, index) => ({
+    type_id: row.type_id,
+    type_name: String(row.type_name ?? '').trim() || 'Bilinmeyen tip',
+    total: Number(row.total) || 0,
+    icon: getTypeIcon(row.type_name),
+    tone: TONES[Math.abs(Number(row.type_id) || index) % TONES.length],
+  }));
+  
   const hasData = categories.length > 0;
 
-  // Fixed visual order for the card grid (positions inside ``categories``).
-  // Guarded so a shorter list (some types without machines) cannot crash the page.
-  const CARD_ORDER = [9, 2, 4, 7, 14, 10, 13, 12, 17, 15, 16, 0, 8, 1, 3, 6, 5, 11];
+  // order must be in this form
+  const CARD_ORDER = [17, 5, 1, 14, 16, 9, 7, 12, 13, 20, 24, 15, 4, 3, 23, 6, 10, 8, 11 ];
   const orderedIndexes = new Set(CARD_ORDER);
   const orderedCategories = [
     ...CARD_ORDER.map((index) => categories[index]).filter(Boolean),
     ...categories.filter((_, index) => !orderedIndexes.has(index)),
   ];
+  
+  let temp = []
+
+  for(let i in Object.entries(categories)){
+    for(let j = 0 ; j<19; j++ ){
+      if(CARD_ORDER[j] === categories[i]['type_id']){
+        temp[j] = categories[i]
+      }
+    }
+  }
+
+
+  
 
   return (
     <section className="overflow-hidden">
@@ -174,7 +187,7 @@ export default function MachineCategoryCards({
           <EmptyState />
         ) : (
           <div className={WRAP_CLASS}>
-            {orderedCategories.map((category) => (
+            {temp.map((category) => (
               <CategoryCard className=""
                 key={category.type_id ?? category.type_name}
                 category={category}
@@ -223,16 +236,7 @@ function CategoryCard({ category, active, onClick }) {
         : ''
         } ${active ? 'ring-2 ring-gray-300 ring-offset-1 duration-400' : ''}`}
     >
-      {/* <span
-        className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-lg ${tone.icon}`}
-      >
-        {image ? (
-          <img src={image} alt="" className="h-20 w-28 object-contain" />
-        ) : (
-          <FlaticonIcon name={icon} size="2xl" />
-        )}
-      </span> */}
-
+    
       <span
         className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-lg `}
       >

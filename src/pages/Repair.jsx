@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { BsWrench } from 'react-icons/bs';
 import { ArrowPathIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useSearchParams } from 'react-router-dom';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import {
@@ -86,6 +87,25 @@ export default function Repair() {
     dispatch(fetchRepairs());
     dispatch(fetchRepairSummary());
   }, [dispatch]);
+
+  // Dashboard kartlarından gelen derin bağlantı:
+  // /repair?status=tamirde veya /repair?repair_type_id=3
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    const repairTypeId = searchParams.get('repair_type_id');
+
+    if (!status && !repairTypeId) return;
+
+    dispatch(resetFilters());
+    dispatch(
+      setFilters({
+        ...(status ? { status } : {}),
+        ...(repairTypeId ? { repair_type_id: repairTypeId } : {}),
+      })
+    );
+  }, [dispatch, searchParams]);
 
   useEffect(() => {
     if (isFirstRender.current) return undefined;

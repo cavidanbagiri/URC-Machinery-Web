@@ -8,6 +8,7 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import { BsCartCheck } from 'react-icons/bs';
+import { useSearchParams } from 'react-router-dom';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import {
@@ -21,6 +22,7 @@ import {
   resetServiceFilters,
   resetSpareFilters,
   setActiveTab,
+  setSpareFilters,
   updateSparePartStatus,
 } from '../stores/purchase_request_slice';
 import { nextSpareStatus } from '../utils/purchaseRequest';
@@ -72,6 +74,19 @@ export default function PurchaseRequests() {
     inactiveFetched.current = true;
     dispatch(isSpare ? fetchServiceRequests() : fetchSparePartRequests());
   }, [dispatch, isSpare]);
+
+  // Dashboard kartından gelen derin bağlantı:
+  // /purchase_requests?status=bekleniyor → yedek parça sekmesi + durum filtresi
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (!status) return;
+
+    dispatch(setActiveTab(SPARE_TAB));
+    dispatch(resetSpareFilters());
+    dispatch(setSpareFilters({ status }));
+  }, [dispatch, searchParams]);
 
   const activeFilterCount = Object.values(filters).filter(
     (value) => value !== '' && value !== null && value !== undefined

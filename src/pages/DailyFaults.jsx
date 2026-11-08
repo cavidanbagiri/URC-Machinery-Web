@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import { HiOutlineClipboardDocumentList } from 'react-icons/hi2';
+import { useSearchParams } from 'react-router-dom';
 import {
   ArrowPathIcon,
   MagnifyingGlassIcon,
@@ -47,6 +48,17 @@ export default function DailyFaults() {
   useEffect(() => {
     dispatch(fetchDailyFaults());
   }, [dispatch]);
+
+  // Dashboard kartından gelen derin bağlantı: /daily_faults?date_from=YYYY-MM-01
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const dateFrom = searchParams.get('date_from');
+    if (!dateFrom) return;
+
+    dispatch(resetFilters());
+    dispatch(setFilter({ key: 'date_from', value: dateFrom }));
+  }, [dispatch, searchParams]);
 
   useEffect(() => {
     if (isFirstRender.current) return undefined;

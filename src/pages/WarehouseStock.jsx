@@ -11,6 +11,7 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import { BsBoxSeam } from 'react-icons/bs';
+import { useSearchParams } from 'react-router-dom';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import {
@@ -85,6 +86,18 @@ export default function WarehouseStock() {
     dispatch(fetchLookupIfNeeded('territory'));
     dispatch(fetchWarehouseSummary());
   }, [dispatch]);
+
+  // Dashboard kartından gelen derin bağlantı:
+  // /warehouse_stock?low_stock=1 → stok sekmesi + kritik stok filtresi
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!searchParams.get('low_stock')) return;
+
+    dispatch(setActiveTab(STOCK_TAB));
+    dispatch(resetStockFilters());
+    dispatch(setStockFilter({ key: 'low_stock', value: true }));
+  }, [dispatch, searchParams]);
 
   // One debounced fetch per list; a filter bar only exists for its own tab,
   // so a change here never fires a request for another list.

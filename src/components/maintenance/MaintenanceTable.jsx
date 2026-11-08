@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import FlaticonIcon from '../ui/FlaticonIcon';
-import FilterRow from '../ui/FilterRow';
+import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import StatusBadge from '../machines/StatusBadge';
 import {
   MAINTENANCE_STATUS_OPTIONS,
@@ -114,60 +114,72 @@ export default function MaintenanceTable({
     dispatch(setFilter({ key, value }));
   };
 
-  // One entry per header cell — `null` renders an empty cell.
-  const columnFilters = [
+  // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
+  // `sortable` olan kolon başlığı sıralama düğmesi olarak kalır.
+  const headerColumns = [
     {
-      kind: 'select',
-      key: 'status',
       label: 'Durum',
-      options: MAINTENANCE_STATUS_OPTIONS.map((option) => ({
-        value: option.code,
-        label: option.name,
-      })),
+      filter: {
+        kind: 'select',
+        key: 'status',
+        options: MAINTENANCE_STATUS_OPTIONS.map((option) => ({
+          value: option.code,
+          label: option.name,
+        })),
+      },
     },
-    { kind: 'text', key: 'search', label: 'Makine', placeholder: 'Kimlik / plaka / VIN' },
     {
-      kind: 'select',
-      key: 'territory_id',
+      label: 'Makine',
+      filter: {
+        kind: 'text',
+        key: 'search',
+        placeholder: 'Kimlik / plaka / VIN',
+      },
+    },
+    {
       label: 'Bölge',
-      placeholder: 'Bölge',
-      options: lookups.territory || [],
+      filter: {
+        kind: 'select',
+        key: 'territory_id',
+        options: lookups.territory || [],
+      },
     },
     {
-      kind: 'select',
-      key: 'type_id',
       label: 'Tip',
-      placeholder: 'Tip',
-      options: lookups.type_transport || [],
+      filter: {
+        kind: 'select',
+        key: 'type_id',
+        options: lookups.type_transport || [],
+      },
     },
     {
-      kind: 'stack',
-      fields: [
-        {
-          key: 'car_mark_id',
-          kind: 'select',
-          placeholder: 'Marka',
-          options: lookups.car_mark || [],
-        },
-        {
-          key: 'car_model_id',
-          kind: 'select',
-          placeholder: 'Model',
-          options: lookups.car_model || [],
-        },
-      ],
+      label: 'Marka / Model',
+      filter: {
+        kind: 'stack',
+        fields: [
+          {
+            key: 'car_mark_id',
+            kind: 'select',
+            label: 'Marka',
+            options: lookups.car_mark || [],
+          },
+          {
+            key: 'car_model_id',
+            kind: 'select',
+            label: 'Model',
+            options: lookups.car_model || [],
+          },
+        ],
+      },
     },
     {
-      kind: 'select',
-      key: 'has_plan',
       label: 'Plan',
-      placeholder: 'Plan',
-      options: HAS_PLAN_OPTIONS,
+      filter: { kind: 'select', key: 'has_plan', options: HAS_PLAN_OPTIONS },
     },
-    null,
-    null,
-    null,
-    { kind: 'actions' },
+    { label: 'Son Bakım' },
+    { label: 'Güncel Sayaç' },
+    { label: 'Kalan', sortable: true },
+    { label: 'İşlemler', align: 'right' },
   ];
 
   if (loading && items.length === 0) {
@@ -190,50 +202,64 @@ export default function MaintenanceTable({
         <table className="w-full" style={{ fontFamily: 'Inter' }}>
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
-              <th className="px-4 py-2.5 text-left font-medium">Durum</th>
-              <th className="px-4 py-2.5 text-left font-medium">Makine</th>
-              <th className="px-4 py-2.5 text-left font-medium">Bölge</th>
-              <th className="px-4 py-2.5 text-left font-medium">Tip</th>
-              <th className="px-4 py-2.5 text-left font-medium">Marka / Model</th>
-              <th className="px-4 py-2.5 text-left font-medium">Plan</th>
-              <th className="px-4 py-2.5 text-left font-medium">Son Bakım</th>
-              <th className="px-4 py-2.5 text-left font-medium">Güncel Sayaç</th>
-              <th
-                className="px-4 py-2.5 text-left font-medium"
-                aria-sort={
-                  sortBy === 'remaining'
-                    ? sortOrder === 'desc'
-                      ? 'descending'
-                      : 'ascending'
-                    : 'none'
+              {headerColumns.map((column) => {
+                if (column.sortable) {
+                  return (
+                    <th
+                      key={column.label}
+                      className="px-4 py-2.5 text-left font-medium"
+                      aria-sort={
+                        sortBy === 'remaining'
+                          ? sortOrder === 'desc'
+                            ? 'descending'
+                            : 'ascending'
+                          : 'none'
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onSortChange?.()}
+                        title="Kalan değerine göre sırala"
+                        className={`inline-flex items-center gap-1 rounded transition hover:text-blue-700 ${
+                          sortBy === 'remaining' ? 'text-blue-700' : ''
+                        }`}
+                      >
+                        Kalan
+                        <FlaticonIcon
+                          name={
+                            sortBy === 'remaining'
+                              ? `angle-${sortOrder === 'desc' ? 'down' : 'up'}`
+                              : 'sort'
+                          }
+                          size="xs"
+                        />
+                      </button>
+                    </th>
+                  );
                 }
-              >
-                <button
-                  type="button"
-                  onClick={() => onSortChange?.()}
-                  title="Kalan değerine göre sırala"
-                  className={`inline-flex items-center gap-1 rounded transition hover:text-blue-700 ${
-                    sortBy === 'remaining' ? 'text-blue-700' : ''
-                  }`}
-                >
-                  Kalan
-                  <FlaticonIcon
-                    name={
-                      sortBy === 'remaining'
-                        ? `angle-${sortOrder === 'desc' ? 'down' : 'up'}`
-                        : 'sort'
-                    }
-                    size="xs"
-                  />
-                </button>
-              </th>
-              <th className="px-4 py-2.5 text-right font-medium">İşlemler</th>
+
+                return (
+                  <th
+                    key={column.label}
+                    className={`px-4 py-2.5 font-medium ${
+                      column.align === 'right' ? 'text-right' : 'text-left'
+                    }`}
+                  >
+                    {column.filter ? (
+                      <ColumnFilterHeader
+                        label={column.label}
+                        filter={column.filter}
+                        values={filters}
+                        onChange={handleFilterChange}
+                        align={column.align}
+                      />
+                    ) : (
+                      column.label
+                    )}
+                  </th>
+                );
+              })}
             </tr>
-            <FilterRow
-              columns={columnFilters}
-              values={filters}
-              onChange={handleFilterChange}
-            />
           </thead>
           <tbody className="divide-y divide-gray-100">
             {items.length === 0 && (

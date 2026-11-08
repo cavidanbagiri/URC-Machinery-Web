@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import StatusBadge from '../machines/StatusBadge';
-import FilterRow from '../ui/FilterRow';
+import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import {
   REPAIR_STATUS_OPTIONS,
   setFilter,
@@ -169,57 +169,83 @@ export default function RepairTable({
     dispatch(setFilter({ key, value }));
   };
 
-  // One entry per header cell — `null` renders an empty cell.
-  const columnFilters = [
+  const headerColumns = [
     {
-      kind: 'select',
-      key: 'status',
-      value: statusFilterValue,
       label: 'Durum',
-      options: REPAIR_STATUS_OPTIONS.map((option) => ({
-        value: option.code,
-        label: option.name,
-      })),
-      extraOptions: [
-        { value: 'overdue', label: 'Yalnızca gecikmiş' },
-        { value: 'due_soon', label: 'Yaklaşan (≤3 gün)' },
-      ],
+      filter: {
+        kind: 'select',
+        key: 'status',
+        value: statusFilterValue,
+        options: [
+          ...REPAIR_STATUS_OPTIONS.map((option) => ({
+            value: option.code,
+            label: option.name,
+          })),
+          { value: 'overdue', label: 'Yalnızca gecikmiş' },
+          { value: 'due_soon', label: 'Yaklaşan (≤3 gün)' },
+        ],
+      },
     },
     {
-      kind: 'stack',
-      fields: [
-        { key: 'identification_no', placeholder: 'Kimlik No' },
-        { key: 'plate_no', placeholder: 'Plaka No' },
-      ],
+      label: 'Makine',
+      filter: {
+        kind: 'stack',
+        fields: [
+          {
+            key: 'identification_no',
+            kind: 'text',
+            label: 'Kimlik No',
+            placeholder: 'Kimlik No',
+          },
+          {
+            key: 'plate_no',
+            kind: 'text',
+            label: 'Plaka No',
+            placeholder: 'Plaka No',
+          },
+        ],
+      },
     },
     {
-      kind: 'select',
-      key: 'repair_type_id',
       label: 'Tamir Tipi',
-      placeholder: 'Tamir tipi',
-      options: lookups.repair_type || [],
+      filter: {
+        kind: 'select',
+        key: 'repair_type_id',
+        options: lookups.repair_type || [],
+      },
     },
     {
-      kind: 'select',
-      key: 'garage_service_id',
       label: 'Garaj Servisi',
-      placeholder: 'Garaj servisi',
-      options: lookups.garage_service || [],
+      filter: {
+        kind: 'select',
+        key: 'garage_service_id',
+        options: lookups.garage_service || [],
+      },
     },
     {
-      kind: 'text',
-      key: 'fault_location',
       label: 'Arıza Yeri',
-      placeholder: 'Arıza yeri',
+      filter: {
+        kind: 'text',
+        key: 'fault_location',
+        placeholder: 'Arıza yeri',
+      },
     },
-    { kind: 'dateRange', keys: ['date_from', 'date_to'], label: 'Giriş tarihi' },
     {
-      kind: 'dateRange',
-      keys: ['exit_date_from', 'exit_date_to'],
-      label: 'Tahmini çıkış',
+      label: 'Giriş',
+      filter: { kind: 'dateRange', keys: ['date_from', 'date_to'] },
     },
-    { kind: 'text', key: 'notes', label: 'Güncel durum / not', placeholder: 'Not' },
-    { kind: 'actions' },
+    {
+      label: 'Tahmini Çıkış',
+      filter: {
+        kind: 'dateRange',
+        keys: ['exit_date_from', 'exit_date_to'],
+      },
+    },
+    {
+      label: 'Güncel Durum',
+      filter: { kind: 'text', key: 'notes', placeholder: 'Not' },
+    },
+    { label: 'İşlemler', align: 'right' },
   ];
 
   if (loading && items.length === 0) {
@@ -242,21 +268,27 @@ export default function RepairTable({
         <table className="w-full" style={{ fontFamily: 'Inter' }}>
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
-              <th className="px-4 py-2.5 text-left font-medium">Durum</th>
-              <th className="px-4 py-2.5 text-left font-medium">Makine</th>
-              <th className="px-4 py-2.5 text-left font-medium">Tamir Tipi</th>
-              <th className="px-4 py-2.5 text-left font-medium">Garaj Servisi</th>
-              <th className="px-4 py-2.5 text-left font-medium">Arıza Yeri</th>
-              <th className="px-4 py-2.5 text-left font-medium">Giriş</th>
-              <th className="px-4 py-2.5 text-left font-medium">Tahmini Çıkış</th>
-              <th className="px-4 py-2.5 text-left font-medium">Güncel Durum</th>
-              <th className="px-4 py-2.5 text-right font-medium">İşlemler</th>
+              {headerColumns.map((column) => (
+                <th
+                  key={column.label}
+                  className={`px-4 py-2.5 font-medium ${
+                    column.align === 'right' ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  {column.filter ? (
+                    <ColumnFilterHeader
+                      label={column.label}
+                      filter={column.filter}
+                      values={filters}
+                      onChange={handleFilterChange}
+                      align={column.align}
+                    />
+                  ) : (
+                    column.label
+                  )}
+                </th>
+              ))}
             </tr>
-            <FilterRow
-              columns={columnFilters}
-              values={filters}
-              onChange={handleFilterChange}
-            />
           </thead>
           <tbody className="divide-y divide-gray-100">
             {items.length === 0 && (
@@ -308,7 +340,14 @@ export default function RepairTable({
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700 min-w-32">
-                    {item.garage_service_name || '—'}
+                    {
+                      item.garage_service_name === 'Garaj'
+                      ?
+                      <span className='bg-orange-200 text-orange-700 py-0.5 px-2 rounded-md'>{item.garage_service_name}</span>
+                      :
+                      <span className='bg-green-200  text-green-700 py-0.5 px-2 rounded-md'>{item.garage_service_name}</span>
+                    }
+                    {/* {item.garage_service_name || '—'} */}
                   </td>
 
                   <td className="max-w-[220px] px-4 py-2.5 text-[12px] text-gray-700">

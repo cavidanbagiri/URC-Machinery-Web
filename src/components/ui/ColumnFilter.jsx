@@ -16,12 +16,30 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
+import { hasAnyFilter, isFilterFilled } from '../../utils/filters';
+
 //: Panel width in px — also used to keep the panel inside the viewport.
 const MENU_WIDTH = 248;
 
-/** True when the filter holds a real value (empty strings mean "no filter"). */
-function isFilterFilled(value) {
-  return value !== '' && value !== null && value !== undefined;
+//: Panel içindeki tüm input'lar aynı görünsün.
+const INPUT_CLASS =
+  'w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-xs outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-200';
+
+const FIELD_LABEL_CLASS =
+  'mb-0.5 block text-[10px] font-semibold uppercase tracking-wide text-gray-500';
+
+/** "Temizle" düğmesi — tüm panel türlerinde aynı görünüm. */
+function ClearButton({ disabled, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="text-[11px] font-medium text-red-600 transition hover:underline disabled:cursor-not-allowed disabled:text-gray-300 disabled:no-underline"
+    >
+      Temizle
+    </button>
+  );
 }
 
 /** Accepts `[{id,name}]`, `[{value,label}]` or plain scalars. */
@@ -65,6 +83,7 @@ function OptionRow({ label, selected, onClick }) {
 
 /** Value list of a column: "Tümü" + one row per option, with a search box. */
 export function ColumnFilterOptions({
+  label,
   options = [],
   value,
   onChange,
@@ -84,6 +103,8 @@ export function ColumnFilterOptions({
 
   return (
     <div className="flex flex-col gap-1.5">
+      {label && <span className={`px-1 ${FIELD_LABEL_CLASS}`}>{label}</span>}
+
       {normalized.length > 7 && (
         <div className="relative">
           <MagnifyingGlassIcon className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
@@ -126,6 +147,7 @@ export function ColumnFilterOptions({
 
 /** Free text column filter ("contains") with a clear action. */
 export function ColumnFilterText({
+  label,
   value,
   placeholder = 'İçerir...',
   hint,
@@ -133,29 +155,168 @@ export function ColumnFilterText({
 }) {
   return (
     <div className="flex flex-col gap-1.5 px-1 pb-1">
+      {label && <span className={FIELD_LABEL_CLASS}>{label}</span>}
+
       <input
         type="text"
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        aria-label={placeholder}
-        className="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-xs outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+        aria-label={label || placeholder}
+        className={INPUT_CLASS}
       />
 
       <div className="flex items-center justify-between gap-2">
         <span className="text-[10px] leading-tight text-gray-400">
           {hint || 'İçeren kayıtlar'}
         </span>
-        <button
-          type="button"
-          onClick={() => onChange('')}
+        <ClearButton
           disabled={!isFilterFilled(value)}
-          className="text-[11px] font-medium text-red-600 transition hover:underline disabled:cursor-not-allowed disabled:text-gray-300 disabled:no-underline"
-        >
-          Temizle
-        </button>
+          onClick={() => onChange('')}
+        />
       </div>
     </div>
+  );
+}
+
+/** Tarih aralığı filtresi (başlangıç + bitiş). */
+export function ColumnFilterDateRange({ values, keys = [], onChange }) {
+  const [fromKey, toKey] = keys;
+  const empty = !isFilterFilled(values?.[fromKey]) && !isFilterFilled(values?.[toKey]);
+
+  return (
+    <div className="flex flex-col gap-1.5 px-1 pb-1">
+      <label className="block">
+        <span className={FIELD_LABEL_CLASS}>Başlangıç</span>
+        <input
+          type="date"
+          value={values?.[fromKey] ?? ''}
+          max={values?.[toKey] || undefined}
+          onChange={(event) => onChange(fromKey, event.target.value)}
+          className={INPUT_CLASS}
+        />
+      </label>
+
+      <label className="block">
+        <span className={FIELD_LABEL_CLASS}>Bitiş</span>
+        <input
+          type="date"
+          value={values?.[toKey] ?? ''}
+          min={values?.[fromKey] || undefined}
+          onChange={(event) => onChange(toKey, event.target.value)}
+          className={INPUT_CLASS}
+        />
+      </label>
+
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] leading-tight text-gray-400">
+          Aralık (dahil)
+        </span>
+        <ClearButton
+          disabled={empty}
+          onClick={() => {
+            onChange(fromKey, '');
+            onChange(toKey, '');
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Bir kolonda birden fazla kontrol (ör. Marka + Model) için dikey yığın. */
+export function ColumnFilterStack({ children }) {
+  return <div className="flex flex-col gap-2">{children}</div>;
+}
+
+/**
+ * Bir kolonun başlığını ve menüsünü birlikte çizer: `filter.kind` değerine göre
+ * değer listesi, serbest metin, tarih aralığı veya yığın gösterir.
+ *
+ * `values` redux'taki filtre nesnesi, `onChange(key, value)` ise o filtreyi
+ * güncelleyen fonksiyondur (sayfanın debounce'lu fetch'i aynen korunur).
+ */
+export function ColumnFilterHeader({
+  label,
+  filter,
+  values,
+  onChange,
+  align = 'left',
+}) {
+  const currentValue =
+    filter.value !== undefined ? filter.value : values?.[filter.key];
+
+  const active =
+    filter.kind === 'dateRange'
+      ? hasAnyFilter(values, filter.keys)
+      : filter.kind === 'stack'
+        ? filter.fields?.some((field) => isFilterFilled(values?.[field.key]))
+        : isFilterFilled(currentValue);
+
+  const renderMenu = (close) => {
+    if (filter.kind === 'text') {
+      return (
+        <ColumnFilterText
+          value={values?.[filter.key]}
+          placeholder={filter.placeholder}
+          hint={filter.hint}
+          onChange={(value) => onChange(filter.key, value)}
+        />
+      );
+    }
+
+    if (filter.kind === 'dateRange') {
+      return <ColumnFilterDateRange values={values} keys={filter.keys} onChange={onChange} />;
+    }
+
+    if (filter.kind === 'stack') {
+      return (
+        <ColumnFilterStack>
+          {(filter.fields || []).map((field) =>
+            field.kind === 'select' ? (
+              <ColumnFilterOptions
+                key={field.key}
+                label={field.label}
+                options={field.options || []}
+                value={values?.[field.key]}
+                searchPlaceholder={field.searchPlaceholder}
+                onChange={(value) => {
+                  onChange(field.key, value);
+                  close();
+                }}
+              />
+            ) : (
+              <ColumnFilterText
+                key={field.key}
+                label={field.label}
+                value={values?.[field.key]}
+                placeholder={field.placeholder}
+                onChange={(value) => onChange(field.key, value)}
+              />
+            )
+          )}
+        </ColumnFilterStack>
+      );
+    }
+
+    return (
+      <ColumnFilterOptions
+        options={filter.options || []}
+        value={currentValue}
+        allLabel={filter.allLabel}
+        searchPlaceholder={filter.searchPlaceholder}
+        onChange={(value) => {
+          onChange(filter.key, value);
+          close();
+        }}
+      />
+    );
+  };
+
+  return (
+    <ColumnFilter label={label} active={active} align={align}>
+      {({ close }) => renderMenu(close)}
+    </ColumnFilter>
   );
 }
 

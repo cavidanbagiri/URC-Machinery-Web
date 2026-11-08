@@ -2,7 +2,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-import FilterRow from '../ui/FilterRow';
+import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import { setServiceFilter } from '../../stores/purchase_request_slice';
 import { formatDate, machineLabel } from '../../utils/repair';
 
@@ -38,20 +38,38 @@ export default function ServiceRequestTable({
     dispatch(setServiceFilter({ key, value }));
   };
 
-  // One entry per header cell — `null` renders an empty cell.
-  const columnFilters = [
-    { kind: 'text', key: 'search', label: 'Servis Form', placeholder: 'Başlık / form no' },
-    { kind: 'text', key: 'identification_no', label: 'ID No', placeholder: 'Kimlik no' },
-    { kind: 'text', key: 'company_name', label: 'Firma', placeholder: 'Firma' },
+  // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
+  const headerColumns = [
     {
-      kind: 'text',
-      key: 'service_description',
-      label: 'Hizmet Tanımı',
-      placeholder: 'Hizmet tanımı',
+      label: 'Servis Form',
+      filter: { kind: 'text', key: 'search', placeholder: 'Başlık / form no' },
     },
-    { kind: 'dateRange', keys: ['date_from', 'date_to'], label: 'Tarih' },
-    null,
-    { kind: 'actions' },
+    {
+      label: 'ID No',
+      filter: {
+        kind: 'text',
+        key: 'identification_no',
+        placeholder: 'Kimlik no',
+      },
+    },
+    {
+      label: 'Firma',
+      filter: { kind: 'text', key: 'company_name', placeholder: 'Firma' },
+    },
+    {
+      label: 'Hizmet Tanımı',
+      filter: {
+        kind: 'text',
+        key: 'service_description',
+        placeholder: 'Hizmet tanımı',
+      },
+    },
+    {
+      label: 'Tarih',
+      filter: { kind: 'dateRange', keys: ['date_from', 'date_to'] },
+    },
+    { label: 'Kayıt' },
+    { label: 'İşlem', align: 'right' },
   ];
 
   if (loading && items.length === 0) {
@@ -74,19 +92,27 @@ export default function ServiceRequestTable({
         <table className="w-full" style={{ fontFamily: 'Inter' }}>
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
-              <th className="px-4 py-2.5 text-left font-medium">Servis Form</th>
-              <th className="px-4 py-2.5 text-left font-medium">ID No</th>
-              <th className="px-4 py-2.5 text-left font-medium">Firma</th>
-              <th className="px-4 py-2.5 text-left font-medium">Hizmet Tanımı</th>
-              <th className="px-4 py-2.5 text-left font-medium">Tarih</th>
-              <th className="px-4 py-2.5 text-left font-medium">Kayıt</th>
-              <th className="px-4 py-2.5 text-right font-medium">İşlem</th>
+              {headerColumns.map((column) => (
+                <th
+                  key={column.label}
+                  className={`px-4 py-2.5 font-medium ${
+                    column.align === 'right' ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  {column.filter ? (
+                    <ColumnFilterHeader
+                      label={column.label}
+                      filter={column.filter}
+                      values={filters}
+                      onChange={handleFilterChange}
+                      align={column.align}
+                    />
+                  ) : (
+                    column.label
+                  )}
+                </th>
+              ))}
             </tr>
-            <FilterRow
-              columns={columnFilters}
-              values={filters}
-              onChange={handleFilterChange}
-            />
           </thead>
 
           <tbody className="text-sm text-gray-800">
