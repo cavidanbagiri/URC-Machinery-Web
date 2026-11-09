@@ -63,22 +63,22 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 p-6">
 
-      {/* Üst şerit: solda ekip fotoğrafları, sağda son güncelleme + Yenile */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 ">
+
         <TeamAvatarStack />
 
-        <div className="flex items-center gap-3">
-          {overviewUpdatedAt && (
+        <div className="flex items-center gap-3 ml-3">
+          {/* {overviewUpdatedAt && (
             <span className="text-[11px] text-gray-400">
               Son güncelleme: {formatDateTime(overviewUpdatedAt)}
             </span>
-          )}
+          )} */}
 
           <button
             type="button"
             onClick={refresh}
             disabled={refreshing}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-blue-600 px-3.5 py-1.5 text-[13px] font-medium text-white transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`}
@@ -86,6 +86,9 @@ export default function DashboardPage() {
             {refreshing ? 'Yükleniyor' : 'Yenile'}
           </button>
         </div>
+        
+        
+      
       </div>
 
       <div
@@ -93,7 +96,7 @@ export default function DashboardPage() {
         className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
 
-        <div className="min-w-0">
+        {/* <div className="min-w-0">
           <div className='flex items-center'>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <RxDashboard className="h-4 w-4" />
@@ -106,13 +109,25 @@ export default function DashboardPage() {
           <p className="mt-1 text-sm text-gray-500 font-light tracking-tight">
             Makinelerin Durumu ve Dağılımına İlişkin Genel Görünüm
           </p>
+        </div> */}
+
+        <div className="min-w-0 ">
+          <div className='flex items-center'>
+            {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <RxDashboard className="h-4 w-4" />
+            </div> */}
+            <h1
+              className="ml-2 text-4xl font-semibold tracking-tight text-gray-900">
+              Güncel Durum Raporu
+            </h1>
+          </div>
+          {/* <p className="mt-1 text-sm text-gray-500 font-light tracking-tight">
+            Makinelerin Durumu ve Dağılımına İlişkin Genel Görünüm
+          </p> */}
         </div>
 
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <UserSummary user={user} />
-
-
-
         </div>
       </div>
 
@@ -135,21 +150,27 @@ export default function DashboardPage() {
       {/* <OpsKpiStrip /> */}
 
 
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1">
           <StatusChart />
         </div>
 
-        {/* Sağ 66% — Pivot */}
         <div className="lg:col-span-2">
           <PivotTable />
         </div>
       </div>
 
+
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="min-h-[320px] xl:col-span-2 xl:h-[440px]">
+        {/* <div className="min-h-[320px] xl:col-span-2 xl:h-[440px]">
           <DepotOverview />
+        </div> */}
+
+        <div className="min-h-[320px] xl:h-[440px]">
+          <MaintenanceStatusChart />
+        </div>
+        <div className="min-h-[320px] xl:h-[440px]">
+          <RepairTypeChart />
         </div>
 
         <div className="flex flex-col gap-6 xl:h-[440px]">
@@ -165,12 +186,17 @@ export default function DashboardPage() {
 
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="min-h-[300px] xl:h-[360px]">
+        {/* <div className="min-h-[300px] xl:h-[360px]">
           <MaintenanceStatusChart />
         </div>
         <div className="min-h-[300px] xl:h-[360px]">
           <RepairTypeChart />
+        </div> */}
+
+        <div className="min-h-[300px] xl:col-span-2 xl:h-[360px]">
+          <DepotOverview />
         </div>
+
         <div className="min-h-[300px] xl:h-[360px]">
           <GarageLoadCard />
         </div>
