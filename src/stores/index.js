@@ -10,6 +10,7 @@ import purchaseRequestReducer from './purchase_request_slice';
 import warehouseReducer from './warehouse_slice';
 import dashboardReducer from './dashboard_slice';
 import forumReducer from './forum_slice';
+import tireReducer from './tire_slice';
 
 const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ const store = configureStore({
     warehouse: warehouseReducer,
     dashboard: dashboardReducer,
     forum: forumReducer,
+    tire: tireReducer,
   },
 });
 

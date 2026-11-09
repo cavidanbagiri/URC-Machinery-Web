@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../services/AuthService';
+import userService from '../services/UserService';
 
 // Get user from localStorage (tolerate corrupted/legacy values)
 function readStoredUser() {
@@ -19,6 +20,13 @@ const initialState = {
   isError: false,
   isSuccess: false,
   message: '',
+
+  // Team directory behind the dashboard avatar stack (read-only).
+  team: [],
+  teamTotal: 0,
+  teamWithPhoto: 0,
+  teamLoading: false,
+  teamError: '',
 };
 
 // Add this new thunk for checking session on page refresh
@@ -61,6 +69,19 @@ export const uploadAvatar = createAsyncThunk(
   async (file, thunkAPI) => {
     try {
       return await authService.uploadAvatar(file);
+    } catch (error) {
+      const message = error.response?.data?.detail || error.message || '';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Team members for the dashboard avatar stack (photo first, self first).
+export const fetchTeamMembers = createAsyncThunk(
+  'auth/fetchTeamMembers',
+  async ({ limit = 8 } = {}, thunkAPI) => {
+    try {
+      return await userService.fetchTeam({ limit });
     } catch (error) {
       const message = error.response?.data?.detail || error.message || '';
       return thunkAPI.rejectWithValue(message);
@@ -205,7 +226,32 @@ const authSlice = createSlice({
         if (action.payload) {
           state.user = action.payload;
           localStorage.setItem('user', JSON.stringify(action.payload));
+
+          // Keep the header stack in sync: your own circle swaps immediately
+          // (the order is not re-sorted, so the row does not jump around).
+          const imageUrl = action.payload.image_url || '';
+          state.team = state.team.map((member) =>
+            member.id === action.payload.id
+              ? { ...member, image_url: imageUrl, has_photo: Boolean(imageUrl) }
+              : member
+          );
         }
+      })
+      // Team directory for the dashboard avatar stack. A failure keeps the
+      // previous circles on screen (the header must never collapse).
+      .addCase(fetchTeamMembers.pending, (state) => {
+        state.teamLoading = true;
+        state.teamError = '';
+      })
+      .addCase(fetchTeamMembers.fulfilled, (state, action) => {
+        state.teamLoading = false;
+        state.team = action.payload?.items || [];
+        state.teamTotal = action.payload?.total || 0;
+        state.teamWithPhoto = action.payload?.with_photo || 0;
+      })
+      .addCase(fetchTeamMembers.rejected, (state, action) => {
+        state.teamLoading = false;
+        state.teamError = action.payload || 'Kullanıcı listesi yüklenemedi';
       })
   },
 });

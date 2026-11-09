@@ -63,7 +63,7 @@ export default function UserSummary({ user }) {
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white py-2 pl-2 pr-4 shadow-sm">
+    <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white py-1 pl-2 pr-4 shadow-xs">
       <div className="group relative shrink-0">
         <button
           type="button"

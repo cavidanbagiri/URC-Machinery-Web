@@ -12,9 +12,10 @@ import {
   fetchPivotStatistics,
   fetchDashboardOverview,
 } from '../stores/dashboard_slice';
-import { fetchCurrentUser } from '../stores/user_slice';
+import { fetchCurrentUser, fetchTeamMembers } from '../stores/user_slice';
 import { formatDateTime } from '../utils/maintenance';
 import KpiCards from '../components/dashboard/KpiCards';
+import TeamAvatarStack from '../components/dashboard/TeamAvatarStack';
 import OpsKpiStrip from '../components/dashboard/OpsKpiStrip';
 import AlertStrip from '../components/dashboard/AlertStrip';
 import StatusChart from '../components/dashboard/StatusChart';
@@ -46,6 +47,8 @@ export default function DashboardPage() {
     dispatch(fetchStatusStatistics());
     dispatch(fetchPivotStatistics());
     dispatch(fetchDashboardOverview());
+    // The header shows the team's photos, so a refresh reloads them too.
+    dispatch(fetchTeamMembers());
   }, [dispatch]);
 
   useEffect(() => {
@@ -59,7 +62,32 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header: title on the left, signed-in user on the right */}
+
+      {/* Üst şerit: solda ekip fotoğrafları, sağda son güncelleme + Yenile */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <TeamAvatarStack />
+
+        <div className="flex items-center gap-3">
+          {overviewUpdatedAt && (
+            <span className="text-[11px] text-gray-400">
+              Son güncelleme: {formatDateTime(overviewUpdatedAt)}
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`}
+            />
+            {refreshing ? 'Yükleniyor' : 'Yenile'}
+          </button>
+        </div>
+      </div>
+
       <div
         style={{ fontFamily: 'Inter' }}
         className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
@@ -71,7 +99,7 @@ export default function DashboardPage() {
               <RxDashboard className="h-4 w-4" />
             </div>
             <h1
-              className="ml-2 text-3xl font-semibold tracking-tight text-gray-900">
+              className="ml-2 text-4xl font-semibold tracking-tight text-gray-900">
               Dashboard
             </h1>
           </div>
@@ -83,29 +111,12 @@ export default function DashboardPage() {
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <UserSummary user={user} />
 
-          <div className="flex items-center gap-3">
-            {overviewUpdatedAt && (
-              <span className="text-[11px] text-gray-400">
-                Son güncelleme: {formatDateTime(overviewUpdatedAt)}
-              </span>
-            )}
 
-            <button
-              type="button"
-              onClick={refresh}
-              disabled={refreshing}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`}
-              />
-              {refreshing ? 'Yükleniyor' : 'Yenile'}
-            </button>
-          </div>
+
         </div>
       </div>
 
-       
+
 
       {errorMessage && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -113,24 +124,19 @@ export default function DashboardPage() {
         </div>
       )}
 
-     
 
-      {/* Dikkat şeridi — sayaçlar sıfırsa görünmez */}
-      <AlertStrip />
 
-      
+      {/* <AlertStrip /> */}
 
-      {/* KPI Cards — makine envanteri */}
+
+
       <KpiCards />
 
-      {/* Operasyon şeridi: tamir / bakım / depo / talep / arıza */}
-      <OpsKpiStrip />
+      {/* <OpsKpiStrip /> */}
 
-      
 
-      {/* Status Chart + Pivot Table */}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Sol 33% — Status Chart */}
         <div className="lg:col-span-1">
           <StatusChart />
         </div>
@@ -141,7 +147,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Depo (2/3) + bekleyen talep ve forum (1/3) */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="min-h-[320px] xl:col-span-2 xl:h-[440px]">
           <DepotOverview />
@@ -157,9 +162,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      
 
-      {/* Grafikler: bakım durumu / arıza tipi / garaj yükü */}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="min-h-[300px] xl:h-[360px]">
           <MaintenanceStatusChart />
@@ -172,7 +176,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Liste widget'ları: son arızalar / gecikmiş tamirler / gecikmiş bakımlar */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="min-h-[300px] xl:h-[320px]">
           <RecentDailyFaults />
@@ -185,7 +188,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      
+
     </div>
   );
 }
