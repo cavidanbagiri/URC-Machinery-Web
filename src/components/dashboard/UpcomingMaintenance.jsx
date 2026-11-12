@@ -45,7 +45,7 @@ export default function UpcomingMaintenance() {
 
   return (
     <SectionCard
-      title="Gecikmiş Bakımlar"
+      title="Zamanı Gelen Bakımlar"
       subtitle="Kalan değere göre en acil kayıtlar"
       icon={AlertTriangle}
       action={{

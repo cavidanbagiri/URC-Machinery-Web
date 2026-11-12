@@ -31,7 +31,7 @@ export default function OverdueRepairs() {
 
   return (
     <SectionCard
-      title="Gecikmiş Tamirler"
+      title="Zamanı Gelen Tamirler"
       subtitle="Tahmini çıkış tarihi geçen kayıtlar"
       icon={Wrench}
       action={{
