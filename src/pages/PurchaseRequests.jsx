@@ -15,6 +15,7 @@ import {
   SERVICE_TAB,
   SPARE_TAB,
   deleteServiceRequest,
+  deleteSparePartDocument,
   deleteSparePartRequest,
   fetchPurchaseRequestTypes,
   fetchServiceRequests,
@@ -23,9 +24,12 @@ import {
   resetSpareFilters,
   setActiveTab,
   setSpareFilters,
+  updateSparePartItemArrival,
   updateSparePartStatus,
+  uploadSparePartDocument,
 } from '../stores/purchase_request_slice';
-import { nextSpareStatus } from '../utils/purchaseRequest';
+import { spareStatusLabel, validateSpareDocument } from '../utils/purchaseRequest';
+import PurchaseRequestService from '../services/PurchaseRequestService';
 import SparePartRequestTable from '../components/purchaserequest/SparePartRequestTable';
 import ServiceRequestTable from '../components/purchaserequest/ServiceRequestTable';
 import PurchaseRequestPagination from '../components/purchaserequest/PurchaseRequestPagination';
@@ -37,15 +41,16 @@ const LOOKUPS_NEEDED = ['territory'];
 
 export default function PurchaseRequests() {
   const dispatch = useDispatch();
-  const { activeTab, spareParts, serviceRequests, rowBusy } = useSelector(
-    (s) => s.purchaseRequest
-  );
+  const { activeTab, spareParts, serviceRequests, rowBusy, documentBusy } =
+    useSelector((s) => s.purchaseRequest);
 
   const isSpare = activeTab === SPARE_TAB;
   const active = isSpare ? spareParts : serviceRequests;
   const { items, loading, error, filters, offset, limit } = active;
 
   const [spareFormOpen, setSpareFormOpen] = useState(false);
+  // The request being edited; ``null`` opens the empty create form.
+  const [spareFormRequest, setSpareFormRequest] = useState(null);
   const [serviceFormOpen, setServiceFormOpen] = useState(false);
   const [detailId, setDetailId] = useState(null);
 
@@ -76,7 +81,7 @@ export default function PurchaseRequests() {
   }, [dispatch, isSpare]);
 
   // Dashboard kartından gelen derin bağlantı:
-  // /purchase_requests?status=bekleniyor → yedek parça sekmesi + durum filtresi
+  // /purchase_requests?status=firma_bekleniyor → yedek parça sekmesi + durum filtresi
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -98,23 +103,52 @@ export default function PurchaseRequests() {
   };
 
   const openCreate = () => {
-    if (isSpare) setSpareFormOpen(true);
-    else setServiceFormOpen(true);
+    if (isSpare) {
+      setSpareFormRequest(null);
+      setSpareFormOpen(true);
+    } else {
+      setServiceFormOpen(true);
+    }
   };
 
-  const handleToggleStatus = async (item, status) => {
-    const next = status || nextSpareStatus(item.status);
+  const openSpareEdit = (request) => {
+    setSpareFormRequest(request);
+    setSpareFormOpen(true);
+  };
+
+  const closeSpareForm = () => {
+    setSpareFormOpen(false);
+    setSpareFormRequest(null);
+  };
+
+  const handleChangeStatus = async (item, status) => {
+    if (!status || status === item.status) return;
     try {
       await dispatch(
-        updateSparePartStatus({ requestId: item.id, status: next })
+        updateSparePartStatus({ requestId: item.id, status })
       ).unwrap();
-      toast.success(
-        next === 'geldi'
-          ? 'Talep "Geldi" olarak işaretlendi'
-          : 'Talep "Bekleniyor" olarak işaretlendi'
-      );
+      toast.success(`Talep "${spareStatusLabel(status)}" olarak güncellendi`);
     } catch (err) {
       toast.error(String(err || 'Durum güncellenemedi'));
+    }
+  };
+
+  const handleToggleArrival = async (request, partRow, isArrived) => {
+    try {
+      await dispatch(
+        updateSparePartItemArrival({
+          requestId: request.id,
+          itemId: partRow.id,
+          isArrived,
+        })
+      ).unwrap();
+      toast.success(
+        `${partRow.part_number || 'Kalem'} "${
+          isArrived ? 'Geldi' : 'Gelmedi'
+        }" olarak işaretlendi`
+      );
+    } catch (err) {
+      toast.error(String(err || 'Kalem durumu güncellenemedi'));
     }
   };
 
@@ -133,6 +167,85 @@ export default function PurchaseRequests() {
       toast.success('Talep silindi');
     } catch (err) {
       toast.error(String(err || 'Talep silinemedi'));
+    }
+  };
+
+  const fetchDocumentUrl = async (request, document) => {
+    const blob = await PurchaseRequestService.fetchSparePartDocument(
+      request.id,
+      document.id
+    );
+    return URL.createObjectURL(
+      new Blob([blob], { type: document.content_type || 'application/pdf' })
+    );
+  };
+
+  const handleUploadDocument = async (request, file) => {
+    const validationError = validateSpareDocument(file);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    try {
+      await dispatch(
+        uploadSparePartDocument({ requestId: request.id, file })
+      ).unwrap();
+      toast.success('Evrak eklendi');
+    } catch (err) {
+      toast.error(String(err || 'Evrak yüklenemedi'));
+    }
+  };
+
+  const handleViewDocument = async (request, document) => {
+    // Open the tab before awaiting so the browser keeps the user gesture.
+    const tab = window.open('', '_blank');
+    if (!tab) {
+      toast.error('Tarayıcı yeni sekmeyi engelledi');
+      return;
+    }
+
+    try {
+      const url = await fetchDocumentUrl(request, document);
+      tab.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      tab.close();
+      toast.error('Evrak açılamadı');
+    }
+  };
+
+  const handleDownloadDocument = async (request, document) => {
+    try {
+      const url = await fetchDocumentUrl(request, document);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.file_name || 'evrak.pdf';
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      toast.error('Evrak indirilemedi');
+    }
+  };
+
+  const handleDeleteDocument = async (request, document) => {
+    const confirmed = window.confirm(
+      `"${document.file_name}" evrakını silmek istiyor musunuz?`
+    );
+    if (!confirmed) return;
+
+    try {
+      await dispatch(
+        deleteSparePartDocument({
+          requestId: request.id,
+          documentId: document.id,
+        })
+      ).unwrap();
+      toast.success('Evrak silindi');
+    } catch (err) {
+      toast.error(String(err || 'Evrak silinemedi'));
     }
   };
 
@@ -250,7 +363,9 @@ export default function PurchaseRequests() {
           hasActiveFilters={hasActiveFilters}
           onResetFilters={handleResetFilters}
           onOpenDetail={(request) => setDetailId(request.id)}
-          onToggleStatus={handleToggleStatus}
+          onEdit={openSpareEdit}
+          onChangeStatus={handleChangeStatus}
+          onToggleArrival={handleToggleArrival}
           onDelete={handleDelete}
           rowBusy={rowBusy}
         />
@@ -269,7 +384,8 @@ export default function PurchaseRequests() {
 
       <SparePartFormModal
         open={spareFormOpen}
-        onClose={() => setSpareFormOpen(false)}
+        onClose={closeSpareForm}
+        request={spareFormRequest}
       />
 
       <ServiceFormModal
@@ -279,6 +395,11 @@ export default function PurchaseRequests() {
 
       <SparePartDetailModal
         request={detailRequest}
+        documentBusy={documentBusy}
+        onUploadDocument={handleUploadDocument}
+        onViewDocument={handleViewDocument}
+        onDownloadDocument={handleDownloadDocument}
+        onDeleteDocument={handleDeleteDocument}
         onClose={() => setDetailId(null)}
       />
     </div>

@@ -120,7 +120,7 @@ export default function OpsKpiStrip() {
         }
         icon={ShoppingCart}
         tone="sky"
-        onClick={() => navigate('/purchase_requests?status=bekleniyor')}
+        onClick={() => navigate('/purchase_requests?status=firma_bekleniyor')}
       />
 
       <OpsCard

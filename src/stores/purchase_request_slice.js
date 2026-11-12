@@ -44,6 +44,8 @@ const initialState = {
   mutationError: null,
   // { id, scope } while a status toggle or a delete request runs
   rowBusy: null,
+  // { requestId, documentId, action } while a PDF upload / delete runs
+  documentBusy: null,
 };
 
 function errorMessage(err, fallback) {
@@ -141,6 +143,19 @@ export const createSparePartRequest = createAsyncThunk(
   }
 );
 
+export const updateSparePartRequest = createAsyncThunk(
+  'purchaseRequest/updateSparePart',
+  async ({ requestId, payload }, { rejectWithValue }) => {
+    try {
+      return await PurchaseRequestService.updateSparePart(requestId, payload);
+    } catch (err) {
+      return rejectWithValue(
+        errorMessage(err, 'Yedek parça talebi güncellenemedi')
+      );
+    }
+  }
+);
+
 export const updateSparePartStatus = createAsyncThunk(
   'purchaseRequest/updateSparePartStatus',
   async ({ requestId, status }, { rejectWithValue }) => {
@@ -155,6 +170,21 @@ export const updateSparePartStatus = createAsyncThunk(
   }
 );
 
+export const updateSparePartItemArrival = createAsyncThunk(
+  'purchaseRequest/updateSparePartItemArrival',
+  async ({ requestId, itemId, isArrived }, { rejectWithValue }) => {
+    try {
+      return await PurchaseRequestService.updateSparePartItemArrival(
+        requestId,
+        itemId,
+        isArrived
+      );
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Kalem durumu güncellenemedi'));
+    }
+  }
+);
+
 export const deleteSparePartRequest = createAsyncThunk(
   'purchaseRequest/deleteSparePart',
   async (requestId, { rejectWithValue }) => {
@@ -165,6 +195,34 @@ export const deleteSparePartRequest = createAsyncThunk(
       return rejectWithValue(
         errorMessage(err, 'Yedek parça talebi silinemedi')
       );
+    }
+  }
+);
+
+export const uploadSparePartDocument = createAsyncThunk(
+  'purchaseRequest/uploadSparePartDocument',
+  async ({ requestId, file }, { rejectWithValue }) => {
+    try {
+      return await PurchaseRequestService.uploadSparePartDocument(
+        requestId,
+        file
+      );
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Evrak yüklenemedi'));
+    }
+  }
+);
+
+export const deleteSparePartDocument = createAsyncThunk(
+  'purchaseRequest/deleteSparePartDocument',
+  async ({ requestId, documentId }, { rejectWithValue }) => {
+    try {
+      return await PurchaseRequestService.deleteSparePartDocument(
+        requestId,
+        documentId
+      );
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Evrak silinemedi'));
     }
   }
 );
@@ -342,6 +400,39 @@ const purchaseRequestSlice = createSlice({
       });
 
     builder
+      .addCase(updateSparePartRequest.pending, (state) => {
+        state.mutating = true;
+        state.mutationError = null;
+      })
+      .addCase(updateSparePartRequest.fulfilled, (state, action) => {
+        state.mutating = false;
+        applyItem(state, SPARE_TAB, action.payload);
+      })
+      .addCase(updateSparePartRequest.rejected, (state, action) => {
+        state.mutating = false;
+        state.mutationError = action.payload;
+      });
+
+    builder
+      .addCase(updateSparePartItemArrival.pending, (state, action) => {
+        state.mutationError = null;
+        state.rowBusy = {
+          scope: SPARE_TAB,
+          id: action.meta.arg.requestId,
+          itemId: action.meta.arg.itemId,
+          action: 'arrival',
+        };
+      })
+      .addCase(updateSparePartItemArrival.fulfilled, (state, action) => {
+        state.rowBusy = null;
+        applyItem(state, SPARE_TAB, action.payload);
+      })
+      .addCase(updateSparePartItemArrival.rejected, (state, action) => {
+        state.rowBusy = null;
+        state.mutationError = action.payload;
+      });
+
+    builder
       .addCase(updateSparePartStatus.pending, (state, action) => {
         state.mutationError = null;
         state.rowBusy = {
@@ -370,6 +461,42 @@ const purchaseRequestSlice = createSlice({
       })
       .addCase(deleteSparePartRequest.rejected, (state, action) => {
         state.rowBusy = null;
+        state.mutationError = action.payload;
+      });
+
+    builder
+      .addCase(uploadSparePartDocument.pending, (state, action) => {
+        state.mutationError = null;
+        state.documentBusy = {
+          requestId: action.meta.arg.requestId,
+          documentId: null,
+          action: 'upload',
+        };
+      })
+      .addCase(uploadSparePartDocument.fulfilled, (state, action) => {
+        state.documentBusy = null;
+        applyItem(state, SPARE_TAB, action.payload);
+      })
+      .addCase(uploadSparePartDocument.rejected, (state, action) => {
+        state.documentBusy = null;
+        state.mutationError = action.payload;
+      });
+
+    builder
+      .addCase(deleteSparePartDocument.pending, (state, action) => {
+        state.mutationError = null;
+        state.documentBusy = {
+          requestId: action.meta.arg.requestId,
+          documentId: action.meta.arg.documentId,
+          action: 'delete',
+        };
+      })
+      .addCase(deleteSparePartDocument.fulfilled, (state, action) => {
+        state.documentBusy = null;
+        applyItem(state, SPARE_TAB, action.payload);
+      })
+      .addCase(deleteSparePartDocument.rejected, (state, action) => {
+        state.documentBusy = null;
         state.mutationError = action.payload;
       });
 

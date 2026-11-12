@@ -1,7 +1,7 @@
 // src/components/dashboard/PendingSpareParts.jsx
 //
-// Onay bekleyen yedek parça talepleri.
-// Kaynak: GET /purchase-requests/spare-parts?status=bekleniyor
+// Firmadan gelmesi beklenen yedek parça talepleri.
+// Kaynak: GET /purchase-requests/spare-parts?status=firma_bekleniyor
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ShoppingCart } from 'lucide-react';
@@ -26,7 +26,7 @@ export default function PendingSpareParts() {
       )}`,
       value: `${request.item_count} kalem`,
       tone: 'amber',
-      onClick: () => navigate('/purchase_requests?status=bekleniyor'),
+      onClick: () => navigate('/purchase_requests?status=firma_bekleniyor'),
     };
   });
 
@@ -37,7 +37,7 @@ export default function PendingSpareParts() {
       icon={ShoppingCart}
       action={{
         label: 'Tümü',
-        onClick: () => navigate('/purchase_requests?status=bekleniyor'),
+        onClick: () => navigate('/purchase_requests?status=firma_bekleniyor'),
       }}
       loading={overviewLoading}
       error={error}

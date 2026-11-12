@@ -131,7 +131,9 @@ export const fetchDashboardOverview = createAsyncThunk(
         MaintenanceService.fetchSummary(),
         WarehouseService.fetchSummary(),
         PurchaseRequestService.fetchSpareParts({
-          status: 'bekleniyor',
+          // What the dashboard calls "bekleyen": still waiting for the firm to
+          // deliver (the old ``bekleniyor`` state).
+          status: 'firma_bekleniyor',
           limit: COMPACT_LIMIT,
           offset: 0,
         }),

@@ -78,12 +78,15 @@ export default function RepairModal({
   );
 }
 
-export function ModalField({ label, hint, error, children }) {
+export function ModalField({ label, hint, error, children, index=0 }) {
   return (
-    <div>
+    <div className=''>
+      {
+        index === 0 &&
       <label className="mb-1 block text-xs font-medium text-gray-600">
         {label}
       </label>
+      }
       {children}
       {hint && !error && <p className="mt-1 text-[11px] text-gray-400">{hint}</p>}
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
@@ -92,7 +95,7 @@ export function ModalField({ label, hint, error, children }) {
 }
 
 export const inputClass =
-  'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
+  'w-full rounded-lg border border-gray-50 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
 
 export const errorInputClass =
   'w-full rounded-lg border border-red-400 px-3 py-2 text-sm outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-100';

@@ -18,6 +18,7 @@ import {
 } from '../../stores/daily_fault_slice';
 import { fetchLookupIfNeeded } from '../../stores/lookup_slice';
 import { machineLabel, toNullableText } from '../../utils/repair';
+import { CHANGED_PART_UNITS, parsePartQuantity } from '../../utils/dailyFault';
 
 function emptyForm() {
   return {
@@ -27,6 +28,9 @@ function emptyForm() {
     repair_type_id: '',
     fault_assignment: '',
     changed_parts: '',
+    changed_part_no: '',
+    changed_part_quantity: '',
+    changed_part_unit: '',
   };
 }
 
@@ -82,6 +86,20 @@ export default function DailyFaultFormModal({ open, onClose, onSaved }) {
     }
     if (!form.territory_id) nextErrors.territory_id = 'Şantiye seçin';
     if (!form.repair_type_id) nextErrors.repair_type_id = 'Arıza tipi seçin';
+
+    // "Sayı" and "Birim" belong together: a quantity without a unit (or the
+    // other way round) would leave a half-filled part row in the table.
+    const quantity = parsePartQuantity(form.changed_part_quantity);
+    if (quantity === null) {
+      if (form.changed_part_unit) {
+        nextErrors.changed_part_quantity = 'Sayı girin';
+      }
+    } else if (Number.isNaN(quantity) || quantity <= 0) {
+      nextErrors.changed_part_quantity = 'Sayı sıfırdan büyük bir değer olmalı';
+    } else if (!form.changed_part_unit) {
+      nextErrors.changed_part_unit = 'Birim seçin';
+    }
+
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -89,6 +107,8 @@ export default function DailyFaultFormModal({ open, onClose, onSaved }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validate()) return;
+
+    const quantity = parsePartQuantity(form.changed_part_quantity);
 
     try {
       await dispatch(
@@ -99,6 +119,9 @@ export default function DailyFaultFormModal({ open, onClose, onSaved }) {
           km_hour: form.km_hour.trim(),
           fault_assignment: toNullableText(form.fault_assignment),
           changed_parts: toNullableText(form.changed_parts),
+          changed_part_no: toNullableText(form.changed_part_no),
+          changed_part_quantity: Number.isFinite(quantity) ? quantity : null,
+          changed_part_unit: toNullableText(form.changed_part_unit),
         })
       ).unwrap();
       toast.success('Günlük arıza kaydı oluşturuldu');
@@ -306,19 +329,79 @@ export default function DailyFaultFormModal({ open, onClose, onSaved }) {
               />
             </ModalField>
 
-            <ModalField
-              label="Değişen Parça"
-              hint="Kullanılan yedek parça / sarf malzemesi"
-            >
-              <textarea
-                rows={3}
-                value={form.changed_parts}
-                onChange={(e) => handleChange('changed_parts', e.target.value)}
-                placeholder="Örn. 1 adet 315/80 R22.5 lastik"
-                className={inputClass}
-                maxLength={4000}
-              />
-            </ModalField>
+            <div className="rounded-lg border border-gray-200 p-3">
+              <p className="mb-2 border-b border-gray-100 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Değişen Parça
+              </p>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <ModalField label="Parça Numarası" error={errors.changed_part_no}>
+                  <input
+                    type="text"
+                    value={form.changed_part_no}
+                    onChange={(e) =>
+                      handleChange('changed_part_no', e.target.value)
+                    }
+                    placeholder="Örn. 315/80 R22.5"
+                    className={
+                      errors.changed_part_no ? errorInputClass : inputClass
+                    }
+                    maxLength={100}
+                  />
+                </ModalField>
+
+                <ModalField label="Sayı" error={errors.changed_part_quantity}>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={form.changed_part_quantity}
+                    onChange={(e) =>
+                      handleChange('changed_part_quantity', e.target.value)
+                    }
+                    placeholder="Örn. 2 veya 3,2"
+                    className={
+                      errors.changed_part_quantity ? errorInputClass : inputClass
+                    }
+                    maxLength={12}
+                  />
+                </ModalField>
+
+                <ModalField label="Birim" error={errors.changed_part_unit}>
+                  <select
+                    value={form.changed_part_unit}
+                    onChange={(e) =>
+                      handleChange('changed_part_unit', e.target.value)
+                    }
+                    className={
+                      errors.changed_part_unit ? errorInputClass : inputClass
+                    }
+                  >
+                    <option value="">Seçin</option>
+                    {CHANGED_PART_UNITS.map((unit) => (
+                      <option key={unit} value={unit}>
+                        {unit}
+                      </option>
+                    ))}
+                  </select>
+                </ModalField>
+              </div>
+
+              <div className="mt-3">
+                <ModalField
+                  label="Açıklama / Not"
+                  hint="Değişen parça veya yapılan işlem hakkında serbest not"
+                >
+                  <textarea
+                    rows={3}
+                    value={form.changed_parts}
+                    onChange={(e) => handleChange('changed_parts', e.target.value)}
+                    placeholder="Örn. Sol ön lastik değişti, jant kontrol edildi"
+                    className={inputClass}
+                    maxLength={4000}
+                  />
+                </ModalField>
+              </div>
+            </div>
           </div>
         </section>
 

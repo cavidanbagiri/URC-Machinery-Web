@@ -10,7 +10,40 @@ import {
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import { setFilter } from '../../stores/daily_fault_slice';
 import { formatDate } from '../../utils/repair';
-import { formatFileSize } from '../../utils/dailyFault';
+import { changedPartLabel, formatFileSize } from '../../utils/dailyFault';
+
+/**
+ * "Değişen Parça" cell: the structured part ("315/80 R22.5 · 2 Adet") sits on
+ * top, the free-text note stays below so both survive the migration.
+ */
+function ChangedPartCell({ item }) {
+  const partLabel = changedPartLabel(item);
+  const note = item.changed_parts || '';
+
+  if (!partLabel) {
+    return (
+      <p className="max-w-[14rem] truncate" title={note}>
+        {note || '—'}
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <p
+        className="max-w-[14rem] truncate text-[13px] font-medium text-gray-900"
+        title={partLabel}
+      >
+        {partLabel}
+      </p>
+      {note && (
+        <p className="max-w-[14rem] truncate text-[11px] text-gray-500" title={note}>
+          {note}
+        </p>
+      )}
+    </>
+  );
+}
 
 function DocumentCell({
   item,
@@ -150,7 +183,7 @@ export default function DailyFaultTable({
       filter: {
         kind: 'text',
         key: 'search',
-        placeholder: 'Kimlik / plaka / not',
+        placeholder: 'Kimlik / plaka / parça / not',
       },
     },
     { label: 'KM / Saat' },
@@ -284,12 +317,7 @@ export default function DailyFaultTable({
                 </td>
 
                 <td className="px-4 py-2.5 text-[12px] text-gray-700">
-                  <p
-                    className="max-w-[14rem] truncate"
-                    title={item.changed_parts || ''}
-                  >
-                    {item.changed_parts || '—'}
-                  </p>
+                  <ChangedPartCell item={item} />
                 </td>
 
                 <td className="px-4 py-2.5">
