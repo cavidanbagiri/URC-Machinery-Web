@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, reset } from '../stores/user_slice';
@@ -34,7 +34,7 @@ const NAV_ITEMS = [
 
 const LOGIN_ITEM = { to: '/auth?mode=login', label: 'Giriş Yap', icon: IoIosLogIn };
 
-function NavItem({ item, expanded, onShowTooltip, onHideTooltip }) {
+function NavItem({ item, expanded, onShowTooltip, onHideTooltip, onNavigate }) {
   const Icon = item.icon;
 
   // Menü açıkken etiket metin olarak görünür; kapalıyken hover/focus ile tooltip gösterilir.
@@ -52,6 +52,7 @@ function NavItem({ item, expanded, onShowTooltip, onHideTooltip }) {
       <NavLink
         to={item.to}
         aria-label={item.label}
+        onClick={onNavigate}
         {...tooltipHandlers}
         className={({ isActive }) =>
           `flex w-full items-center gap-3 rounded-lg py-3 text-sm no-underline transition-colors ${
@@ -70,7 +71,7 @@ function NavItem({ item, expanded, onShowTooltip, onHideTooltip }) {
   );
 }
 
-const Navbar = ({ expanded = false, onToggle = () => {} }) => {
+const Navbar = ({ expanded = false, onToggle = () => {}, onClose = () => {} }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
@@ -84,6 +85,7 @@ const Navbar = ({ expanded = false, onToggle = () => {} }) => {
       dispatch(logout());
       dispatch(reset());
       navigate('/auth?mode=login');
+      onClose();
     }
   };
 
@@ -98,6 +100,20 @@ const Navbar = ({ expanded = false, onToggle = () => {} }) => {
   };
 
   const hideTooltip = () => setTooltip(null);
+
+  // Modal gibi davranır: Escape tuşu da menüyü kapatır.
+  useEffect(() => {
+    if (!expanded) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      setTooltip(null);
+      onClose();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [expanded, onClose]);
 
   // Kapalı menüde "hover/focus" ile tooltip, açık menüde metin etiketi kullanılır.
   const tooltipHandlers = (label) =>
@@ -116,103 +132,121 @@ const Navbar = ({ expanded = false, onToggle = () => {} }) => {
   };
 
   return (
-    <nav
-      className={`fixed left-0 top-0 z-50 flex h-screen flex-col bg-white shadow-sm transition-[width] duration-300 ease-in-out ${
-        expanded ? 'w-64' : 'w-16'
-      }`}
-    >
-      {/* Header / Logo */}
-      <div
-        className={`flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 ${
-          expanded ? 'px-4' : 'justify-center px-2'
+    <>
+      {/* Menü açıkken sayfanın geri kalanı hafifçe karartılır; bu katmana yapılan
+          her tıklama menüyü kapatır (modal davranışı). */}
+      {expanded && (
+        <button
+          type="button"
+          aria-label="Menüyü kapat"
+          onClick={onClose}
+          className="fixed inset-0 z-40 cursor-default bg-gray-900/25"
+        />
+      )}
+
+      <nav
+        className={`fixed left-0 top-0 z-50 flex h-screen flex-col bg-white transition-[width] duration-300 ease-in-out ${
+          expanded ? 'w-64 shadow-2xl' : 'w-16 shadow-sm'
         }`}
       >
-        <img
-          src={logo}
-          alt="URC Machinery"
-          className={`shrink-0 object-cover object-left ${expanded ? 'h-9 w-9' : 'h-8 w-8'}`}
-        />
-        {expanded && (
-          <span className="truncate text-sm font-semibold tracking-wide text-gray-800">
-            URC Machinery
-          </span>
-        )}
-      </div>
-
-      {/* Menüyü aç / kapa */}
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label={expanded ? 'Menüyü daralt' : 'Menüyü genişlet'}
-        aria-expanded={expanded}
-        className="absolute -right-3 cursor-pointer top-20 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-colors hover:border-red-200 hover:text-red-600"
-      >
-        {expanded ? (
-          <HiOutlineChevronDoubleLeft className="h-3.5 w-3.5" />
-        ) : (
-          <HiOutlineChevronDoubleRight className="h-3.5 w-3.5" />
-        )}
-      </button>
-
-      {/* Menu Items */}
-      <ul
-        className="m-0 flex-1 list-none space-y-0.5 overflow-y-auto p-2"
-        onScroll={hideTooltip}
-      >
-        {!user ? (
-          // Not logged in - show only Login
-          <NavItem
-            item={LOGIN_ITEM}
-            expanded={expanded}
-            onShowTooltip={showTooltip}
-            onHideTooltip={hideTooltip}
+        {/* Header / Logo — tıklanınca menü açılır/kapanır */}
+        <button
+          type="button"
+          onClick={handleToggle}
+          title={expanded ? 'Menüyü daralt' : 'Menüyü genişlet'}
+          className={`flex h-16 w-full shrink-0 cursor-pointer items-center gap-2 border-b border-gray-200 text-left transition-colors hover:bg-gray-50 ${
+            expanded ? 'px-4' : 'justify-center px-2'
+          }`}
+        >
+          <img
+            src={logo}
+            alt="URC Machinery"
+            className={`shrink-0 object-cover object-left ${expanded ? 'h-9 w-9' : 'h-8 w-8'}`}
           />
-        ) : (
-          NAV_ITEMS.map((item) => (
+          {expanded && (
+            <span className="truncate text-sm font-semibold tracking-wide text-gray-800">
+              URC Machinery
+            </span>
+          )}
+        </button>
+
+        {/* Menüyü aç / kapa */}
+        <button
+          type="button"
+          onClick={handleToggle}
+          aria-label={expanded ? 'Menüyü daralt' : 'Menüyü genişlet'}
+          aria-expanded={expanded}
+          className="absolute -right-3 cursor-pointer top-20 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-colors hover:border-red-200 hover:text-red-600"
+        >
+          {expanded ? (
+            <HiOutlineChevronDoubleLeft className="h-3.5 w-3.5" />
+          ) : (
+            <HiOutlineChevronDoubleRight className="h-3.5 w-3.5" />
+          )}
+        </button>
+
+        {/* Menu Items */}
+        <ul
+          className="m-0 flex-1 list-none space-y-0.5 overflow-y-auto p-2"
+          onScroll={hideTooltip}
+        >
+          {!user ? (
+            // Not logged in - show only Login
             <NavItem
-              key={item.to}
-              item={item}
+              item={LOGIN_ITEM}
               expanded={expanded}
               onShowTooltip={showTooltip}
               onHideTooltip={hideTooltip}
+              onNavigate={onClose}
             />
-          ))
+          ) : (
+            NAV_ITEMS.map((item) => (
+              <NavItem
+                key={item.to}
+                item={item}
+                expanded={expanded}
+                onShowTooltip={showTooltip}
+                onHideTooltip={hideTooltip}
+                onNavigate={onClose}
+              />
+            ))
+          )}
+        </ul>
+
+        {/* Çıkış */}
+        {user && (
+          <div className="shrink-0 border-t border-gray-200 p-2">
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Çıkış Yap"
+              {...tooltipHandlers('Çıkış Yap')}
+              className={`flex w-full items-center gap-3 rounded-lg py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 ${
+                expanded ? 'px-3' : 'justify-center px-0'
+              }`}
+            >
+              <IoIosLogOut className="shrink-0 text-2xl" />
+              {expanded && <span className="truncate">Çıkış Yap</span>}
+            </button>
+          </div>
         )}
-      </ul>
 
-      {/* Çıkış */}
-      {user && (
-        <div className="shrink-0 border-t border-gray-200 p-2">
-          <button
-            type="button"
-            onClick={handleLogout}
-            aria-label="Çıkış Yap"
-            {...tooltipHandlers('Çıkış Yap')}
-            className={`flex w-full items-center gap-3 rounded-lg py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 ${
-              expanded ? 'px-3' : 'justify-center px-0'
-            }`}
+        {/* Tooltip - yalnızca menü kapalıyken */}
+        {tooltip && !expanded && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none fixed z-[60] whitespace-nowrap rounded-md border border-gray-700 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
+            style={{
+              top: tooltip.top,
+              left: '4.1rem',
+              transform: 'translateY(-50%)',
+            }}
           >
-            <IoIosLogOut className="shrink-0 text-2xl" />
-            {expanded && <span className="truncate">Çıkış Yap</span>}
-          </button>
-        </div>
-      )}
-
-      {/* Tooltip - yalnızca menü kapalıyken */}
-      {tooltip && !expanded && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none fixed z-[60] whitespace-nowrap rounded-md border border-gray-700 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
-          style={{
-            top: tooltip.top,
-            left: '4.1rem',
-            transform: 'translateY(-50%)',
-          }}
-        >
-          {tooltip.label}
-        </span>
-      )}
-    </nav>
+            {tooltip.label}
+          </span>
+        )}
+      </nav>
+    </>
   );
 };
 

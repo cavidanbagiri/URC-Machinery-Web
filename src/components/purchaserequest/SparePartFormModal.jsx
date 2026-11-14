@@ -16,7 +16,6 @@ import RepairModal, {
   errorInputClass,
   inputClass,
 } from '../repair/RepairModal';
-import MachineSearchSelect from './MachineSearchSelect';
 import { fetchLookupIfNeeded } from '../../stores/lookup_slice';
 import {
   createSparePartRequest,
@@ -314,6 +313,11 @@ export default function SparePartFormModal({ open, onClose, onSaved, request }) 
             </button>
           </div>
 
+          <p className="mb-2 text-[11px] text-gray-500">
+            Aynı parça birden fazla makineye gidebilir; bu durumda Makine ID No
+            alanına numaraları virgülle yazın (örn. <code>1042, 1043</code>).
+          </p>
+
           {errors.items && (
             <p className="mb-2 text-xs text-red-600">{errors.items}</p>
           )}
@@ -328,14 +332,25 @@ export default function SparePartFormModal({ open, onClose, onSaved, request }) 
                   className="p-0.5 "
                 >
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 lg:grid-cols-12">
-                    <div className="lg:col-span-1">
-                      <ModalField label="Makine (ID No) *" error={rowErrors.machine} index={index}>
-                        <MachineSearchSelect
-                          value={item.machine}
-                          onChange={(machine) =>
-                            setRowValue(index, 'machine', machine)
+                    <div className="sm:col-span-2 lg:col-span-2">
+                      <ModalField
+                        label="Makine ID No *"
+                        error={rowErrors.machine_no}
+                        index={index}
+                      >
+                        <input
+                          type="text"
+                          value={item.machine_no}
+                          onChange={(e) =>
+                            setRowValue(index, 'machine_no', e.target.value)
                           }
-                          hasError={Boolean(rowErrors.machine)}
+                          placeholder="Örn. 1042, 1043"
+                          title="Aynı parça birden fazla makineye gidebilir; ID numaralarını virgülle yazın"
+                          className={
+                            rowErrors.machine_no
+                              ? compactErrorClass
+                              : compactInputClass
+                          }
                         />
                       </ModalField>
                     </div>
@@ -362,7 +377,7 @@ export default function SparePartFormModal({ open, onClose, onSaved, request }) 
                       />
                     </ModalField>
 
-                    <div className="sm:col-span-3">
+                    <div className="sm:col-span-2 lg:col-span-2">
                       <ModalField label="Açıklama (RU)" index={index}>
                         <input
                           type="text"
@@ -375,7 +390,7 @@ export default function SparePartFormModal({ open, onClose, onSaved, request }) 
                       </ModalField>
                     </div>
 
-                    <div className="sm:col-span-3">
+                    <div className="sm:col-span-2 lg:col-span-2">
                       <ModalField label="Açıklama (TR)" index={index}>
                         <input
                           type="text"
@@ -430,16 +445,16 @@ export default function SparePartFormModal({ open, onClose, onSaved, request }) 
                       />
                     </ModalField>
 
-                    {/* <button
+                    <button
                       type="button"
                       onClick={() => removeRow(index)}
                       disabled={form.items.length === 1}
                       title="Satırı kaldır"
                       aria-label={`Parça ${index + 1} satırını kaldır`}
-                      className="rounded-lg p-1 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="rounded-lg p-1 text-red-600 text-center transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
                     >
                       <TrashIcon className="h-4 w-4" />
-                    </button> */}
+                    </button>
                   </div>
                 </div>
               );

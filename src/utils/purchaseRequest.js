@@ -1,5 +1,5 @@
 // src/utils/purchaseRequest.js
-import { toNullableText, todayISO } from './repair';
+import { machineLabel, toNullableText, todayISO } from './repair';
 
 /**
  * The header status says what the request is waiting for and is picked by the
@@ -77,7 +77,12 @@ export function emptySpareItem() {
   return {
     key: `spare-item-${rowSequence}`,
     id: null,
-    machine: null,
+    // ``machine_no`` is the "Makine ID No" typed by hand ("1042, 1043"),
+    // because the same part often goes to several machines. ``machine_id`` is
+    // kept only for rows that were saved with a machine from the old picker,
+    // so editing such a request keeps its warehouse link.
+    machine_id: null,
+    machine_no: '',
     garage_request_no: '',
     part_number: '',
     description_ru: '',
@@ -95,9 +100,10 @@ export function emptySpareItem() {
  */
 export function isEmptySpareItem(item) {
   if (!item) return true;
-  if (item.machine) return false;
+  if (item.machine_id) return false;
 
   const textKeys = [
+    'machine_no',
     'garage_request_no',
     'part_number',
     'description_ru',
@@ -108,6 +114,49 @@ export function isEmptySpareItem(item) {
 
   const quantity = String(item.quantity ?? '').trim();
   return quantity === '' || quantity === '1';
+}
+
+/** "ID No" of one part row: the typed numbers win over the linked machine. */
+export function spareItemMachineLabel(item) {
+  const typed = String(item?.machine_no ?? '').trim();
+  if (typed) return typed;
+
+  const hasMachine =
+    item?.machine_id ||
+    item?.identification_no ||
+    item?.plate_no ||
+    item?.vin_no;
+  return hasMachine ? machineLabel(item) : '';
+}
+
+/**
+ * How many distinct machines a saved request covers. A row may carry several
+ * numbers typed by hand ("1042, 1043"), so they are split and de-duplicated;
+ * rows saved with the old picker fall back to their linked machine.
+ */
+export function spareRequestMachineCount(request) {
+  const seen = new Set();
+
+  for (const item of request?.items || []) {
+    const typed = String(item?.machine_no ?? '').trim();
+    if (typed) {
+      typed
+        .split(/[\s,;/]+/)
+        .filter(Boolean)
+        .forEach((number) => seen.add(`no:${number.toLowerCase()}`));
+      continue;
+    }
+
+    const label = spareItemMachineLabel(item);
+    if (!label) continue;
+    seen.add(item?.machine_id ? `id:${item.machine_id}` : `label:${label}`);
+  }
+
+  // Requests saved before the hand-typed numbers only had ``machine_labels``.
+  if (seen.size === 0) {
+    return (request?.machine_labels || []).length;
+  }
+  return seen.size;
 }
 
 export function emptySpareForm() {
@@ -133,14 +182,15 @@ export function requestToSpareForm(request) {
   const items = (request?.items || []).map((item) => ({
     ...emptySpareItem(),
     id: item.id ?? null,
-    machine: item.machine_id
-      ? {
-          id: item.machine_id,
-          identification_no: item.identification_no,
-          plate_no: item.plate_no,
-          vin_no: item.vin_no,
-        }
-      : null,
+    // Old rows keep the machine they were saved with; the form shows its
+    // number as the starting value of the hand-typed "Makine ID No".
+    machine_id: item.machine_id ?? null,
+    machine_no:
+      item.machine_no ||
+      item.identification_no ||
+      item.plate_no ||
+      item.vin_no ||
+      '',
     garage_request_no: item.garage_request_no || '',
     part_number: item.part_number || '',
     description_ru: item.description_ru || '',
@@ -216,7 +266,9 @@ export function validateSpareForm(form) {
 
     const rowErrors = {};
 
-    if (!item.machine) rowErrors.machine = 'Makine seçin';
+    if (!item.machine_id && !String(item.machine_no || '').trim()) {
+      rowErrors.machine_no = 'Makine ID No girin';
+    }
 
     const quantity = parseQuantity(item.quantity);
     if (quantity === null) {
@@ -272,7 +324,10 @@ export function buildSparePayload(form) {
         // Saved rows keep their id so the arrival flag survives the edit;
         // new rows simply omit it (the create endpoint forbids it).
         ...(item.id ? { id: item.id } : {}),
-        machine_id: item.machine?.id,
+        // ``machine_id`` only survives for rows that were saved with a machine
+        // picked from the old list; ``machine_no`` carries the typed numbers.
+        machine_id: item.machine_id || null,
+        machine_no: toNullableText(item.machine_no),
         garage_request_no: toNullableText(item.garage_request_no),
         part_number: toNullableText(item.part_number),
         description_ru: toNullableText(item.description_ru),

@@ -7,12 +7,14 @@ import {
 } from '@heroicons/react/24/outline';
 
 import RepairModal, { SecondaryButton } from '../repair/RepairModal';
-import { formatDate, machineLabel } from '../../utils/repair';
+import { formatDate } from '../../utils/repair';
 import {
   formatFileSize,
   formatQuantity,
   spareArrivalBadgeClass,
   spareArrivalLabel,
+  spareItemMachineLabel,
+  spareRequestMachineCount,
   spareStatusBadgeClass,
   spareStatusLabel,
 } from '../../utils/purchaseRequest';
@@ -173,7 +175,7 @@ export default function SparePartDetailModal({
             <Info label="Oluşturan" value={request.created_by_name} />
             <Info
               label="Makine Sayısı"
-              value={`${(request.machine_ids || []).length} adet`}
+              value={`${spareRequestMachineCount(request)} adet`}
             />
             <Info label="Parça Kalemi" value={`${request.item_count} kalem`} />
             <Info
@@ -205,7 +207,7 @@ export default function SparePartDetailModal({
                   {(request.items || []).map((item) => (
                     <tr key={item.id} className="border-t border-gray-100">
                       <td className="whitespace-nowrap px-3 py-2 text-[12px] font-medium">
-                        {machineLabel(item) || '—'}
+                        {spareItemMachineLabel(item) || '—'}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-[12px] text-gray-600">
                         {item.garage_request_no || '—'}
