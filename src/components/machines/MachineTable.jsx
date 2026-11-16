@@ -2,11 +2,29 @@
 import { useDispatch, useSelector } from 'react-redux';
 import FlaticonIcon from '../ui/FlaticonIcon';
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import MachineSkeleton from './MachineSkeleton';
 import StatusBadge from './StatusBadge';
 import { setFilter } from '../../stores/machine_slice';
 
 const COLUMN_COUNT = 11;
+
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const MACHINE_COLUMN_WIDTHS = {
+  select: 64,
+  photo: 92,
+  status: 130,
+  identification_no: 160,
+  plate_no: 150,
+  territory: 130,
+  car_mark: 140,
+  car_model: 160,
+  vin_no: 190,
+  production_year: 96,
+  company: 160,
+};
 
 // Üretim yılı backend'de int olarak beklenir; serbest metin 422 üretmesin diye
 // seçilebilir yıl listesi kullanılır.
@@ -27,6 +45,11 @@ export default function MachineTable({
   const dispatch = useDispatch();
   const { items, loading, filters } = useSelector((s) => s.machine);
   const lookups = useSelector((s) => s.lookup.data);
+
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır. (Skeleton erken `return`'ünden önce
+  // çağrılmalı — hooks kuralı.)
+  const resize = useColumnResize('machines:list', MACHINE_COLUMN_WIDTHS);
 
   const handleFilterChange = (key, value) => {
     dispatch(setFilter({ key, value }));
@@ -72,12 +95,14 @@ export default function MachineTable({
 
   // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
   const headerColumns = [
-    { label: 'Fotoğraf' },
+    { id: 'photo', label: 'Fotoğraf' },
     {
+      id: 'status',
       label: 'Durum',
       filter: { kind: 'select', key: 'status_id', options: lookups.car_status },
     },
     {
+      id: 'identification_no',
       label: 'Kimlik No',
       filter: {
         kind: 'text',
@@ -86,10 +111,12 @@ export default function MachineTable({
       },
     },
     {
+      id: 'plate_no',
       label: 'Plaka No',
       filter: { kind: 'text', key: 'plate_no', placeholder: '90 AB 123' },
     },
     {
+      id: 'territory',
       label: 'Bölge',
       filter: {
         kind: 'select',
@@ -98,10 +125,12 @@ export default function MachineTable({
       },
     },
     {
+      id: 'car_mark',
       label: 'Marka',
       filter: { kind: 'select', key: 'car_mark_id', options: lookups.car_mark },
     },
     {
+      id: 'car_model',
       label: 'Model',
       filter: {
         kind: 'select',
@@ -110,10 +139,12 @@ export default function MachineTable({
       },
     },
     {
+      id: 'vin_no',
       label: 'VIN No',
       filter: { kind: 'text', key: 'vin_no', placeholder: 'WDB963...' },
     },
     {
+      id: 'production_year',
       label: 'Yıl',
       filter: {
         kind: 'select',
@@ -122,10 +153,14 @@ export default function MachineTable({
       },
     },
     {
+      id: 'company',
       label: 'Şirket',
       filter: { kind: 'select', key: 'company_id', options: lookups.company },
     },
   ];
+
+  // Sütun id'leri: seçim sütunu + filtre başlıkları.
+  const columnIds = ['select', ...headerColumns.map((column) => column.id)];
 
   // Menü içeriği `filter.kind` ile belirlenir (select / text).
   return (
@@ -140,16 +175,29 @@ export default function MachineTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full rounded-lg" style={{'fontFamily':'Inter'}}>
+        <ResizableTable
+          resize={resize}
+          columnIds={columnIds}
+          className="rounded-lg"
+          style={{ fontFamily: 'Inter' }}
+        >
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700 rounded-lg">
             <tr>
-              <th className="w-10 px-4 py-2 text-left font-medium">
+              <ResizableTh
+                resize={resize}
+                columnId="select"
+                label="Seç"
+                className="px-4 py-2 text-left font-medium"
+              >
                 <span className="sr-only">Seç</span>
-              </th>
+              </ResizableTh>
 
               {headerColumns.map((column) => (
-                <th
-                  key={column.label}
+                <ResizableTh
+                  key={column.id}
+                  resize={resize}
+                  columnId={column.id}
+                  label={column.label}
                   className="whitespace-nowrap px-6 py-2 text-left font-medium"
                 >
                   {column.filter ? (
@@ -162,7 +210,7 @@ export default function MachineTable({
                   ) : (
                     column.label
                   )}
-                </th>
+                </ResizableTh>
               ))}
             </tr>
           </thead>
@@ -314,7 +362,7 @@ export default function MachineTable({
               );
             })}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
     </div>
   );

@@ -13,6 +13,8 @@ import {
 
 import StatusBadge from '../machines/StatusBadge';
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import {
   REPAIR_STATUS_OPTIONS,
   setFilter,
@@ -21,6 +23,20 @@ import {
 import { durationLabel, formatDate, remainingLabel } from '../../utils/repair';
 
 const COLUMN_COUNT = 9;
+
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const REPAIR_COLUMN_WIDTHS = {
+  status: 130,
+  machine: 230,
+  repair_type: 150,
+  garage_service: 160,
+  fault_location: 170,
+  entry: 130,
+  estimated_exit: 160,
+  notes: 260,
+  actions: 170,
+};
 
 // Hover kartı tablonun `overflow-x-auto` kabuğu tarafından kırpılmasın diye
 // body'ye portal ile, tetikleyici hücrenin ekran koordinatlarına göre çizilir.
@@ -171,6 +187,7 @@ export default function RepairTable({
 
   const headerColumns = [
     {
+      id: 'status',
       label: 'Durum',
       filter: {
         kind: 'select',
@@ -187,6 +204,7 @@ export default function RepairTable({
       },
     },
     {
+      id: 'machine',
       label: 'Makine',
       filter: {
         kind: 'stack',
@@ -207,6 +225,7 @@ export default function RepairTable({
       },
     },
     {
+      id: 'repair_type',
       label: 'Tamir Tipi',
       filter: {
         kind: 'select',
@@ -215,6 +234,7 @@ export default function RepairTable({
       },
     },
     {
+      id: 'garage_service',
       label: 'Garaj Servisi',
       filter: {
         kind: 'select',
@@ -223,6 +243,7 @@ export default function RepairTable({
       },
     },
     {
+      id: 'fault_location',
       label: 'Arıza Yeri',
       filter: {
         kind: 'text',
@@ -231,10 +252,12 @@ export default function RepairTable({
       },
     },
     {
+      id: 'entry',
       label: 'Giriş',
       filter: { kind: 'dateRange', keys: ['date_from', 'date_to'] },
     },
     {
+      id: 'estimated_exit',
       label: 'Tahmini Çıkış',
       filter: {
         kind: 'dateRange',
@@ -242,11 +265,17 @@ export default function RepairTable({
       },
     },
     {
+      id: 'notes',
       label: 'Güncel Durum',
       filter: { kind: 'text', key: 'notes', placeholder: 'Not' },
     },
-    { label: 'İşlemler', align: 'right' },
+    { id: 'actions', label: 'İşlemler', align: 'right' },
   ];
+
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize('repair:list', REPAIR_COLUMN_WIDTHS);
+  const columnIds = headerColumns.map((column) => column.id);
 
   if (loading && items.length === 0) {
     return (
@@ -265,12 +294,19 @@ export default function RepairTable({
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ fontFamily: 'Inter' }}>
+        <ResizableTable
+          resize={resize}
+          columnIds={columnIds}
+          style={{ fontFamily: 'Inter' }}
+        >
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
               {headerColumns.map((column) => (
-                <th
-                  key={column.label}
+                <ResizableTh
+                  key={column.id}
+                  resize={resize}
+                  columnId={column.id}
+                  label={column.label}
                   className={`px-4 py-2.5 font-medium ${
                     column.align === 'right' ? 'text-right' : 'text-left'
                   }`}
@@ -286,7 +322,7 @@ export default function RepairTable({
                   ) : (
                     column.label
                   )}
-                </th>
+                </ResizableTh>
               ))}
             </tr>
           </thead>
@@ -469,7 +505,7 @@ export default function RepairTable({
               );
             })}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
 
       <NotePreview preview={notePreview} />

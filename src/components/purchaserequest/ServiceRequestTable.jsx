@@ -3,10 +3,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
 import ColumnVisibilityMenu from '../ui/ColumnVisibilityMenu';
+import useColumnResize from '../ui/useColumnResize';
 import useColumnVisibility from '../ui/useColumnVisibility';
 import { setServiceFilter } from '../../stores/purchase_request_slice';
 import { formatDate, machineLabel } from '../../utils/repair';
+
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const SERVICE_COLUMN_WIDTHS = {
+  service_form: 300,
+  identification_no: 150,
+  company_name: 180,
+  service_description: 320,
+  request_date: 130,
+  created_by: 140,
+  actions: 90,
+};
 
 function Skeleton() {
   return (
@@ -83,9 +97,22 @@ export default function ServiceRequestTable({
   );
   const menuColumns = headerColumns.map(({ id, label }) => ({ id, label }));
 
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize(
+    'purchase-requests:service',
+    SERVICE_COLUMN_WIDTHS
+  );
+  const visibleColumnIds = headerColumns
+    .filter((column) => visibility.isVisible(column.id))
+    .map((column) => column.id);
+
   // Gizlenen sütunun `th` ve `td` hücresi aynı sınıfla kaldırılır.
+  // `overflow-hidden`: daraltılan sütunda taşan içerik komşu sütuna taşmasın.
   const columnClass = (id, className = '') =>
-    `${className} ${visibility.isVisible(id) ? '' : 'hidden'}`.trim();
+    `${className} overflow-hidden ${
+      visibility.isVisible(id) ? '' : 'hidden'
+    }`.trim();
 
   if (loading && items.length === 0) {
     return (
@@ -97,7 +124,20 @@ export default function ServiceRequestTable({
 
   return (
     <div className="space-y-2">
-      <ColumnVisibilityMenu columns={menuColumns} {...visibility} />
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <ColumnVisibilityMenu columns={menuColumns} {...visibility} />
+        {resize.isCustomized && (
+          <button
+            type="button"
+            onClick={resize.resetAll}
+            title="Tüm sütunları varsayılan genişliğe döndür"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            <ArrowPathIcon className="h-4 w-4 text-gray-400" />
+            Genişlikleri sıfırla
+          </button>
+        )}
+      </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         {loading && (
@@ -124,12 +164,19 @@ export default function ServiceRequestTable({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full" style={{ fontFamily: 'Inter' }}>
+            <ResizableTable
+              resize={resize}
+              columnIds={visibleColumnIds}
+              style={{ fontFamily: 'Inter' }}
+            >
               <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
                 <tr>
                   {headerColumns.map((column) => (
-                    <th
+                    <ResizableTh
                       key={column.id}
+                      resize={resize}
+                      columnId={column.id}
+                      label={column.label}
                       className={columnClass(
                         column.id,
                         `px-4 py-2.5 font-medium ${
@@ -148,7 +195,7 @@ export default function ServiceRequestTable({
                       ) : (
                         column.label
                       )}
-                    </th>
+                    </ResizableTh>
                   ))}
                 </tr>
               </thead>
@@ -273,7 +320,7 @@ export default function ServiceRequestTable({
                 );
               })}
               </tbody>
-            </table>
+            </ResizableTable>
           </div>
         )}
       </div>

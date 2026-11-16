@@ -9,6 +9,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import { setFilter } from '../../stores/tire_slice';
 import { formatDate } from '../../utils/repair';
 import { TIRE_POSITIONS, formatFileSize } from '../../utils/tire';
@@ -143,6 +145,20 @@ function Skeleton() {
   );
 }
 
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const TIRE_COLUMN_WIDTHS = {
+  change_date: 120,
+  machine: 210,
+  position: 150,
+  brand_model: 180,
+  size: 120,
+  change_reason: 220,
+  km_hour: 130,
+  documents: 220,
+  history: 130,
+};
+
 const EMPTY_TEXT =
   'Makine kimlik no, lastik konumu veya marka / model ile arama yapabilirsiniz';
 
@@ -168,10 +184,12 @@ export default function TireTable({
   // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
   const headerColumns = [
     {
+      id: 'change_date',
       label: 'Tarih',
       filter: { kind: 'dateRange', keys: ['date_from', 'date_to'] },
     },
     {
+      id: 'machine',
       label: 'ID No',
       filter: {
         kind: 'text',
@@ -180,6 +198,7 @@ export default function TireTable({
       },
     },
     {
+      id: 'position',
       label: 'Lastik Konumu',
       filter: {
         kind: 'select',
@@ -187,13 +206,18 @@ export default function TireTable({
         options: TIRE_POSITIONS,
       },
     },
-    { label: 'Lastik Marka / Model' },
-    { label: 'Lastik Ebadı' },
-    { label: 'Değişim Sebebi' },
-    { label: 'Motor Saati / KM' },
-    { label: 'Evrak' },
-    { label: 'Eski Kayıtlar' },
+    { id: 'brand_model', label: 'Lastik Marka / Model' },
+    { id: 'size', label: 'Lastik Ebadı' },
+    { id: 'change_reason', label: 'Değişim Sebebi' },
+    { id: 'km_hour', label: 'Motor Saati / KM' },
+    { id: 'documents', label: 'Evrak' },
+    { id: 'history', label: 'Eski Kayıtlar' },
   ];
+
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize('tires:list', TIRE_COLUMN_WIDTHS);
+  const columnIds = headerColumns.map((column) => column.id);
 
   if (loading && items.length === 0) {
     return (
@@ -236,12 +260,19 @@ export default function TireTable({
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ fontFamily: 'Inter' }}>
+        <ResizableTable
+          resize={resize}
+          columnIds={columnIds}
+          style={{ fontFamily: 'Inter' }}
+        >
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
               {headerColumns.map((column) => (
-                <th
-                  key={column.label}
+                <ResizableTh
+                  key={column.id}
+                  resize={resize}
+                  columnId={column.id}
+                  label={column.label}
                   className="px-4 py-2.5 text-left font-medium"
                 >
                   {column.filter ? (
@@ -254,7 +285,7 @@ export default function TireTable({
                   ) : (
                     column.label
                   )}
-                </th>
+                </ResizableTh>
               ))}
             </tr>
           </thead>
@@ -326,7 +357,7 @@ export default function TireTable({
               </tr>
             ))}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
     </div>
   );

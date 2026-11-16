@@ -2,3 +2,11 @@
 @tailwind components;
 @tailwind utilities; */
 @import "tailwindcss";
+
+/* Excel tarzı sütun genişliği (bkz. components/ui/useColumnResize.js):
+   `table-fixed` tablolarda daraltılan sütunun içeriği komşu hücreye taşmasın. */
+.table-fixed > thead th,
+.table-fixed > tbody td,
+.table-fixed > tbody th {
+  overflow: hidden;
+}

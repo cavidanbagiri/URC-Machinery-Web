@@ -12,7 +12,9 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
 import ColumnVisibilityMenu from '../ui/ColumnVisibilityMenu';
+import useColumnResize from '../ui/useColumnResize';
 import useColumnVisibility from '../ui/useColumnVisibility';
 import { formatDate } from '../../utils/repair';
 import { setSpareFilter } from '../../stores/purchase_request_slice';
@@ -30,6 +32,19 @@ const STATUS_OPTIONS = SPARE_STATUSES.map((value) => ({
   value,
   label: SPARE_STATUS_LABELS[value],
 }));
+
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const SPARE_COLUMN_WIDTHS = {
+  request: 280,
+  identification_no: 160,
+  territory: 110,
+  request_type: 130,
+  part: 110,
+  request_date: 115,
+  status: 160,
+  actions: 128,
+};
 
 function MachineLabels({ labels = [] }) {
   if (labels.length === 0) return <span className="text-gray-400">—</span>;
@@ -292,9 +307,19 @@ export default function SparePartRequestTable({
   );
   const menuColumns = headerColumns.map(({ id, label }) => ({ id, label }));
 
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize('purchase-requests:spare-parts', SPARE_COLUMN_WIDTHS);
+  const visibleColumnIds = headerColumns
+    .filter((column) => visibility.isVisible(column.id))
+    .map((column) => column.id);
+
   // Gizlenen sütunun `th` ve `td` hücresi aynı sınıfla kaldırılır.
+  // `overflow-hidden`: daraltılan sütunda taşan içerik komşu sütuna taşmasın.
   const columnClass = (id, className = '') =>
-    `${className} ${visibility.isVisible(id) ? '' : 'hidden'}`.trim();
+    `${className} overflow-hidden ${
+      visibility.isVisible(id) ? '' : 'hidden'
+    }`.trim();
 
   if (loading && items.length === 0) {
     return (
@@ -306,7 +331,20 @@ export default function SparePartRequestTable({
 
   return (
     <div className="space-y-2">
-      <ColumnVisibilityMenu columns={menuColumns} {...visibility} />
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {/* <ColumnVisibilityMenu columns={menuColumns} {...visibility} /> */}
+        {resize.isCustomized && (
+          <button
+            type="button"
+            onClick={resize.resetAll}
+            title="Tüm sütunları varsayılan genişliğe döndür"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            <ArrowPathIcon className="h-4 w-4 text-gray-400" />
+            Genişlikleri sıfırla
+          </button>
+        )}
+      </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         {loading && (
@@ -333,12 +371,19 @@ export default function SparePartRequestTable({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full" style={{ fontFamily: 'Inter' }}>
+            <ResizableTable
+              resize={resize}
+              columnIds={visibleColumnIds}
+              style={{ fontFamily: 'Inter' }}
+            >
               <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
                 <tr>
                   {headerColumns.map((column) => (
-                    <th
+                    <ResizableTh
                       key={column.id}
+                      resize={resize}
+                      columnId={column.id}
+                      label={column.label}
                       className={columnClass(
                         column.id,
                         `px-4 py-2.5 font-medium ${
@@ -357,7 +402,7 @@ export default function SparePartRequestTable({
                       ) : (
                         column.label
                       )}
-                    </th>
+                    </ResizableTh>
                   ))}
                 </tr>
               </thead>
@@ -587,7 +632,7 @@ export default function SparePartRequestTable({
                 );
               })}
               </tbody>
-            </table>
+            </ResizableTable>
           </div>
         )}
       </div>

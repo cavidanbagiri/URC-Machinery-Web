@@ -9,6 +9,8 @@ import {
 
 import FlaticonIcon from '../ui/FlaticonIcon';
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import StatusBadge from '../machines/StatusBadge';
 import {
   MAINTENANCE_STATUS_OPTIONS,
@@ -23,6 +25,21 @@ import {
 } from '../../utils/maintenance';
 
 const COLUMN_COUNT = 10;
+
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const MAINTENANCE_COLUMN_WIDTHS = {
+  status: 130,
+  machine: 230,
+  territory: 130,
+  type: 150,
+  mark_model: 190,
+  has_plan: 140,
+  last_service: 140,
+  current_counter: 150,
+  remaining: 140,
+  actions: 170,
+};
 
 const HAS_PLAN_OPTIONS = [
   { value: 'true', label: 'Planlı' },
@@ -118,6 +135,7 @@ export default function MaintenanceTable({
   // `sortable` olan kolon başlığı sıralama düğmesi olarak kalır.
   const headerColumns = [
     {
+      id: 'status',
       label: 'Durum',
       filter: {
         kind: 'select',
@@ -129,6 +147,7 @@ export default function MaintenanceTable({
       },
     },
     {
+      id: 'machine',
       label: 'Makine',
       filter: {
         kind: 'text',
@@ -137,6 +156,7 @@ export default function MaintenanceTable({
       },
     },
     {
+      id: 'territory',
       label: 'Bölge',
       filter: {
         kind: 'select',
@@ -145,6 +165,7 @@ export default function MaintenanceTable({
       },
     },
     {
+      id: 'type',
       label: 'Tip',
       filter: {
         kind: 'select',
@@ -153,6 +174,7 @@ export default function MaintenanceTable({
       },
     },
     {
+      id: 'mark_model',
       label: 'Marka / Model',
       filter: {
         kind: 'stack',
@@ -173,14 +195,20 @@ export default function MaintenanceTable({
       },
     },
     {
+      id: 'has_plan',
       label: 'Plan',
       filter: { kind: 'select', key: 'has_plan', options: HAS_PLAN_OPTIONS },
     },
-    { label: 'Son Bakım' },
-    { label: 'Güncel Sayaç' },
-    { label: 'Kalan', sortable: true },
-    { label: 'İşlemler', align: 'right' },
+    { id: 'last_service', label: 'Son Bakım' },
+    { id: 'current_counter', label: 'Güncel Sayaç' },
+    { id: 'remaining', label: 'Kalan', sortable: true },
+    { id: 'actions', label: 'İşlemler', align: 'right' },
   ];
+
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize('maintenance:list', MAINTENANCE_COLUMN_WIDTHS);
+  const columnIds = headerColumns.map((column) => column.id);
 
   if (loading && items.length === 0) {
     return (
@@ -199,14 +227,21 @@ export default function MaintenanceTable({
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ fontFamily: 'Inter' }}>
+        <ResizableTable
+          resize={resize}
+          columnIds={columnIds}
+          style={{ fontFamily: 'Inter' }}
+        >
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
               {headerColumns.map((column) => {
                 if (column.sortable) {
                   return (
-                    <th
-                      key={column.label}
+                    <ResizableTh
+                      key={column.id}
+                      resize={resize}
+                      columnId={column.id}
+                      label={column.label}
                       className="px-4 py-2.5 text-left font-medium"
                       aria-sort={
                         sortBy === 'remaining'
@@ -234,13 +269,16 @@ export default function MaintenanceTable({
                           size="xs"
                         />
                       </button>
-                    </th>
+                    </ResizableTh>
                   );
                 }
 
                 return (
-                  <th
-                    key={column.label}
+                  <ResizableTh
+                    key={column.id}
+                    resize={resize}
+                    columnId={column.id}
+                    label={column.label}
                     className={`px-4 py-2.5 font-medium ${
                       column.align === 'right' ? 'text-right' : 'text-left'
                     }`}
@@ -256,7 +294,7 @@ export default function MaintenanceTable({
                     ) : (
                       column.label
                     )}
-                  </th>
+                  </ResizableTh>
                 );
               })}
             </tr>
@@ -426,7 +464,7 @@ export default function MaintenanceTable({
               );
             })}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import { setFilter } from '../../stores/daily_fault_slice';
 import { formatDate } from '../../utils/repair';
 import { changedPartLabel, formatFileSize } from '../../utils/dailyFault';
@@ -153,6 +155,19 @@ function Skeleton() {
 
 const EMPTY_TEXT = 'Makine, şantiye veya arıza notu ile arama yapabilirsiniz';
 
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const DAILY_FAULT_COLUMN_WIDTHS = {
+  fault_date: 120,
+  machine: 200,
+  km_hour: 110,
+  territory: 120,
+  repair_type: 140,
+  fault_assignment: 240,
+  changed_part: 190,
+  documents: 250,
+};
+
 export default function DailyFaultTable({
   items,
   loading,
@@ -175,10 +190,12 @@ export default function DailyFaultTable({
   // Kolon başlıkları — `filter` taşıyan başlıklar Excel tarzı açılır filtre alır.
   const headerColumns = [
     {
+      id: 'fault_date',
       label: 'Tarih',
       filter: { kind: 'dateRange', keys: ['date_from', 'date_to'] },
     },
     {
+      id: 'machine',
       label: 'Makine',
       filter: {
         kind: 'text',
@@ -186,8 +203,9 @@ export default function DailyFaultTable({
         placeholder: 'Kimlik / plaka / parça / not',
       },
     },
-    { label: 'KM / Saat' },
+    { id: 'km_hour', label: 'KM / Saat' },
     {
+      id: 'territory',
       label: 'Şantiye',
       filter: {
         kind: 'select',
@@ -196,6 +214,7 @@ export default function DailyFaultTable({
       },
     },
     {
+      id: 'repair_type',
       label: 'Arıza Tipi',
       filter: {
         kind: 'select',
@@ -203,10 +222,18 @@ export default function DailyFaultTable({
         options: lookups.repair_type || [],
       },
     },
-    { label: 'Arıza Ataması' },
-    { label: 'Değişen Parça' },
-    { label: 'Evrak' },
+    { id: 'fault_assignment', label: 'Arıza Ataması' },
+    { id: 'changed_part', label: 'Değişen Parça' },
+    { id: 'documents', label: 'Evrak' },
   ];
+
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize(
+    'daily-faults:list',
+    DAILY_FAULT_COLUMN_WIDTHS
+  );
+  const columnIds = headerColumns.map((column) => column.id);
 
   if (loading && items.length === 0) {
     return (
@@ -249,12 +276,19 @@ export default function DailyFaultTable({
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ fontFamily: 'Inter' }}>
+        <ResizableTable
+          resize={resize}
+          columnIds={columnIds}
+          style={{ fontFamily: 'Inter' }}
+        >
           <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
             <tr>
               {headerColumns.map((column) => (
-                <th
-                  key={column.label}
+                <ResizableTh
+                  key={column.id}
+                  resize={resize}
+                  columnId={column.id}
+                  label={column.label}
                   className="px-4 py-2.5 text-left font-medium"
                 >
                   {column.filter ? (
@@ -267,7 +301,7 @@ export default function DailyFaultTable({
                   ) : (
                     column.label
                   )}
-                </th>
+                </ResizableTh>
               ))}
             </tr>
           </thead>
@@ -333,7 +367,7 @@ export default function DailyFaultTable({
               </tr>
             ))}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
     </div>
   );

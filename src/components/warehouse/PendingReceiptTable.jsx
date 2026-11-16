@@ -1,10 +1,26 @@
 // src/components/warehouse/PendingReceiptTable.jsx
 import { ArrowPathIcon, InboxArrowDownIcon } from '@heroicons/react/24/outline';
 
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import { formatDate, formatQuantity } from '../../utils/warehouse';
 
 const HEAD_CLASS =
   'whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500';
+
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const PENDING_RECEIPT_COLUMN_WIDTHS = {
+  select: 56,
+  request: 280,
+  machine: 190,
+  part: 240,
+  quantity: 120,
+  request_date: 140,
+  target_stock: 240,
+  action: 140,
+};
+const PENDING_RECEIPT_COLUMN_IDS = Object.keys(PENDING_RECEIPT_COLUMN_WIDTHS);
 
 export default function PendingReceiptTable({
   items,
@@ -17,6 +33,13 @@ export default function PendingReceiptTable({
   onReceive,
   busyId,
 }) {
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize(
+    'warehouse:pending-receipts',
+    PENDING_RECEIPT_COLUMN_WIDTHS
+  );
+
   if (loading && items.length === 0) {
     return (
       <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -65,10 +88,15 @@ export default function PendingReceiptTable({
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="min-w-full">
+        <ResizableTable resize={resize} columnIds={PENDING_RECEIPT_COLUMN_IDS}>
           <thead className="bg-gray-50">
             <tr>
-              <th className={`${HEAD_CLASS} w-10`}>
+              <ResizableTh
+                resize={resize}
+                columnId="select"
+                label="Seç"
+                className={HEAD_CLASS}
+              >
                 <input
                   type="checkbox"
                   checked={allSelected}
@@ -76,14 +104,63 @@ export default function PendingReceiptTable({
                   aria-label="Tümünü seç"
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-              </th>
-              <th className={HEAD_CLASS}>Talep</th>
-              <th className={HEAD_CLASS}>Makine</th>
-              <th className={HEAD_CLASS}>Parça</th>
-              <th className={HEAD_CLASS}>Miktar</th>
-              <th className={HEAD_CLASS}>Talep Tarihi</th>
-              <th className={HEAD_CLASS}>Hedef Stok Kartı</th>
-              <th className={`${HEAD_CLASS} text-right`}>İşlem</th>
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="request"
+                label="Talep"
+                className={HEAD_CLASS}
+              >
+                Talep
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="machine"
+                label="Makine"
+                className={HEAD_CLASS}
+              >
+                Makine
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="part"
+                label="Parça"
+                className={HEAD_CLASS}
+              >
+                Parça
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="quantity"
+                label="Miktar"
+                className={HEAD_CLASS}
+              >
+                Miktar
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="request_date"
+                label="Talep Tarihi"
+                className={HEAD_CLASS}
+              >
+                Talep Tarihi
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="target_stock"
+                label="Hedef Stok Kartı"
+                className={HEAD_CLASS}
+              >
+                Hedef Stok Kartı
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="action"
+                label="İşlem"
+                className={`${HEAD_CLASS} text-right`}
+              >
+                İşlem
+              </ResizableTh>
             </tr>
           </thead>
 
@@ -183,7 +260,7 @@ export default function PendingReceiptTable({
               );
             })}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
     </div>
   );

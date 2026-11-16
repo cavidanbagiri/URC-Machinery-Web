@@ -28,8 +28,8 @@ const NAV_ITEMS = [
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },
   { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
   { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },
-  { to: '/forum', label: 'Forum', icon: BsChatDots },
-  { to: '/notifications', label: 'Bildirimler', icon: BsBell },
+  // { to: '/forum', label: 'Forum', icon: BsChatDots },
+  // { to: '/notifications', label: 'Bildirimler', icon: BsBell },
 ];
 
 const LOGIN_ITEM = { to: '/auth?mode=login', label: 'Giriş Yap', icon: IoIosLogIn };

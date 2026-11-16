@@ -9,6 +9,8 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import {
   formatQuantity,
   stockStatusBadgeClass,
@@ -17,6 +19,18 @@ import {
 
 const HEAD_CLASS =
   'whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500';
+
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const STOCK_COLUMN_WIDTHS = {
+  material: 280,
+  location: 200,
+  quantity: 120,
+  min_level: 150,
+  movements: 150,
+  actions: 260,
+};
+const STOCK_COLUMN_IDS = Object.keys(STOCK_COLUMN_WIDTHS);
 
 function Skeleton() {
   return (
@@ -46,6 +60,10 @@ export default function StockTable({
   onShowMovements,
   rowBusy,
 }) {
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize('warehouse:stock', STOCK_COLUMN_WIDTHS);
+
   if (loading && items.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -79,15 +97,57 @@ export default function StockTable({
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="min-w-full">
+        <ResizableTable resize={resize} columnIds={STOCK_COLUMN_IDS}>
           <thead className="bg-gray-50">
             <tr>
-              <th className={HEAD_CLASS}>Malzeme</th>
-              <th className={HEAD_CLASS}>Bölge / Konum</th>
-              <th className={HEAD_CLASS}>Stok</th>
-              <th className={HEAD_CLASS}>Kritik Seviye</th>
-              <th className={HEAD_CLASS}>Hareket</th>
-              <th className={`${HEAD_CLASS} text-right`}>İşlemler</th>
+              <ResizableTh
+                resize={resize}
+                columnId="material"
+                label="Malzeme"
+                className={HEAD_CLASS}
+              >
+                Malzeme
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="location"
+                label="Bölge / Konum"
+                className={HEAD_CLASS}
+              >
+                Bölge / Konum
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="quantity"
+                label="Stok"
+                className={HEAD_CLASS}
+              >
+                Stok
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="min_level"
+                label="Kritik Seviye"
+                className={HEAD_CLASS}
+              >
+                Kritik Seviye
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="movements"
+                label="Hareket"
+                className={HEAD_CLASS}
+              >
+                Hareket
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="actions"
+                label="İşlemler"
+                className={`${HEAD_CLASS} text-right`}
+              >
+                İşlemler
+              </ResizableTh>
             </tr>
           </thead>
 
@@ -217,7 +277,7 @@ export default function StockTable({
               );
             })}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
     </div>
   );

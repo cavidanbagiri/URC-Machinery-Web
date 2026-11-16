@@ -1,6 +1,8 @@
 // src/components/warehouse/MovementTable.jsx
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 
+import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import useColumnResize from '../ui/useColumnResize';
 import {
   formatDate,
   formatQuantity,
@@ -13,12 +15,29 @@ import {
 const HEAD_CLASS =
   'whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500';
 
+// Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
+// sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
+const MOVEMENT_COLUMN_WIDTHS = {
+  movement_date: 120,
+  movement_type: 130,
+  item: 260,
+  quantity: 150,
+  machine: 190,
+  document: 220,
+  user: 150,
+};
+const MOVEMENT_COLUMN_IDS = Object.keys(MOVEMENT_COLUMN_WIDTHS);
+
 export default function MovementTable({
   items,
   loading,
   hasActiveFilters,
   onResetFilters,
 }) {
+  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
+  // genişlikler tarayıcıda saklanır.
+  const resize = useColumnResize('warehouse:movements', MOVEMENT_COLUMN_WIDTHS);
+
   if (loading && items.length === 0) {
     return (
       <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -62,16 +81,65 @@ export default function MovementTable({
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="min-w-full">
+        <ResizableTable resize={resize} columnIds={MOVEMENT_COLUMN_IDS}>
           <thead className="bg-gray-50">
             <tr>
-              <th className={HEAD_CLASS}>Tarih</th>
-              <th className={HEAD_CLASS}>Tip</th>
-              <th className={HEAD_CLASS}>Malzeme</th>
-              <th className={HEAD_CLASS}>Miktar</th>
-              <th className={HEAD_CLASS}>Makine</th>
-              <th className={HEAD_CLASS}>Belge / Kaynak</th>
-              <th className={HEAD_CLASS}>Kullanıcı</th>
+              <ResizableTh
+                resize={resize}
+                columnId="movement_date"
+                label="Tarih"
+                className={HEAD_CLASS}
+              >
+                Tarih
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="movement_type"
+                label="Tip"
+                className={HEAD_CLASS}
+              >
+                Tip
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="item"
+                label="Malzeme"
+                className={HEAD_CLASS}
+              >
+                Malzeme
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="quantity"
+                label="Miktar"
+                className={HEAD_CLASS}
+              >
+                Miktar
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="machine"
+                label="Makine"
+                className={HEAD_CLASS}
+              >
+                Makine
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="document"
+                label="Belge / Kaynak"
+                className={HEAD_CLASS}
+              >
+                Belge / Kaynak
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="user"
+                label="Kullanıcı"
+                className={HEAD_CLASS}
+              >
+                Kullanıcı
+              </ResizableTh>
             </tr>
           </thead>
 
@@ -135,7 +203,7 @@ export default function MovementTable({
               </tr>
             ))}
           </tbody>
-        </table>
+        </ResizableTable>
       </div>
     </div>
   );
