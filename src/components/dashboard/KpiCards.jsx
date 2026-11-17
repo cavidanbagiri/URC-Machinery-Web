@@ -159,7 +159,7 @@ export default function KpiCards() {
 
   return (
     <div style={{ fontFamily: 'Inter' }}
-    className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+    className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
       <KpiCard
         label="Genel"
         value={total}

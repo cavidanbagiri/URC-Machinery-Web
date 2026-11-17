@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
   { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
   { to: '/repair', label: 'Arızalı Ekipman', icon: PiWrenchLight },
-  { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
+  // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
   { to: '/tires', label: 'Lastik Takibi', icon: RxColorWheel },
   { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },

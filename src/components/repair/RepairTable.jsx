@@ -462,13 +462,13 @@ export default function RepairTable({
                             <CheckCircleIcon className="h-4 w-4" />
                           </ActionButton>
 
-                          <ActionButton
+                          {/* <ActionButton
                             title="Tamiri iptal et"
                             onClick={() => onCancel(item)}
                             tone="red"
                           >
                             <XCircleIcon className="h-4 w-4" />
-                          </ActionButton>
+                          </ActionButton> */}
                         </>
                       )}
 
@@ -481,22 +481,23 @@ export default function RepairTable({
                           <ArrowPathIcon className="h-4 w-4" />
                         </ActionButton>
                       )}
-
-                      <ActionButton
+                      {/* Gerek Yok */}
+                      {/* <ActionButton
                         title="Not ekle"
                         onClick={() => onNote(item)}
                         tone="gray"
                       >
                         <ChatBubbleLeftEllipsisIcon className="h-4 w-4" />
-                      </ActionButton>
+                      </ActionButton> */}
 
-                      <ActionButton
+                      {/* Gerek Yok */}
+                      {/* <ActionButton
                         title="Tamir geçmişi"
                         onClick={() => onHistory(item)}
                         tone="gray"
                       >
                         <ClockIcon className="h-4 w-4" />
-                      </ActionButton>
+                      </ActionButton> */}
                     </div>
                   </td>
                 </tr>
