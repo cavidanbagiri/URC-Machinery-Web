@@ -1,18 +1,22 @@
 // src/pages/Repair.jsx
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { BsWrench } from 'react-icons/bs';
 import { ArrowPathIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'react-router-dom';
 
+import RepairService from '../services/RepairService';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import {
+  deleteRepairDocument,
   fetchRepairSummary,
   fetchRepairs,
   resetFilters,
   setFilters,
+  uploadRepairDocument,
 } from '../stores/repair_slice';
+import { validateRepairPdf } from '../utils/repair';
 
 import RepairSummaryCards from '../components/repair/RepairSummaryCards';
 import RepairAdvancedFilters from '../components/repair/RepairAdvancedFilters';
@@ -23,6 +27,7 @@ import RepairCloseModal from '../components/repair/RepairCloseModal';
 import RepairCancelModal from '../components/repair/RepairCancelModal';
 import RepairReopenModal from '../components/repair/RepairReopenModal';
 import RepairNoteModal from '../components/repair/RepairNoteModal';
+import RepairDocumentsModal from '../components/repair/RepairDocumentsModal';
 import RepairHistoryDrawer from '../components/repair/RepairHistoryDrawer';
 
 const LOOKUPS_NEEDED = [
@@ -46,6 +51,7 @@ export default function Repair() {
     error,
     summary,
     summaryLoading,
+    documentBusy,
   } = useSelector((s) => s.repair);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -65,6 +71,8 @@ export default function Repair() {
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyRecord, setHistoryRecord] = useState(null);
+
+  const [documentsRecord, setDocumentsRecord] = useState(null);
 
   const activeFilterCount = Object.values(filters).filter((value) => {
     if (typeof value === 'boolean') return value;
@@ -184,6 +192,87 @@ export default function Repair() {
     setHistoryOpen(true);
   };
 
+  // The dialog keeps the record id; the list (updated by the slice) supplies
+  // the fresh documents array after each upload/delete.
+  const documentsItem = documentsRecord
+    ? items.find((row) => row.id === documentsRecord.id) || documentsRecord
+    : null;
+
+  const fetchDocumentUrl = async (record, document) => {
+    const blob = await RepairService.fetchDocument(record.id, document.id);
+    return URL.createObjectURL(
+      new Blob([blob], { type: document.content_type || 'application/pdf' })
+    );
+  };
+
+  const handleUploadDocument = async (record, file, validationError) => {
+    if (!record) return;
+
+    const error = validationError || validateRepairPdf(file);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    try {
+      await dispatch(
+        uploadRepairDocument({ repairId: record.id, file })
+      ).unwrap();
+      toast.success('Evrak eklendi');
+    } catch (err) {
+      toast.error(String(err || 'Evrak yüklenemedi'));
+    }
+  };
+
+  const handleViewDocument = async (record, document) => {
+    // Open the tab before awaiting so the browser keeps the user gesture.
+    const tab = window.open('', '_blank');
+    if (!tab) {
+      toast.error('Tarayıcı yeni sekmeyi engelledi');
+      return;
+    }
+
+    try {
+      const url = await fetchDocumentUrl(record, document);
+      tab.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      tab.close();
+      toast.error('Evrak açılamadı');
+    }
+  };
+
+  const handleDownloadDocument = async (record, document) => {
+    try {
+      const url = await fetchDocumentUrl(record, document);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.file_name || 'evrak.pdf';
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      toast.error('Evrak indirilemedi');
+    }
+  };
+
+  const handleDeleteDocument = async (record, document) => {
+    const confirmed = window.confirm(
+      `"${document.file_name}" evrakını silmek istiyor musunuz?`
+    );
+    if (!confirmed) return;
+
+    try {
+      await dispatch(
+        deleteRepairDocument({ repairId: record.id, documentId: document.id })
+      ).unwrap();
+      toast.success('Evrak silindi');
+    } catch (err) {
+      toast.error(String(err || 'Evrak silinemedi'));
+    }
+  };
+
   return (
     <div className="space-y-4 p-3">
       <Toaster position="top-right" />
@@ -278,6 +367,7 @@ export default function Repair() {
           onReopen={openReopen}
           onNote={openNote}
           onHistory={openHistory}
+          onDocuments={setDocumentsRecord}
         />
 
         <RepairPagination />
@@ -321,6 +411,17 @@ export default function Repair() {
         onClose={() => setNoteOpen(false)}
         record={noteRecord}
         onSaved={handleSaved}
+      />
+
+      <RepairDocumentsModal
+        open={Boolean(documentsRecord)}
+        record={documentsItem}
+        busy={documentBusy}
+        onClose={() => setDocumentsRecord(null)}
+        onUploadDocument={handleUploadDocument}
+        onViewDocument={handleViewDocument}
+        onDownloadDocument={handleDownloadDocument}
+        onDeleteDocument={handleDeleteDocument}
       />
 
       <RepairHistoryDrawer

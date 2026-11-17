@@ -1,5 +1,15 @@
 // src/utils/repair.js
 
+/**
+ * PDF helpers are shared with the daily fault and tire modules: the same 10 MB
+ * limit, the same browser MIME quirks and the same "Sadece PDF" messages.
+ */
+export {
+  MAX_DOCUMENT_MB,
+  formatFileSize,
+  validatePdfFile as validateRepairPdf,
+} from './dailyFault';
+
 export const REPAIR_STATUS_COLORS = {
   tamirde: 'blue',
   tamamlandi: 'green',

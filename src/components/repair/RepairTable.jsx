@@ -7,6 +7,7 @@ import {
   ChatBubbleLeftEllipsisIcon,
   CheckCircleIcon,
   ClockIcon,
+  DocumentTextIcon,
   PencilSquareIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -120,6 +121,7 @@ export default function RepairTable({
   onReopen,
   onNote,
   onHistory,
+  onDocuments,
 }) {
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.repair.filters);
@@ -351,6 +353,7 @@ export default function RepairTable({
             {items.map((item) => {
               const isActive = item.status === 'tamirde';
               const remaining = remainingLabel(item);
+              const documentCount = item.documents?.length || 0;
 
               return (
                 <tr key={item.id} className="hover:bg-gray-50">
@@ -444,6 +447,18 @@ export default function RepairTable({
 
                   <td className="whitespace-nowrap px-4 py-2.5 text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <ActionButton
+                        title={
+                          documentCount
+                            ? `Evraklar (${documentCount})`
+                            : 'PDF evrak ekle'
+                        }
+                        onClick={() => onDocuments(item)}
+                        tone={documentCount ? 'blue' : 'gray'}
+                      >
+                        <DocumentTextIcon className="h-4 w-4" />
+                      </ActionButton>
+
                       {isActive && (
                         <>
                           <ActionButton

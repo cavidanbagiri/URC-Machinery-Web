@@ -59,6 +59,9 @@ const initialState = {
 
   mutating: false,
   mutationError: null,
+
+  // { repairId, documentId, action: 'upload' | 'delete' } while a PDF runs
+  documentBusy: null,
 };
 
 function errorMessage(err, fallback) {
@@ -221,6 +224,28 @@ export const addRepairNote = createAsyncThunk(
       return await RepairService.addNote(repairId, payload);
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Not eklenemedi'));
+    }
+  }
+);
+
+export const uploadRepairDocument = createAsyncThunk(
+  'repair/uploadDocument',
+  async ({ repairId, file }, { rejectWithValue }) => {
+    try {
+      return await RepairService.uploadDocument(repairId, file);
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Evrak yüklenemedi'));
+    }
+  }
+);
+
+export const deleteRepairDocument = createAsyncThunk(
+  'repair/deleteDocument',
+  async ({ repairId, documentId }, { rejectWithValue }) => {
+    try {
+      return await RepairService.deleteDocument(repairId, documentId);
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Evrak silinemedi'));
     }
   }
 );
@@ -392,6 +417,41 @@ const repairSlice = createSlice({
           state.mutationError = action.payload;
         });
     });
+
+    builder
+      .addCase(uploadRepairDocument.pending, (state, action) => {
+        state.mutationError = null;
+        state.documentBusy = {
+          repairId: action.meta.arg.repairId,
+          action: 'upload',
+        };
+      })
+      .addCase(uploadRepairDocument.fulfilled, (state, action) => {
+        state.documentBusy = null;
+        applyItem(state, action.payload);
+      })
+      .addCase(uploadRepairDocument.rejected, (state, action) => {
+        state.documentBusy = null;
+        state.mutationError = action.payload;
+      });
+
+    builder
+      .addCase(deleteRepairDocument.pending, (state, action) => {
+        state.mutationError = null;
+        state.documentBusy = {
+          repairId: action.meta.arg.repairId,
+          documentId: action.meta.arg.documentId,
+          action: 'delete',
+        };
+      })
+      .addCase(deleteRepairDocument.fulfilled, (state, action) => {
+        state.documentBusy = null;
+        applyItem(state, action.payload);
+      })
+      .addCase(deleteRepairDocument.rejected, (state, action) => {
+        state.documentBusy = null;
+        state.mutationError = action.payload;
+      });
   },
 });
 

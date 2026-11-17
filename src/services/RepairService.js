@@ -83,6 +83,31 @@ class RepairService {
     const res = await $api.post(`/repair/${repairId}/notes`, payload);
     return res.data;
   }
+
+  async uploadDocument(repairId, file) {
+    const form = new FormData();
+    form.append('file', file);
+
+    const res = await $api.post(`/repair/${repairId}/documents`, form, {
+      // Let the browser add the multipart boundary to this header.
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  }
+
+  async fetchDocument(repairId, documentId) {
+    const res = await $api.get(`/repair/${repairId}/documents/${documentId}`, {
+      responseType: 'blob',
+    });
+    return res.data;
+  }
+
+  async deleteDocument(repairId, documentId) {
+    const res = await $api.delete(
+      `/repair/${repairId}/documents/${documentId}`
+    );
+    return res.data;
+  }
 }
 
 export default new RepairService();
