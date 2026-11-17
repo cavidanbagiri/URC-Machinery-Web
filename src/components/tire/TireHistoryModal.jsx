@@ -53,6 +53,7 @@ export default function TireHistoryModal({
           Seçili kayıt: <strong>{formatDate(item.change_date)}</strong> ·{' '}
           {item.brand_model || 'Marka / model belirtilmedi'}
           {item.size ? ` · ${item.size}` : ''}
+          {item.serial_no ? ` · Seri No: ${item.serial_no}` : ''}
         </div>
 
         {loading && (
@@ -97,8 +98,13 @@ export default function TireHistoryModal({
                 </div>
 
                 <p className="mt-1 text-[12px] text-gray-700">
-                  {[old.brand_model, old.size].filter(Boolean).join(' · ') ||
-                    'Marka / model ve ebat belirtilmedi'}
+                  {[
+                    old.brand_model,
+                    old.size,
+                    old.serial_no ? `Seri No: ${old.serial_no}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ') || 'Marka / model ve ebat belirtilmedi'}
                 </p>
 
                 {old.change_reason && (

@@ -27,6 +27,11 @@ const initialState = {
   error: null,
   listRequestId: null,
 
+  // Cards above the table: all changes + today's changes
+  summary: null,
+  summaryLoading: false,
+  summaryError: null,
+
   machineOptions: {
     items: [],
     loading: false,
@@ -71,6 +76,17 @@ export const fetchTires = createAsyncThunk(
       return await TireService.fetchTires({ limit, offset, ...filters });
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Lastik listesi yüklenemedi'));
+    }
+  }
+);
+
+export const fetchTireSummary = createAsyncThunk(
+  'tire/fetchSummary',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await TireService.fetchSummary();
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Lastik özeti yüklenemedi'));
     }
   }
 );
@@ -189,6 +205,20 @@ const tireSlice = createSlice({
         if (action.meta.requestId !== state.listRequestId) return;
         state.loading = false;
         state.error = action.payload;
+      });
+
+    builder
+      .addCase(fetchTireSummary.pending, (state) => {
+        state.summaryLoading = true;
+        state.summaryError = null;
+      })
+      .addCase(fetchTireSummary.fulfilled, (state, action) => {
+        state.summaryLoading = false;
+        state.summary = action.payload;
+      })
+      .addCase(fetchTireSummary.rejected, (state, action) => {
+        state.summaryLoading = false;
+        state.summaryError = action.payload;
       });
 
     builder

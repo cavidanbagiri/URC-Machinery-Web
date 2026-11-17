@@ -17,6 +17,12 @@ class TireService {
     return res.data;
   }
 
+  /** Counters for the cards above the table (total / changed today). */
+  async fetchSummary() {
+    const res = await $api.get('/tires/summary');
+    return res.data;
+  }
+
   async fetchMachineOptions(params = {}) {
     const res = await $api.get('/tires/machines', {
       params: cleanParams(params),

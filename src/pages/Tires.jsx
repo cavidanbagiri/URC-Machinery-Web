@@ -13,6 +13,7 @@ import TireService from '../services/TireService';
 import {
   deleteTireDocument,
   fetchTires,
+  fetchTireSummary,
   resetFilters,
   setFilter,
   uploadTireDocument,
@@ -20,13 +21,24 @@ import {
 import { validateTirePdf } from '../utils/tire';
 import TireTable from '../components/tire/TireTable';
 import TirePagination from '../components/tire/TirePagination';
+import TireSummaryCards from '../components/tire/TireSummaryCards';
 import TireFormModal from '../components/tire/TireFormModal';
 import TireHistoryModal from '../components/tire/TireHistoryModal';
 
 export default function Tires() {
   const dispatch = useDispatch();
-  const { items, total, limit, offset, filters, loading, error, documentBusy } =
-    useSelector((s) => s.tire);
+  const {
+    items,
+    total,
+    limit,
+    offset,
+    filters,
+    loading,
+    error,
+    documentBusy,
+    summary,
+    summaryLoading,
+  } = useSelector((s) => s.tire);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formNonce, setFormNonce] = useState(0);
@@ -41,6 +53,7 @@ export default function Tires() {
 
   useEffect(() => {
     dispatch(fetchTires());
+    dispatch(fetchTireSummary());
   }, [dispatch]);
 
   useEffect(() => {
@@ -59,7 +72,10 @@ export default function Tires() {
     dispatch(fetchTires());
   }, [dispatch, offset, limit]);
 
-  const refreshAll = () => dispatch(fetchTires());
+  const refreshAll = () => {
+    dispatch(fetchTires());
+    dispatch(fetchTireSummary());
+  };
   const handleResetFilters = () => dispatch(resetFilters());
 
   const openCreate = () => {
@@ -181,6 +197,10 @@ export default function Tires() {
         </div>
       </div>
 
+      <div className="px-1">
+        <TireSummaryCards summary={summary} loading={summaryLoading} />
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3 px-2">
         <div className="relative w-full max-w-sm">
           <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -190,7 +210,7 @@ export default function Tires() {
             onChange={(e) =>
               dispatch(setFilter({ key: 'search', value: e.target.value }))
             }
-            placeholder="ID no, lastik marka / model veya konum ara..."
+            placeholder="ID no, lastik seri no, marka / model veya konum ara..."
             className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
         </div>

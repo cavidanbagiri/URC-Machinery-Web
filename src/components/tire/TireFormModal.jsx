@@ -35,6 +35,7 @@ function emptyForm() {
     position: '',
     brand_model: '',
     size: '',
+    serial_no: '',
     change_reason: '',
     change_date: todayISO(),
     km_hour: '',
@@ -117,6 +118,7 @@ export default function TireFormModal({ open, onClose, onSaved }) {
           position: form.position.trim(),
           brand_model: toNullableText(form.brand_model),
           size: toNullableText(form.size),
+          serial_no: toNullableText(form.serial_no),
           change_reason: toNullableText(form.change_reason),
           km_hour: toNullableText(form.km_hour),
           change_date: form.change_date,
@@ -313,6 +315,20 @@ export default function TireFormModal({ open, onClose, onSaved }) {
                 placeholder="Örn. 12.00 R20"
                 className={inputClass}
                 maxLength={50}
+              />
+            </ModalField>
+
+            <ModalField
+              label="Lastik Seri No"
+              hint="Örn. DOT 3524 ABC123 — eski kayıtlarda boş kalabilir"
+            >
+              <input
+                type="text"
+                value={form.serial_no}
+                onChange={(e) => handleChange('serial_no', e.target.value)}
+                placeholder="Lastik üzerindeki seri numarası"
+                className={inputClass}
+                maxLength={100}
               />
             </ModalField>
 

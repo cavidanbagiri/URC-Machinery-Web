@@ -151,6 +151,7 @@ const TIRE_COLUMN_WIDTHS = {
   change_date: 120,
   machine: 210,
   position: 150,
+  serial_no: 160,
   brand_model: 180,
   size: 120,
   change_reason: 220,
@@ -160,7 +161,7 @@ const TIRE_COLUMN_WIDTHS = {
 };
 
 const EMPTY_TEXT =
-  'Makine kimlik no, lastik konumu veya marka / model ile arama yapabilirsiniz';
+  'Makine kimlik no, lastik konumu, seri no veya marka / model ile arama yapabilirsiniz';
 
 export default function TireTable({
   items,
@@ -194,7 +195,7 @@ export default function TireTable({
       filter: {
         kind: 'text',
         key: 'search',
-        placeholder: 'Kimlik no / plaka / marka',
+        placeholder: 'Kimlik no / plaka / seri no',
       },
     },
     {
@@ -206,6 +207,7 @@ export default function TireTable({
         options: TIRE_POSITIONS,
       },
     },
+    { id: 'serial_no', label: 'Lastik Seri No' },
     { id: 'brand_model', label: 'Lastik Marka / Model' },
     { id: 'size', label: 'Lastik Ebadı' },
     { id: 'change_reason', label: 'Değişim Sebebi' },
@@ -315,6 +317,15 @@ export default function TireTable({
                   <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
                     {item.position || '—'}
                   </span>
+                </td>
+
+                <td className="px-4 py-2.5 text-[12px] text-gray-700">
+                  <p
+                    className="max-w-[10rem] truncate font-mono"
+                    title={item.serial_no || ''}
+                  >
+                    {item.serial_no || '—'}
+                  </p>
                 </td>
 
                 <td className="px-4 py-2.5 text-[12px] text-gray-700">
