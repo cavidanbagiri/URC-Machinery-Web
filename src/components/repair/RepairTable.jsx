@@ -16,7 +16,6 @@ import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
 import {
-  REPAIR_STATUS_OPTIONS,
   setFilter,
   setFilters,
 } from '../../stores/repair_slice';
@@ -194,10 +193,9 @@ export default function RepairTable({
         key: 'status',
         value: statusFilterValue,
         options: [
-          ...REPAIR_STATUS_OPTIONS.map((option) => ({
-            value: option.code,
-            label: option.name,
-          })),
+          // The page only lists equipment that is still waiting/under repair,
+          // so "Tamamlandı" / "İptal edildi" are not offered any more.
+          { value: 'tamirde', label: 'Tamirde' },
           { value: 'overdue', label: 'Yalnızca gecikmiş' },
           { value: 'due_soon', label: 'Yaklaşan (≤3 gün)' },
         ],

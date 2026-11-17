@@ -44,7 +44,7 @@ export default function WarehousePagination({ scope }) {
   // The receipts tab is called ``receipts`` but its list lives under ``pending``.
   const listKey = scope === RECEIPTS_TAB ? 'pending' : scope;
   const state = useSelector((s) => s.warehouse[listKey]);
-  const { total = 0, limit = 20, offset = 0, loading } = state || {};
+  const { total = 0, limit = 100, offset = 0, loading } = state || {};
 
   if (total === 0) return null;
 

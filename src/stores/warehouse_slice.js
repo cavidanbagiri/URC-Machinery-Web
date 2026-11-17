@@ -33,7 +33,7 @@ function initialList(filters) {
   return {
     items: [],
     total: 0,
-    limit: 20,
+    limit: 100,
     offset: 0,
     filters: { ...filters },
     loading: false,
@@ -48,7 +48,7 @@ const initialState = {
   pending: {
     items: [],
     total: 0,
-    limit: 20,
+    limit: 100,
     offset: 0,
     filters: { search: '' },
     loading: false,

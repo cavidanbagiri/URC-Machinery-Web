@@ -13,7 +13,7 @@ const initialFilters = {
 const initialState = {
   items: [],
   total: 0,
-  limit: 20,
+  limit: 100,
   offset: 0,
   filters: { ...initialFilters },
   loading: false,

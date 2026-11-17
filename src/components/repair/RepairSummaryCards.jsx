@@ -185,7 +185,6 @@ export default function RepairSummaryCards({
         hint="Şimdiye kadar tamamlanan"
         icon={CheckCircle2}
         tone="green"
-        onClick={() => onSelectFilters?.({ status: 'tamamlandi' })}
       />
       <SummaryCard
         label="Günlük Tamir"
@@ -193,7 +192,6 @@ export default function RepairSummaryCards({
         hint={`${data.opened_today} bugün açılan kayıt`}
         icon={CalendarDays}
         tone="amber"
-        onClick={() => onSelectFilters?.({ status: 'tamamlandi' })}
       />
       <SummaryCard
         label="Ortalama Arızada Kalma"
