@@ -11,6 +11,8 @@ import warehouseReducer from './warehouse_slice';
 import dashboardReducer from './dashboard_slice';
 import forumReducer from './forum_slice';
 import tireReducer from './tire_slice';
+import meterLogReducer from './meter_log_slice';
+import fuelLogReducer from './fuel_log_slice';
 
 const store = configureStore({
   reducer: {
@@ -26,6 +28,8 @@ const store = configureStore({
     dashboard: dashboardReducer,
     forum: forumReducer,
     tire: tireReducer,
+    meterLog: meterLogReducer,
+    fuelLog: fuelLogReducer,
   },
 });
 

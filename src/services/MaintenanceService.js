@@ -43,8 +43,33 @@ class MaintenanceService {
     return res.data;
   }
 
-  async complete(machineId, payload) {
-    const res = await $api.post(`/maintenance/complete/${machineId}`, payload);
+  async complete(machineId, payload = {}, file = null) {
+    const form = new FormData();
+
+    if (payload.counter_value !== null && payload.counter_value !== undefined) {
+      form.append('counter_value', String(payload.counter_value));
+    }
+    if (payload.maintenance_date) {
+      form.append('maintenance_date', payload.maintenance_date);
+    }
+    if (payload.notes) {
+      form.append('notes', payload.notes);
+    }
+    if (file) {
+      form.append('file', file);
+    }
+
+    const res = await $api.post(`/maintenance/complete/${machineId}`, form, {
+      // Let the browser add the multipart boundary to this header.
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  }
+
+  async fetchDocument(documentId) {
+    const res = await $api.get(`/maintenance/documents/${documentId}`, {
+      responseType: 'blob',
+    });
     return res.data;
   }
 }

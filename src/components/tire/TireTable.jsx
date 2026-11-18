@@ -1,4 +1,5 @@
 // src/components/tire/TireTable.jsx
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowDownTrayIcon,
@@ -12,8 +13,9 @@ import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
 import { setFilter } from '../../stores/tire_slice';
+import { fetchLookupIfNeeded } from '../../stores/lookup_slice';
 import { formatDate } from '../../utils/repair';
-import { TIRE_POSITIONS, formatFileSize } from '../../utils/tire';
+import { formatFileSize } from '../../utils/tire';
 
 function DocumentCell({
   item,
@@ -177,6 +179,12 @@ export default function TireTable({
 }) {
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.tire.filters);
+  // Ayarlar → Lastik Konumu (column filter suggestions).
+  const positions = useSelector((s) => s.lookup.data.tire_position);
+
+  useEffect(() => {
+    dispatch(fetchLookupIfNeeded('tire_position'));
+  }, [dispatch]);
 
   const handleFilterChange = (key, value) => {
     dispatch(setFilter({ key, value }));
@@ -204,7 +212,7 @@ export default function TireTable({
       filter: {
         kind: 'select',
         key: 'position',
-        options: TIRE_POSITIONS,
+        options: positions.map((position) => position.name),
       },
     },
     { id: 'serial_no', label: 'Lastik Seri No' },

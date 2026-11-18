@@ -1,5 +1,16 @@
 // src/utils/maintenance.js
 
+/**
+ * PDF helpers are shared with the daily fault, repair and tire modules: the
+ * same 10 MB limit, the same browser MIME quirks and the same "Sadece PDF"
+ * messages.
+ */
+export {
+  MAX_DOCUMENT_MB,
+  formatFileSize,
+  validatePdfFile as validateMaintenancePdf,
+} from './dailyFault';
+
 export const UNIT_LABELS = {
   km: 'km',
   hour: 'saat',

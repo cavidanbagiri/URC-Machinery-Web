@@ -149,9 +149,9 @@ export const recordMaintenanceReading = createAsyncThunk(
 
 export const completeMaintenance = createAsyncThunk(
   'maintenance/completeMaintenance',
-  async ({ machineId, payload }, { rejectWithValue }) => {
+  async ({ machineId, payload, file }, { rejectWithValue }) => {
     try {
-      return await MaintenanceService.complete(machineId, payload);
+      return await MaintenanceService.complete(machineId, payload, file);
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Bakım tamamlanamadı'));
     }

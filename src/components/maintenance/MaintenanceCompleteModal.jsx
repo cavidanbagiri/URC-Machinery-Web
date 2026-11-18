@@ -2,6 +2,11 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import {
+  DocumentPlusIcon,
+  DocumentTextIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 
 import StatusBadge from '../machines/StatusBadge';
 import MaintenanceModal, {
@@ -13,11 +18,14 @@ import MaintenanceModal, {
 } from './MaintenanceModal';
 import { completeMaintenance } from '../../stores/maintenance_slice';
 import {
+  MAX_DOCUMENT_MB,
   formatCounter,
   formatDate,
+  formatFileSize,
   toNullableText,
   todayISO,
   unitLabel,
+  validateMaintenancePdf,
 } from '../../utils/maintenance';
 
 export default function MaintenanceCompleteModal({
@@ -34,6 +42,7 @@ export default function MaintenanceCompleteModal({
     maintenance_date: todayISO(),
     notes: '',
   });
+  const [pdfFile, setPdfFile] = useState(null);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -43,12 +52,35 @@ export default function MaintenanceCompleteModal({
       maintenance_date: todayISO(),
       notes: '',
     });
+    setPdfFile(null);
     setErrors({});
   }, [open, machine]);
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: '' }));
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    // Allow picking the same file again after a validation error.
+    event.target.value = '';
+    if (!file) return;
+
+    const validationError = validateMaintenancePdf(file);
+    if (validationError) {
+      setPdfFile(null);
+      setErrors((prev) => ({ ...prev, document: validationError }));
+      return;
+    }
+
+    setPdfFile(file);
+    setErrors((prev) => ({ ...prev, document: '' }));
+  };
+
+  const removeFile = () => {
+    setPdfFile(null);
+    setErrors((prev) => ({ ...prev, document: '' }));
   };
 
   const handleSubmit = async (event) => {
@@ -76,6 +108,11 @@ export default function MaintenanceCompleteModal({
       return;
     }
 
+    if (!pdfFile) {
+      setErrors({ document: 'Bakımı tamamlamak için PDF evrak eklemelisiniz' });
+      return;
+    }
+
     try {
       await dispatch(
         completeMaintenance({
@@ -85,9 +122,10 @@ export default function MaintenanceCompleteModal({
             maintenance_date: toNullableText(form.maintenance_date),
             notes: toNullableText(form.notes),
           },
+          file: pdfFile,
         })
       ).unwrap();
-      toast.success('Bakım tamamlandı olarak kaydedildi');
+      toast.success('Bakım tamamlandı ve PDF evrak kaydedildi');
       onSaved?.();
       onClose();
     } catch (err) {
@@ -124,7 +162,8 @@ export default function MaintenanceCompleteModal({
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
           Bakım tamamlandığında son bakım sayacı ve tarihi bu kayıtla
-          güncellenir; sonraki bakım sayacı yeniden hesaplanır.
+          güncellenir; sonraki bakım sayacı yeniden hesaplanır. Her bakım
+          kaydı için <strong>PDF evrak zorunludur</strong>.
         </div>
 
         <div className="grid grid-cols-2 gap-3 rounded-xl bg-gray-50 p-4 text-sm sm:grid-cols-4">
@@ -197,6 +236,67 @@ export default function MaintenanceCompleteModal({
             placeholder="Yapılan bakım ile ilgili not..."
             className={inputClass}
           />
+        </ModalField>
+
+        <ModalField
+          label="Bakım Evrakı (PDF) *"
+          hint={`Tamamlanan bakımın iş emri/faturası. Sadece PDF · en fazla ${MAX_DOCUMENT_MB} MB`}
+          error={errors.document}
+        >
+          <div
+            className={`rounded-xl border border-dashed p-3 ${
+              errors.document
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-300 bg-gray-50'
+            }`}
+          >
+            {pdfFile && (
+              <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-blue-100 bg-white px-3 py-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <DocumentTextIcon className="h-4 w-4 flex-none text-blue-600" />
+                  <span
+                    className="max-w-[18rem] truncate text-sm text-gray-700"
+                    title={pdfFile.name}
+                  >
+                    {pdfFile.name}
+                  </span>
+                  <span className="flex-none text-[11px] text-gray-400">
+                    {formatFileSize(pdfFile.size)}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  disabled={mutating}
+                  title="Seçilen evrakı kaldır"
+                  aria-label="Seçilen evrakı kaldır"
+                  className="flex-none rounded p-1 text-red-600 transition hover:bg-red-50 disabled:opacity-40"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+
+            <label
+              htmlFor="maintenance-complete-document"
+              className={`flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition ${
+                mutating
+                  ? 'pointer-events-none opacity-60'
+                  : 'cursor-pointer text-blue-700 hover:text-blue-800'
+              }`}
+            >
+              <DocumentPlusIcon className="h-5 w-5" />
+              {pdfFile ? 'Başka PDF seç' : 'PDF evrak seç (zorunlu)'}
+            </label>
+            <input
+              id="maintenance-complete-document"
+              type="file"
+              accept="application/pdf,.pdf"
+              className="hidden"
+              disabled={mutating}
+              onChange={handleFileChange}
+            />
+          </div>
         </ModalField>
       </form>
     </MaintenanceModal>

@@ -79,6 +79,16 @@ export const LOOKUP_CONFIG = {
     updatePath: (id) => `/update_garage_service/${id}`,
     deletePath: (id) => `/delete_garage_service/${id}`,
   },
+  tire_position: {
+    label: 'Lastik Konumu',
+    endpoint: '/tires',
+    createPath: '/positions',
+    fetchPath: '/positions',
+    updatePath: (id) => `/positions/${id}`,
+    deletePath: (id) => `/positions/${id}`,
+    // tire_changes.position is String(50); keep the modal in sync.
+    nameMaxLength: 50,
+  },
 };
 
 

@@ -184,6 +184,7 @@ export default function Settings() {
         initialDescription={editingItem?.description || ''}
         showColor={activeTab === 'car_status'}
         showDescription={activeTab === 'car_status'}
+        nameMaxLength={currentConfig.nameMaxLength || 255}
         loading={submitting}
       />
 

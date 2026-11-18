@@ -1,10 +1,9 @@
 // src/components/maintenance/MaintenanceSummaryCards.jsx
 import {
   AlertTriangle,
-  CheckCircle2,
+  CalendarDays,
   ClipboardList,
   Clock,
-  Gauge,
 } from 'lucide-react';
 
 function SummaryCard({ label, value, hint, icon: Icon, tone, onClick }) {
@@ -68,12 +67,11 @@ export default function MaintenanceSummaryCards({
   summary,
   loading,
   onSelectFilters,
-  onResetFilters,
 }) {
   if (loading && !summary) {
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, index) => (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
             className="h-[74px] animate-pulse rounded-xl bg-gray-100 ring-1 ring-gray-200/60"
@@ -88,51 +86,45 @@ export default function MaintenanceSummaryCards({
     planned: 0,
     unplanned: 0,
     inactive: 0,
+    completed: 0,
+    completed_today: 0,
     overdue: 0,
     due_soon: 0,
     needs_attention: 0,
   };
+  const todayLabel = new Date().toLocaleDateString('tr-TR');
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <SummaryCard
-        label="Toplam Makine"
-        value={data.total}
-        hint={`${data.unplanned} plansız · ${data.inactive} pasif`}
-        icon={Gauge}
-        tone="gray"
-        onClick={onResetFilters}
-      />
-      <SummaryCard
-        label="Planlı"
-        value={data.planned}
-        hint="Aktif bakım planı"
+        label="Toplam Bakım"
+        value={data.completed}
+        hint="Şimdiye kadar tamamlanan bakımlar"
         icon={ClipboardList}
+        tone="gray"
+      />
+      <SummaryCard
+        label="Günlük Bakım"
+        value={data.completed_today}
+        hint={`${todayLabel} tarihli bakımlar`}
+        icon={CalendarDays}
         tone="blue"
-        onClick={() => onSelectFilters?.({ has_plan: 'true', status: '' })}
       />
       <SummaryCard
-        label="Gecikmiş"
-        value={data.overdue}
-        hint="Bakım aralığı aşıldı"
-        icon={AlertTriangle}
-        tone="red"
-        onClick={() => onSelectFilters?.({ status: 'gecikmis' })}
-      />
-      <SummaryCard
-        label="Yaklaşan"
+        label="Yaklaşan Bakım"
         value={data.due_soon}
-        hint="Eşik değerine yakın"
+        hint="Bakım aralığına yaklaşan makineler"
         icon={Clock}
         tone="amber"
         onClick={() => onSelectFilters?.({ status: 'yaklasiyor' })}
       />
       <SummaryCard
-        label="Dikkat Gereken"
-        value={data.needs_attention}
-        hint="Gecikmiş + yaklaşan + veri"
-        icon={data.needs_attention > 0 ? AlertTriangle : CheckCircle2}
-        tone={data.needs_attention > 0 ? 'orange' : 'gray'}
+        label="Bakım Bekleyen"
+        value={data.overdue}
+        hint="Bakım aralığı aşılan makineler"
+        icon={AlertTriangle}
+        tone="red"
+        onClick={() => onSelectFilters?.({ status: 'gecikmis' })}
       />
     </div>
   );

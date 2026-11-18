@@ -4,14 +4,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout, reset } from '../stores/user_slice';
 
 import { RxDashboard, RxColorWheel } from "react-icons/rx";
-import { BsBoxSeam, BsCartCheck, BsBell, BsChatDots } from "react-icons/bs";
-import { IoSettingsOutline } from "react-icons/io5";
+import { BsBoxSeam, BsCartCheck } from "react-icons/bs";
+import { FaGasPump } from "react-icons/fa";
+import { IoSettingsOutline, IoSpeedometerOutline } from "react-icons/io5";
 import { IoIosLogIn, IoIosLogOut } from "react-icons/io";
 import { PiWrenchLight } from "react-icons/pi";
 import {
   HiOutlineChevronDoubleLeft,
   HiOutlineChevronDoubleRight,
-  HiOutlineClipboardDocumentList,
   HiOutlineWrenchScrewdriver,
 } from "react-icons/hi2";
 import { GiCrane } from "react-icons/gi";
@@ -26,6 +26,8 @@ const NAV_ITEMS = [
   // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
   { to: '/tires', label: 'Lastik Takibi', icon: RxColorWheel },
   { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
+  { to: '/meter_logs', label: 'Güncel KM ve Motor Saatleri', icon: IoSpeedometerOutline },
+  { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: FaGasPump },
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },
   { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
   { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },

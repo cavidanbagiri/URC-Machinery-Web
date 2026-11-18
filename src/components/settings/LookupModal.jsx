@@ -25,6 +25,7 @@ export default function LookupModal({
   initialDescription = '',
   showColor = false,
   showDescription = false,
+  nameMaxLength = 255,
   loading = false,
 }) {
   // Settings remounts this modal via key whenever it opens/changes item.
@@ -37,7 +38,8 @@ export default function LookupModal({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return setError('Ad boş olamaz');
-    if (trimmed.length > 255) return setError('Ad 255 karakterden fazla olamaz');
+    if (trimmed.length > nameMaxLength)
+      return setError(`Ad ${nameMaxLength} karakterden fazla olamaz`);
 
     const payload = { name: trimmed };
     if (showColor) payload.color = color;
@@ -89,6 +91,7 @@ export default function LookupModal({
                     onChange={(e) => { setName(e.target.value); if (error) setError(''); }}
                     autoFocus
                     placeholder="Ad girin..."
+                    maxLength={nameMaxLength}
                     className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400
                       ${error
                         ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100'

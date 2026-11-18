@@ -22,10 +22,10 @@ import {
   fetchTireMachineOptions,
   uploadTireDocument,
 } from '../../stores/tire_slice';
+import { fetchLookupIfNeeded } from '../../stores/lookup_slice';
 import { machineLabel, toNullableText, todayISO } from '../../utils/repair';
 import {
   TIRE_CHANGE_REASONS,
-  TIRE_POSITIONS,
   validateTirePdf,
 } from '../../utils/tire';
 
@@ -46,6 +46,9 @@ export default function TireFormModal({ open, onClose, onSaved }) {
   const dispatch = useDispatch();
   const mutating = useSelector((s) => s.tire.mutating);
   const machineOptions = useSelector((s) => s.tire.machineOptions);
+  // Settings → Lastik Konumu; the input stays free text, this only feeds the
+  // datalist suggestions.
+  const positions = useSelector((s) => s.lookup.data.tire_position);
 
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
@@ -55,6 +58,10 @@ export default function TireFormModal({ open, onClose, onSaved }) {
 
   useEffect(() => {
     if (!open) dispatch(clearMachineOptions());
+  }, [open, dispatch]);
+
+  useEffect(() => {
+    if (open) dispatch(fetchLookupIfNeeded('tire_position'));
   }, [open, dispatch]);
 
   useEffect(() => {
@@ -267,7 +274,7 @@ export default function TireFormModal({ open, onClose, onSaved }) {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <ModalField
               label="Lastik Konumu *"
-              hint="Listeden seçin veya kendi tanımınızı yazın"
+              hint="Listeden seçin veya kendi tanımınızı yazın (Ayarlar → Lastik Konumu)"
               error={errors.position}
             >
               <input
@@ -280,8 +287,8 @@ export default function TireFormModal({ open, onClose, onSaved }) {
                 maxLength={50}
               />
               <datalist id="tire-position-options">
-                {TIRE_POSITIONS.map((position) => (
-                  <option key={position} value={position} />
+                {positions.map((position) => (
+                  <option key={position.id} value={position.name} />
                 ))}
               </datalist>
             </ModalField>

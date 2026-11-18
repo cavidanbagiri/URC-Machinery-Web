@@ -8,6 +8,8 @@ import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
 import CommonCarsPage from '../pages/CommonCarsPage'
 import Maintenance from '../pages/Maintenance'
+import MeterLogs from '../pages/MeterLogs'
+import FuelLogs from '../pages/FuelLogs'
 import Repair from '../pages/Repair'
 import DailyFaults from '../pages/DailyFaults'
 import Tires from '../pages/Tires'
@@ -59,6 +61,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Maintenance />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'meter_logs',
+        element: (
+          <ProtectedRoute>
+            <MeterLogs />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'fuel_logs',
+        element: (
+          <ProtectedRoute>
+            <FuelLogs />
           </ProtectedRoute>
         ),
       },

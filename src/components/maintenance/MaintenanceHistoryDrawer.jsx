@@ -2,8 +2,10 @@
 import { Fragment, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import {
+  ArrowDownTrayIcon,
   ArrowPathIcon,
   CheckCircleIcon,
+  DocumentTextIcon,
   SignalIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -18,9 +20,10 @@ import {
   formatCounter,
   formatDate,
   formatDateTime,
+  formatFileSize,
 } from '../../utils/maintenance';
 
-function HistoryRow({ record }) {
+function HistoryRow({ record, onViewDocument, onDownloadDocument }) {
   const isMaintenance = record.record_type === 'maintenance';
   const Icon = isMaintenance ? CheckCircleIcon : SignalIcon;
 
@@ -68,6 +71,46 @@ function HistoryRow({ record }) {
           </p>
         )}
 
+        {record.documents?.length > 0 && (
+          <div className="mt-2">
+            <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-400">
+              PDF Evrak
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {record.documents.map((document) => (
+                <span
+                  key={document.id}
+                  className="inline-flex max-w-full items-center gap-1 rounded-full border border-blue-100 bg-blue-50 py-0.5 pl-2 pr-1 text-[11px] text-blue-800"
+                >
+                  <button
+                    type="button"
+                    onClick={() => onViewDocument?.(document)}
+                    title={`${document.file_name} · Görüntüle`}
+                    className="inline-flex min-w-0 items-center gap-1 hover:underline"
+                  >
+                    <DocumentTextIcon className="h-3.5 w-3.5 flex-none" />
+                    <span className="max-w-[12rem] truncate">
+                      {document.file_name}
+                    </span>
+                  </button>
+                  <span className="flex-none text-[10px] text-blue-500">
+                    {formatFileSize(document.file_size)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onDownloadDocument?.(document)}
+                    title="İndir"
+                    aria-label={`${document.file_name} indir`}
+                    className="flex-none rounded p-0.5 text-emerald-600 transition hover:bg-emerald-100"
+                  >
+                    <ArrowDownTrayIcon className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         <p className="mt-1.5 text-[11px] text-gray-400">
           {record.created_by_name || 'Sistem'}
           {record.created_at ? ` · ${formatDateTime(record.created_at)}` : ''}
@@ -77,7 +120,13 @@ function HistoryRow({ record }) {
   );
 }
 
-export default function MaintenanceHistoryDrawer({ open, onClose, machine }) {
+export default function MaintenanceHistoryDrawer({
+  open,
+  onClose,
+  machine,
+  onViewDocument,
+  onDownloadDocument,
+}) {
   const dispatch = useDispatch();
   const { history } = useSelector((s) => s.maintenance);
 
@@ -196,7 +245,12 @@ export default function MaintenanceHistoryDrawer({ open, onClose, machine }) {
                       <ul className="relative">
                         <span className="absolute bottom-6 left-4 top-2 w-px bg-gray-200" />
                         {history.items.map((record) => (
-                          <HistoryRow key={record.id} record={record} />
+                          <HistoryRow
+                            key={record.id}
+                            record={record}
+                            onViewDocument={onViewDocument}
+                            onDownloadDocument={onDownloadDocument}
+                          />
                         ))}
                       </ul>
                     )}

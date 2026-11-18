@@ -1,21 +1,11 @@
 // src/utils/tire.js
 
 /**
- * Positions offered while creating a record. The column is free text on the
- * server (cranes and trucks need different names), so the operator can always
- * type a custom position instead of picking one of these.
+ * Tire positions are no longer hard-coded: they come from the Settings lookup
+ * (`tire_position` in `stores/lookup_slice.js`, backed by the `tire_positions`
+ * table and managed in Ayarlar → Lastik Konumu). The record column stays free
+ * text, so the form still accepts a custom value.
  */
-export const TIRE_POSITIONS = [
-  'Sol Ön',
-  'Sağ Ön',
-  'Sol Arka 1',
-  'Sağ Arka 1',
-  'Sol Arka 2',
-  'Sağ Arka 2',
-  'Sol Orta',
-  'Sağ Orta',
-  'Yedek Lastik',
-];
 
 /** Frequently typed reasons; "Değişim sebebi" stays free text as well. */
 export const TIRE_CHANGE_REASONS = [

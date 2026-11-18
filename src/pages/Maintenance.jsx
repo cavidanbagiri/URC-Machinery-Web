@@ -1,12 +1,13 @@
 // src/pages/Maintenance.jsx
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { BsTools } from 'react-icons/bs';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'react-router-dom';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
+import MaintenanceService from '../services/MaintenanceService';
 import {
   fetchMaintenance,
   fetchMaintenanceSummary,
@@ -169,6 +170,46 @@ export default function Maintenance() {
     setHistoryOpen(true);
   };
 
+  const fetchDocumentUrl = async (document) => {
+    const blob = await MaintenanceService.fetchDocument(document.id);
+    return URL.createObjectURL(
+      new Blob([blob], { type: document.content_type || 'application/pdf' })
+    );
+  };
+
+  const handleViewDocument = async (document) => {
+    // Open the tab before awaiting so the browser keeps the user gesture.
+    const tab = window.open('', '_blank');
+    if (!tab) {
+      toast.error('Tarayıcı yeni sekmeyi engelledi');
+      return;
+    }
+
+    try {
+      const url = await fetchDocumentUrl(document);
+      tab.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      tab.close();
+      toast.error('Evrak açılamadı');
+    }
+  };
+
+  const handleDownloadDocument = async (document) => {
+    try {
+      const url = await fetchDocumentUrl(document);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.file_name || 'evrak.pdf';
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      toast.error('Evrak indirilemedi');
+    }
+  };
+
   return (
     <div className="space-y-4 p-3">
       <Toaster position="top-right" />
@@ -212,7 +253,6 @@ export default function Maintenance() {
           summary={summary}
           loading={summaryLoading}
           onSelectFilters={handleSelectSummaryFilters}
-          onResetFilters={handleResetFilters}
         />
       </div>
 
@@ -286,6 +326,8 @@ export default function Maintenance() {
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
         machine={historyMachine}
+        onViewDocument={handleViewDocument}
+        onDownloadDocument={handleDownloadDocument}
       />
     </div>
   );
