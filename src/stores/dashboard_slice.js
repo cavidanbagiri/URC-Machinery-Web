@@ -3,7 +3,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import DashboardService from '../services/DashboardService';
 import RepairService from '../services/RepairService';
 import MaintenanceService from '../services/MaintenanceService';
-import WarehouseService from '../services/WarehouseService';
 import PurchaseRequestService from '../services/PurchaseRequestService';
 import DailyFaultService from '../services/DailyFaultService';
 import ForumService from '../services/ForumService';
@@ -11,7 +10,10 @@ import ForumService from '../services/ForumService';
 // Liste widget'larının satır sayıları — Dashboard'daki kart yükseklikleriyle eşleşir.
 const LIST_LIMIT = 5; // alt sıradaki üç liste widget'ı
 const COMPACT_LIMIT = 3; // sağ kolondaki kompakt liste widget'ları
-const LOW_STOCK_LIMIT = 4; // depo kartının içindeki kritik stok listesi
+
+// Ambar modülü devre dışı: alanlar arayüz uyumu için duruyor, sorgu atılmıyor.
+const EMPTY_WAREHOUSE = { data: null, error: null };
+const EMPTY_LOW_STOCK = { items: [], total: 0, error: null };
 
 // Operasyon widget'ları kendi hata durumlarını taşır; biri patlarsa diğerleri
 // çalışmaya devam eder (Promise.allSettled).
@@ -118,18 +120,15 @@ export const fetchDashboardOverview = createAsyncThunk(
       const [
         repair,
         maintenance,
-        warehouse,
         spareParts,
         recentFaults,
         monthFaults,
         overdueMaintenance,
         overdueRepairs,
         forum,
-        lowStock,
       ] = await Promise.allSettled([
         RepairService.fetchSummary(),
         MaintenanceService.fetchSummary(),
-        WarehouseService.fetchSummary(),
         PurchaseRequestService.fetchSpareParts({
           // What the dashboard calls "bekleyen": still waiting for the firm to
           // deliver (the old ``bekleniyor`` state).
@@ -160,11 +159,6 @@ export const fetchDashboardOverview = createAsyncThunk(
           limit: COMPACT_LIMIT,
           offset: 0,
         }),
-        WarehouseService.fetchStock({
-          low_stock: true,
-          limit: LOW_STOCK_LIMIT,
-          offset: 0,
-        }),
       ]);
 
       const recent = settledList(recentFaults);
@@ -174,7 +168,7 @@ export const fetchDashboardOverview = createAsyncThunk(
         overview: {
           repair: settledData(repair),
           maintenance: settledData(maintenance),
-          warehouse: settledData(warehouse),
+          warehouse: EMPTY_WAREHOUSE,
           spareParts: settledList(spareParts),
           dailyFaults: {
             recent: recent.items,
@@ -184,7 +178,7 @@ export const fetchDashboardOverview = createAsyncThunk(
           overdueMaintenance: settledList(overdueMaintenance),
           overdueRepairs: settledList(overdueRepairs),
           forum: settledList(forum),
-          lowStock: settledList(lowStock),
+          lowStock: EMPTY_LOW_STOCK,
         },
         updatedAt: new Date().toISOString(),
       };

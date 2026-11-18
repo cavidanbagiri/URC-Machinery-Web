@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
+import MachineMeterSnapshot from '../machines/MachineMeterSnapshot';
 import StatusBadge from '../machines/StatusBadge';
 import RepairModal, {
   ModalField,
@@ -250,28 +251,32 @@ export default function RepairFormModal({ open, onClose, record, onSaved }) {
               </p>
             </div>
           ) : selectedMachine ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-gray-900">
-                  {machineLabel(selectedMachine)}
-                </p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  {selectedMachine.plate_no || selectedMachine.vin_no || '—'}
-                  {selectedMachine.status_name
-                    ? ` · ${selectedMachine.status_name}`
-                    : ''}
-                </p>
+            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-gray-900">
+                    {machineLabel(selectedMachine)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-500">
+                    {selectedMachine.plate_no || selectedMachine.vin_no || '—'}
+                    {selectedMachine.status_name
+                      ? ` · ${selectedMachine.status_name}`
+                      : ''}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedMachine(null);
+                    setForm((prev) => ({ ...prev, machine_id: '' }));
+                  }}
+                  className="shrink-0 text-xs font-medium text-blue-700 hover:underline"
+                >
+                  Değiştir
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedMachine(null);
-                  setForm((prev) => ({ ...prev, machine_id: '' }));
-                }}
-                className="shrink-0 text-xs font-medium text-blue-700 hover:underline"
-              >
-                Değiştir
-              </button>
+
+              <MachineMeterSnapshot machine={selectedMachine} />
             </div>
           ) : (
             <div>

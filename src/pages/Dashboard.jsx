@@ -4,7 +4,6 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { RefreshCw } from 'lucide-react';
-import { RxDashboard } from "react-icons/rx";
 
 
 import {
@@ -13,11 +12,8 @@ import {
   fetchDashboardOverview,
 } from '../stores/dashboard_slice';
 import { fetchCurrentUser, fetchTeamMembers } from '../stores/user_slice';
-import { formatDateTime } from '../utils/maintenance';
 import KpiCards from '../components/dashboard/KpiCards';
 import TeamAvatarStack from '../components/dashboard/TeamAvatarStack';
-import OpsKpiStrip from '../components/dashboard/OpsKpiStrip';
-import AlertStrip from '../components/dashboard/AlertStrip';
 import StatusChart from '../components/dashboard/StatusChart';
 import PivotTable from '../components/dashboard/PivotTable';
 import UserSummary from '../components/dashboard/UserSummary';
@@ -27,7 +23,7 @@ import GarageLoadCard from '../components/dashboard/GarageLoadCard';
 import RecentDailyFaults from '../components/dashboard/RecentDailyFaults';
 import UpcomingMaintenance from '../components/dashboard/UpcomingMaintenance';
 import OverdueRepairs from '../components/dashboard/OverdueRepairs';
-import DepotOverview from '../components/dashboard/DepotOverview';
+// import DepotOverview from '../components/dashboard/DepotOverview';
 import PendingSpareParts from '../components/dashboard/PendingSpareParts';
 import OpenForumTopics from '../components/dashboard/OpenForumTopics';
 
@@ -36,7 +32,6 @@ export default function DashboardPage() {
   const {
     error,
     overviewError,
-    overviewUpdatedAt,
     loading,
     pivotLoading,
     overviewLoading,
@@ -185,7 +180,7 @@ export default function DashboardPage() {
 
 
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
         {/* <div className="min-h-[300px] xl:h-[360px]">
           <MaintenanceStatusChart />
         </div>
@@ -193,9 +188,10 @@ export default function DashboardPage() {
           <RepairTypeChart />
         </div> */}
 
-        <div className="min-h-[300px] xl:col-span-2 xl:h-[360px]">
+        {/* Ambar modülü devre dışı: depo kartı gizlendi. */}
+        {/* <div className="min-h-[300px] xl:col-span-2 xl:h-[360px]">
           <DepotOverview />
-        </div>
+        </div> */}
 
         <div className="min-h-[300px] xl:h-[360px]">
           <GarageLoadCard />

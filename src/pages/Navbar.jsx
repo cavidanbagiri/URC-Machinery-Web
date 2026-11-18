@@ -29,7 +29,9 @@ const NAV_ITEMS = [
   { to: '/meter_logs', label: 'Güncel KM ve Motor Saatleri', icon: IoSpeedometerOutline },
   { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: FaGasPump },
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },
-  { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
+  { to: '/stock', label: 'Stok', icon: BsBoxSeam },
+  // Ambar modülü devre dışı; kod duruyor, menüde gösterilmiyor.
+  // { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
   { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },
   // { to: '/forum', label: 'Forum', icon: BsChatDots },
   // { to: '/notifications', label: 'Bildirimler', icon: BsBell },

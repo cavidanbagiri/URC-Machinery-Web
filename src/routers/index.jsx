@@ -16,6 +16,7 @@ import Tires from '../pages/Tires'
 import Forum from '../pages/Forum'
 import Settings from '../pages/Settings'
 import WarehouseStock from '../pages/WarehouseStock'
+import Stock from '../pages/Stock'
 import PurchaseRequests from '../pages/PurchaseRequests'
 import Notifications from '../pages/Notifications'
 
@@ -109,6 +110,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Forum />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'stock',
+        element: (
+          <ProtectedRoute>
+            <Stock />
           </ProtectedRoute>
         ),
       },
