@@ -1,13 +1,43 @@
 // src/components/machines/MachineDetailModal.jsx
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import {
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+  TruckIcon,
+  WrenchScrewdriverIcon,
+} from '@heroicons/react/24/outline';
+
 import FlaticonIcon from '../ui/FlaticonIcon';
 import StatusBadge from './StatusBadge';
 import MachinePhotoGallery from './MachinePhotoGallery';
+import MachineFaultHistoryTab from './MachineFaultHistoryTab';
+import MachineMaintenanceHistoryTab from './MachineMaintenanceHistoryTab';
+import MachineTireHistoryTab from './MachineTireHistoryTab';
 
-
-
+const DETAIL_TABS = [
+  {
+    key: 'technical',
+    label: 'Teknik Özellik',
+    icon: InformationCircleIcon,
+  },
+  {
+    key: 'faults',
+    label: 'Arıza Geçmişi',
+    icon: ExclamationTriangleIcon,
+  },
+  {
+    key: 'maintenance',
+    label: 'Bakım Geçmişi',
+    icon: WrenchScrewdriverIcon,
+  },
+  {
+    key: 'tires',
+    label: 'Lastik Değişim Geçmişi',
+    icon: TruckIcon,
+  },
+];
 
 export default function MachineDetailModal({
   open,
@@ -15,8 +45,9 @@ export default function MachineDetailModal({
   machine,
   onPhotosChange,
 }) {
-
   const lookups = useSelector((s) => s.lookup.data);
+  const [activeTab, setActiveTab] = useState('technical');
+  const bodyRef = useRef(null);
 
   if (!machine) return null;
 
@@ -64,6 +95,12 @@ export default function MachineDetailModal({
   );
 
   
+  const handleTabChange = (tabKey) => {
+    setActiveTab(tabKey);
+    bodyRef.current?.scrollTo({ top: 0 });
+  };
+
+
   return (
     <Transition show={open} as={Fragment}>
       <Dialog onClose={onClose} className="relative z-50">
@@ -89,7 +126,7 @@ export default function MachineDetailModal({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-xl bg-white shadow-xl">
+            <Dialog.Panel className="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-xl bg-white shadow-xl">
               {/* Header */}
               <div className="flex items-start justify-between border-b border-gray-200 px-6 py-4">
                 <div className="flex-1">
@@ -113,9 +150,48 @@ export default function MachineDetailModal({
                 </button>
               </div>
 
+              {/* Tabs */}
+              <div className="border-b border-gray-200 bg-gray-50/70 px-2 sm:px-4">
+                <div
+                  role="tablist"
+                  aria-label="Makine detay sekmeleri"
+                  className="flex gap-1 overflow-x-auto"
+                >
+                  {DETAIL_TABS.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = tab.key === activeTab;
+                    return (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        role="tab"
+                        id={`machine-tab-${tab.key}`}
+                        aria-selected={isActive}
+                        aria-controls="machine-detail-tabpanel"
+                        onClick={() => handleTabChange(tab.key)}
+                        className={`flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium transition ${
+                          isActive
+                            ? 'border-blue-600 text-blue-700'
+                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Body */}
-              <div className="flex-1 overflow-y-auto px-6 py-5">
-                <div className="space-y-8">
+              <div ref={bodyRef} className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+                <div
+                  id="machine-detail-tabpanel"
+                  role="tabpanel"
+                  aria-labelledby={`machine-tab-${activeTab}`}
+                >
+                  {activeTab === 'technical' && (
+                    <div className="space-y-8">
                   {/* PHOTOS */}
                   <Section title="Fotoğraflar">
                     <MachinePhotoGallery
@@ -202,6 +278,27 @@ export default function MachineDetailModal({
                       <InfoItem label="ID" value={`#${machine.id}`} />
                     </Grid>
                   </Section>
+                    </div>
+                  )}
+
+                  {activeTab === 'faults' && (
+                    <MachineFaultHistoryTab
+                      key={`faults-${machine.id}`}
+                      machineId={machine.id}
+                    />
+                  )}
+                  {activeTab === 'maintenance' && (
+                    <MachineMaintenanceHistoryTab
+                      key={`maintenance-${machine.id}`}
+                      machineId={machine.id}
+                    />
+                  )}
+                  {activeTab === 'tires' && (
+                    <MachineTireHistoryTab
+                      key={`tires-${machine.id}`}
+                      machineId={machine.id}
+                    />
+                  )}
                 </div>
               </div>
 

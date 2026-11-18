@@ -505,6 +505,7 @@ export default function CommonCarsPage() {
       />
       {/* Detail Modal — YENİ */}
       <MachineDetailModal
+        key={`machine-detail-${detailMachine?.id ?? 'none'}-${detailOpen ? 'open' : 'closed'}`}
         open={detailOpen}
         onClose={() => {
           setDetailOpen(false);
