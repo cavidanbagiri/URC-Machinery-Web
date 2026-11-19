@@ -114,7 +114,7 @@ function MaintenanceCard({ record }) {
             </span>
             {hasInterval && (
               <span>
-                Aralık:{' '}
+                Bakım paketi:{' '}
                 <strong className="text-gray-900">
                   {formatCounter(record.interval_value, record.usage_unit)}
                 </strong>

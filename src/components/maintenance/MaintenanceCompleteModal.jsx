@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import {
+  ArrowDownTrayIcon,
+  ArrowPathIcon,
   DocumentPlusIcon,
   DocumentTextIcon,
   XMarkIcon,
@@ -16,17 +18,99 @@ import MaintenanceModal, {
   errorInputClass,
   inputClass,
 } from './MaintenanceModal';
+import MaintenanceService from '../../services/MaintenanceService';
 import { completeMaintenance } from '../../stores/maintenance_slice';
 import {
   MAX_DOCUMENT_MB,
+  MAINTENANCE_INTERVAL_HINTS,
   formatCounter,
   formatDate,
   formatFileSize,
+  maintenanceIntervalOptions,
   toNullableText,
   todayISO,
   unitLabel,
   validateMaintenancePdf,
 } from '../../utils/maintenance';
+import {
+  downloadDocument,
+  errorText,
+  viewDocument,
+} from '../../utils/machineHistory';
+
+function CompletionHistoryRow({ record }) {
+  const hasPackage =
+    record.interval_value !== null && record.interval_value !== undefined;
+
+  return (
+    <li className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+          <span className="font-medium text-gray-900">
+            {formatDate(record.record_date)}
+          </span>
+          <span className="text-gray-300">·</span>
+          <span className="text-gray-600">
+            {formatCounter(record.counter_value, record.usage_unit)}
+          </span>
+        </div>
+        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700">
+          {hasPackage
+            ? formatCounter(record.interval_value, record.usage_unit)
+            : 'Paket belirtilmemiş'}
+        </span>
+      </div>
+
+      {record.notes && (
+        <p className="mt-1 whitespace-pre-wrap text-[11px] text-gray-600">
+          {record.notes}
+        </p>
+      )}
+
+      {record.documents?.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {record.documents.map((document) => (
+            <span
+              key={document.id}
+              className="inline-flex max-w-full items-center gap-1 rounded-full border border-blue-100 bg-white py-0.5 pl-2 pr-1 text-[10px] text-blue-800"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  viewDocument(
+                    () => MaintenanceService.fetchDocument(document.id),
+                    document
+                  )
+                }
+                title={`${document.file_name} · Görüntüle`}
+                className="inline-flex min-w-0 items-center gap-1 hover:underline"
+              >
+                <DocumentTextIcon className="h-3 w-3 flex-none" />
+                <span className="max-w-[10rem] truncate">
+                  {document.file_name}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  downloadDocument(
+                    () => MaintenanceService.fetchDocument(document.id),
+                    document
+                  )
+                }
+                title="İndir"
+                aria-label={`${document.file_name} indir`}
+                className="flex-none rounded p-0.5 text-emerald-600 transition hover:bg-emerald-100"
+              >
+                <ArrowDownTrayIcon className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </li>
+  );
+}
 
 export default function MaintenanceCompleteModal({
   open,
@@ -39,22 +123,70 @@ export default function MaintenanceCompleteModal({
 
   const [form, setForm] = useState({
     counter_value: '',
+    interval_value: '',
     maintenance_date: todayISO(),
     notes: '',
   });
   const [pdfFile, setPdfFile] = useState(null);
   const [errors, setErrors] = useState({});
+  const [history, setHistory] = useState({
+    loading: false,
+    error: null,
+    items: [],
+  });
+  const [historyReloadKey, setHistoryReloadKey] = useState(0);
+
+  const intervalOptions = maintenanceIntervalOptions(machine?.usage_unit);
+  const intervalHints =
+    MAINTENANCE_INTERVAL_HINTS[machine?.usage_unit] || {};
+  const selectedPackage =
+    form.interval_value === '' ? null : Number(form.interval_value);
+  const selectedPackageHint =
+    selectedPackage === null ? null : intervalHints[selectedPackage];
 
   useEffect(() => {
     if (!open || !machine) return;
     setForm({
       counter_value: machine.current_counter ?? machine.last_counter ?? '',
+      interval_value: '',
       maintenance_date: todayISO(),
       notes: '',
     });
     setPdfFile(null);
     setErrors({});
+    setHistory({ loading: false, error: null, items: [] });
   }, [open, machine]);
+
+  // The completion dialog shows the newest maintenance-only records so the
+  // operator can pick the right package without leaving the form.
+  useEffect(() => {
+    if (!open || !machine) return undefined;
+
+    let active = true;
+    setHistory({ loading: true, error: null, items: [] });
+
+    (async () => {
+      try {
+        const items = await MaintenanceService.fetchHistory(machine.machine_id, {
+          record_type: 'maintenance',
+          limit: 8,
+        });
+        if (!active) return;
+        setHistory({ loading: false, error: null, items: items || [] });
+      } catch (err) {
+        if (!active) return;
+        setHistory({
+          loading: false,
+          error: errorText(err, 'Son bakım kayıtları yüklenemedi'),
+          items: [],
+        });
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [open, machine, historyReloadKey]);
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -103,6 +235,15 @@ export default function MaintenanceCompleteModal({
       )})`;
     }
 
+    const selectedInterval = Number(form.interval_value);
+    if (
+      form.interval_value === '' ||
+      Number.isNaN(selectedInterval) ||
+      !intervalOptions.includes(selectedInterval)
+    ) {
+      nextErrors.interval_value = 'Yapılan bakım paketini seçin';
+    }
+
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
@@ -119,6 +260,7 @@ export default function MaintenanceCompleteModal({
           machineId: machine.machine_id,
           payload: {
             counter_value: value,
+            interval_value: selectedInterval,
             maintenance_date: toNullableText(form.maintenance_date),
             notes: toNullableText(form.notes),
           },
@@ -193,13 +335,55 @@ export default function MaintenanceCompleteModal({
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-wide text-gray-500">
-              Aralık
+              Plan Aralığı
             </p>
             <p className="mt-0.5 font-medium text-gray-900">
               {formatCounter(machine?.interval_value, machine?.usage_unit)}
             </p>
           </div>
         </div>
+
+        <ModalField
+          label={`Yapılan Bakım Paketi${unit ? ` (${unit})` : ''} *`}
+          hint="Bu bakımda yapılan iş paketini seçin. Seçim bakım geçmişine işlenir."
+          error={errors.interval_value}
+        >
+          {intervalOptions.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-2 text-xs text-gray-500">
+              Bu makinenin bakım birimi tanımlı olmadığı için paket seçilemiyor.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              <select
+                value={form.interval_value}
+                onChange={(event) =>
+                  handleChange(
+                    'interval_value',
+                    event.target.value === ''
+                      ? ''
+                      : Number(event.target.value)
+                  )
+                }
+                disabled={mutating}
+                aria-label="Yapılan bakım paketi"
+                className={errors.interval_value ? errorInputClass : inputClass}
+              >
+                <option value="">Bakım paketi seçin...</option>
+                {intervalOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {formatCounter(option, machine?.usage_unit)}
+                  </option>
+                ))}
+              </select>
+
+              {selectedPackageHint && (
+                <p className="rounded-lg bg-blue-50 px-3 py-2 text-[11px] text-blue-700">
+                  {selectedPackageHint}
+                </p>
+              )}
+            </div>
+          )}
+        </ModalField>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <ModalField
@@ -298,6 +482,71 @@ export default function MaintenanceCompleteModal({
             />
           </div>
         </ModalField>
+
+        <div className="border-t border-gray-200 pt-4">
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Son 8 Bakım Kaydı
+              </p>
+              <p className="mt-0.5 text-[11px] text-gray-400">
+                En yeni bakım en üstte · paket seçmeden önce geçmişi kontrol
+                edin
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setHistoryReloadKey((value) => value + 1)}
+              disabled={history.loading || mutating}
+              className="flex flex-none items-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-1 text-[11px] font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ArrowPathIcon
+                className={`h-3.5 w-3.5 ${
+                  history.loading ? 'animate-spin' : ''
+                }`}
+              />
+              Yenile
+            </button>
+          </div>
+
+          {history.loading && (
+            <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-3 text-xs text-gray-500">
+              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+              Bakım geçmişi yükleniyor...
+            </div>
+          )}
+
+          {!history.loading && history.error && (
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
+              <span>{history.error}</span>
+              <button
+                type="button"
+                onClick={() => setHistoryReloadKey((value) => value + 1)}
+                className="flex-none font-medium underline"
+              >
+                Tekrar dene
+              </button>
+            </div>
+          )}
+
+          {!history.loading &&
+            !history.error &&
+            history.items.length === 0 && (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-5 text-center text-xs text-gray-500">
+                Bu makine için tamamlanmış bakım kaydı bulunmuyor.
+              </div>
+            )}
+
+          {!history.loading &&
+            !history.error &&
+            history.items.length > 0 && (
+              <ul className="max-h-64 space-y-2 overflow-y-auto pr-1">
+                {history.items.map((record) => (
+                  <CompletionHistoryRow key={record.id} record={record} />
+                ))}
+              </ul>
+            )}
+        </div>
       </form>
     </MaintenanceModal>
   );

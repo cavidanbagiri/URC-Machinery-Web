@@ -201,10 +201,10 @@ export default function Stock() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Stok</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          {/* <p className="mt-1 text-sm text-gray-500">
             Sahada kullanılan malzemelerin basit stok takibi; kart açın, sahaya
             çıkış işleyin, kalan miktarı görün.
-          </p>
+          </p> */}
         </div>
 
         <div className="flex items-center gap-2">

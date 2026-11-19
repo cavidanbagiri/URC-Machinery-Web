@@ -57,7 +57,7 @@ function HistoryRow({ record, onViewDocument, onDownloadDocument }) {
           {record.interval_value !== null &&
             record.interval_value !== undefined && (
               <span>
-                Aralık:{' '}
+                Bakım paketi:{' '}
                 <span className="font-medium text-gray-900">
                   {formatCounter(record.interval_value, record.usage_unit)}
                 </span>

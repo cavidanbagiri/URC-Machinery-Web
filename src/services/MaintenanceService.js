@@ -49,6 +49,9 @@ class MaintenanceService {
     if (payload.counter_value !== null && payload.counter_value !== undefined) {
       form.append('counter_value', String(payload.counter_value));
     }
+    if (payload.interval_value !== null && payload.interval_value !== undefined) {
+      form.append('interval_value', String(payload.interval_value));
+    }
     if (payload.maintenance_date) {
       form.append('maintenance_date', payload.maintenance_date);
     }

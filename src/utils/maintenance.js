@@ -16,6 +16,28 @@ export const UNIT_LABELS = {
   hour: 'saat',
 };
 
+// Maintenance packages offered at completion. The backend validates the same
+// lists in `repositories/maintenance_repository.py`.
+export const MAINTENANCE_INTERVAL_OPTIONS = {
+  km: [10_000, 20_000, 30_000, 40_000],
+  hour: [500, 1_000, 2_000, 4_000],
+};
+
+// Short explanations for the hourly packages. They describe the work scope,
+// not a separate schedule: the plan interval still drives the next due date.
+export const MAINTENANCE_INTERVAL_HINTS = {
+  hour: {
+    500: 'Filtre değişimi',
+    1_000: 'Filtre + şanzıman yağı',
+    2_000: 'Genişletilmiş bakım',
+    4_000: 'Kapsamlı bakım',
+  },
+};
+
+export function maintenanceIntervalOptions(unit) {
+  return MAINTENANCE_INTERVAL_OPTIONS[unit] || [];
+}
+
 const numberFormatter = new Intl.NumberFormat('tr-TR', {
   maximumFractionDigits: 2,
 });
