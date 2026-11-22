@@ -17,7 +17,7 @@ class TireService {
     return res.data;
   }
 
-  /** Counters for the cards above the table (total / changed today). */
+  /** Counters for the cards above the table (total / changed this month). */
   async fetchSummary() {
     const res = await $api.get('/tires/summary');
     return res.data;
@@ -33,6 +33,17 @@ class TireService {
   async createChange(payload) {
     const res = await $api.post('/tires/create', payload);
     return res.data;
+  }
+
+  /** Correct an existing record; the machine stays fixed. */
+  async updateChange(tireId, payload) {
+    const res = await $api.put(`/tires/${tireId}`, payload);
+    return res.data;
+  }
+
+  /** Delete a record together with its PDF papers. */
+  async deleteChange(tireId) {
+    await $api.delete(`/tires/${tireId}`);
   }
 
   /** Older changes of the same machine + position ("eski kayıtlar"). */

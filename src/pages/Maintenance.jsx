@@ -16,9 +16,11 @@ import {
   setFilters,
   setSort,
 } from '../stores/maintenance_slice';
+import { formatDate } from '../utils/maintenance';
 
 import MaintenanceSummaryCards from '../components/maintenance/MaintenanceSummaryCards';
 import MaintenanceAdvancedFilters from '../components/maintenance/MaintenanceAdvancedFilters';
+import MaintenanceDateFilter from '../components/maintenance/MaintenanceDateFilter';
 import MaintenanceTable from '../components/maintenance/MaintenanceTable';
 import MaintenancePagination from '../components/maintenance/MaintenancePagination';
 import MaintenancePlanModal from '../components/maintenance/MaintenancePlanModal';
@@ -230,10 +232,19 @@ export default function Maintenance() {
           <p className="mt-1.5 text-sm text-gray-500">
             Toplam {summary?.total ?? total} makine ·{' '}
             {summary?.planned ?? 0} planlı · {summary?.unplanned ?? 0} plansız
+            {filters.updated_on && (
+              <>
+                {' '}
+                · {formatDate(filters.updated_on)} tarihinde güncellenen{' '}
+                <b className="font-semibold text-gray-700">{total}</b> makine
+              </>
+            )}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <MaintenanceDateFilter />
+
           <button
             type="button"
             onClick={refreshAll}

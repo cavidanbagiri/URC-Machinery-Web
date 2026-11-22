@@ -7,9 +7,14 @@ const initialState = {
     fuel_date: null,
     week_start: null,
     month_start: null,
+    previous_month_start: null,
+    previous_month_end: null,
     daily_total: 0,
     weekly_total: 0,
     monthly_total: 0,
+    previous_month_total: 0,
+    sru_monthly_total: 0,
+    dcu_monthly_total: 0,
     machines: [],
   },
   loading: false,
@@ -42,6 +47,7 @@ function applySavedEntry(state, entry) {
 
   machine.day_liters = (Number(machine.day_liters) || 0) + liters;
   machine.day_entry_count = (Number(machine.day_entry_count) || 0) + 1;
+  // Sunucu, "Yakıtı veren" alanını oturumdaki kullanıcı adıyla doldurur.
   machine.last_given_by = entry.given_by;
   machine.last_note = entry.note;
   machine.last_created_at = entry.created_at;
@@ -49,6 +55,15 @@ function applySavedEntry(state, entry) {
   overview.daily_total = (Number(overview.daily_total) || 0) + liters;
   overview.weekly_total = (Number(overview.weekly_total) || 0) + liters;
   overview.monthly_total = (Number(overview.monthly_total) || 0) + liters;
+
+  // SRU / DCU kartları da anında güncellensin; kesin değerler sayfa yeniden
+  // yüklendiğinde sunucudan gelir.
+  const territory = (machine.territory_name || '').trim().toLocaleUpperCase('tr-TR');
+  if (territory === 'SRU') {
+    overview.sru_monthly_total = (Number(overview.sru_monthly_total) || 0) + liters;
+  } else if (territory === 'DCU') {
+    overview.dcu_monthly_total = (Number(overview.dcu_monthly_total) || 0) + liters;
+  }
 }
 
 export const fetchFuelLogOverview = createAsyncThunk(

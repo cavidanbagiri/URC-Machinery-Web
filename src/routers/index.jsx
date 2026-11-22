@@ -7,9 +7,11 @@ import PublicRoute from '../components/auth/PublicRoute';
 import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
 import CommonCarsPage from '../pages/CommonCarsPage'
+import DocumentTracking from '../pages/DocumentTracking'
 import Maintenance from '../pages/Maintenance'
 import MeterLogs from '../pages/MeterLogs'
 import FuelLogs from '../pages/FuelLogs'
+import RentalMachines from '../pages/RentalMachines'
 import Repair from '../pages/Repair'
 import DailyFaults from '../pages/DailyFaults'
 import Tires from '../pages/Tires'
@@ -66,6 +68,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: 'document_tracking',
+        element: (
+          <ProtectedRoute>
+            <DocumentTracking />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'meter_logs',
         element: (
           <ProtectedRoute>
@@ -78,6 +88,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <FuelLogs />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'rental_machines',
+        element: (
+          <ProtectedRoute>
+            <RentalMachines />
           </ProtectedRoute>
         ),
       },

@@ -11,6 +11,7 @@ import {
 
 import TireService from '../services/TireService';
 import {
+  deleteTireChange,
   deleteTireDocument,
   fetchTires,
   fetchTireSummary,
@@ -19,6 +20,7 @@ import {
   uploadTireDocument,
 } from '../stores/tire_slice';
 import { validateTirePdf } from '../utils/tire';
+import { formatDate } from '../utils/repair';
 import TireTable from '../components/tire/TireTable';
 import TirePagination from '../components/tire/TirePagination';
 import TireSummaryCards from '../components/tire/TireSummaryCards';
@@ -36,12 +38,15 @@ export default function Tires() {
     loading,
     error,
     documentBusy,
+    rowBusy,
     summary,
     summaryLoading,
   } = useSelector((s) => s.tire);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formNonce, setFormNonce] = useState(0);
+  // null → "Yeni Lastik"; a row → the same modal in edit mode.
+  const [formItem, setFormItem] = useState(null);
   const [historyItem, setHistoryItem] = useState(null);
 
   const isFirstRender = useRef(true);
@@ -79,8 +84,39 @@ export default function Tires() {
   const handleResetFilters = () => dispatch(resetFilters());
 
   const openCreate = () => {
+    setFormItem(null);
     setFormNonce((value) => value + 1);
     setFormOpen(true);
+  };
+
+  const openEdit = (item) => {
+    setFormItem(item);
+    setFormNonce((value) => value + 1);
+    setFormOpen(true);
+  };
+
+  const handleDeleteChange = async (item) => {
+    const label = [
+      formatDate(item.change_date),
+      item.position,
+      item.identification_no,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+    const confirmed = window.confirm(
+      `"${label}" lastik kaydını silmek istediğinize emin misiniz?\n\n` +
+        'Kayda bağlı evraklar da silinecek. Bu işlem geri alınamaz.'
+    );
+    if (!confirmed) return;
+
+    try {
+      await dispatch(deleteTireChange({ tireId: item.id })).unwrap();
+      toast.success('Lastik kaydı silindi');
+      if (historyItem?.id === item.id) setHistoryItem(null);
+      refreshAll();
+    } catch (err) {
+      toast.error(String(err || 'Lastik kaydı silinemedi'));
+    }
   };
 
   const fetchDocumentUrl = async (item, document) => {
@@ -165,7 +201,7 @@ export default function Tires() {
               <GiCarWheel className="h-4 w-4" />
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-              Lastik Degisim Takibi
+              Yeni Lastik Değişim Takibi
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
@@ -250,6 +286,9 @@ export default function Tires() {
           onDownloadDocument={handleDownloadDocument}
           onDeleteDocument={handleDeleteDocument}
           documentBusy={documentBusy}
+          onEdit={openEdit}
+          onDelete={handleDeleteChange}
+          rowBusy={rowBusy}
         />
 
         <TirePagination />
@@ -258,6 +297,7 @@ export default function Tires() {
       <TireFormModal
         key={`tire-form-${formNonce}`}
         open={formOpen}
+        item={formItem}
         onClose={() => setFormOpen(false)}
         onSaved={refreshAll}
       />

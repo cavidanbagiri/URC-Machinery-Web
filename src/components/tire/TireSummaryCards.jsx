@@ -1,7 +1,7 @@
 // src/components/tire/TireSummaryCards.jsx
 //
-// Lastik Takibi sayfasının üst şeridi: toplam değişim ve bugünkü değişim.
-// Veri: GET /api/tires/summary (summary.total / summary.changed_today).
+// Lastik Takibi sayfasının üst şeridi: toplam değişim ve bu ayki değişim.
+// Veri: GET /api/tires/summary (summary.total / summary.changed_this_month).
 import { CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { GiCarWheel } from 'react-icons/gi';
 
@@ -9,7 +9,7 @@ const CARD_GRID = 'grid grid-cols-1 gap-3 sm:grid-cols-2';
 
 const EMPTY_SUMMARY = {
   total: 0,
-  changed_today: 0,
+  changed_this_month: 0,
 };
 
 const TONES = {
@@ -85,7 +85,12 @@ export default function TireSummaryCards({ summary, loading }) {
   }
 
   const data = { ...EMPTY_SUMMARY, ...(summary || {}) };
-  const todayLabel = new Date().toLocaleDateString('tr-TR');
+  const today = new Date();
+  // "Kasım 2026" — the counter runs from the 1st of the current month.
+  const monthLabel = today.toLocaleDateString('tr-TR', {
+    month: 'long',
+    year: 'numeric',
+  });
 
   return (
     <div className={CARD_GRID}>
@@ -97,9 +102,9 @@ export default function TireSummaryCards({ summary, loading }) {
         tone="indigo"
       />
       <SummaryCard
-        label="Bugün Değişen Lastik"
-        value={data.changed_today}
-        hint={`${todayLabel} tarihli değişimler`}
+        label="Aylık Toplam"
+        value={data.changed_this_month}
+        hint={`${monthLabel} içinde değişen lastikler`}
         icon={CalendarDaysIcon}
         tone="emerald"
       />

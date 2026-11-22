@@ -23,8 +23,8 @@ const FUEL_LOG_COLUMN_WIDTHS = {
   status: 110,
   day_total: 150,
   liters: 110,
-  given_by: 170,
-  note: 220,
+  meter: 180,
+  consumption: 200,
   action: 120,
 };
 
@@ -35,6 +35,115 @@ const INPUT_CLASS =
 
 function machineLabel(machine) {
   return machine.identification_no || machine.plate_no || `#${machine.machine_id}`;
+}
+
+// Litre sayaç farkına bölündüğü için km başına değerler 1'in altına iner;
+// küçük değerlerde üç ondalık, büyük değerlerde iki ondalık gösterilir.
+const smallNumberFormatter = new Intl.NumberFormat('tr-TR', {
+  maximumFractionDigits: 3,
+});
+const largeNumberFormatter = new Intl.NumberFormat('tr-TR', {
+  maximumFractionDigits: 2,
+});
+
+function formatConsumption(value) {
+  if (value === null || value === undefined || value === '') return '—';
+  const number = Number(value);
+  if (Number.isNaN(number)) return '—';
+  return Math.abs(number) < 1
+    ? smallNumberFormatter.format(number)
+    : largeNumberFormatter.format(number);
+}
+
+function consumptionUnitLabel(unit) {
+  return unit === 'hour' ? 'saat' : 'km';
+}
+
+/**
+ * "Güncel KM / Saat": the newest reading from **Güncel KM ve Motor Saatleri**.
+ * Zero counters are hidden when the other one carries the machine's usage.
+ */
+function MeterCell({ machine }) {
+  const km = Number(machine.last_km) || 0;
+  const hours = Number(machine.last_engine_hours) || 0;
+  const hasReading =
+    machine.last_log_date !== null && machine.last_log_date !== undefined;
+
+  if (!hasReading) {
+    return <p className="text-[11px] text-gray-400">Sayaç kaydı yok</p>;
+  }
+
+  const showKm = km > 0 || hours === 0;
+  const showHours = hours > 0 || km === 0;
+
+  return (
+    <>
+      <div className="flex flex-col gap-0.5 text-[12px] text-gray-700">
+        {showKm && (
+          <span>
+            KM:{' '}
+            <strong className="font-semibold text-gray-900">
+              {formatNumber(km)}
+            </strong>
+          </span>
+        )}
+        {showHours && (
+          <span>
+            Saat:{' '}
+            <strong className="font-semibold text-gray-900">
+              {formatNumber(hours)}
+            </strong>
+          </span>
+        )}
+      </div>
+      <p className="mt-0.5 text-[10px] text-gray-400">
+        {formatDate(machine.last_log_date)}
+      </p>
+    </>
+  );
+}
+
+/**
+ * "Ortalama Yakıt": liters per 1 km / 1 engine hour, calculated by the backend
+ * from the fuel ledger and the counter movement since the first fuel row.
+ */
+function ConsumptionCell({ machine }) {
+  const hasConsumption =
+    machine.avg_consumption !== null && machine.avg_consumption !== undefined;
+
+  if (!hasConsumption) {
+    return (
+      <>
+        <p className="text-sm text-gray-300">—</p>
+        <p className="text-[10px] text-gray-400">Sayaç hareketi yetersiz</p>
+      </>
+    );
+  }
+
+  const unit = consumptionUnitLabel(machine.consumption_unit);
+  const title = [
+    `${formatNumber(machine.consumption_liters)} L`,
+    `${formatNumber(machine.consumption_distance)} ${unit}`,
+    machine.consumption_start_date && machine.consumption_end_date
+      ? `${formatDate(machine.consumption_start_date)} – ${formatDate(
+          machine.consumption_end_date
+        )}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return (
+    <>
+      <p className="text-sm font-semibold text-gray-900" title={title}>
+        {formatConsumption(machine.avg_consumption)} L/{unit}
+      </p>
+      <p className="truncate text-[10px] text-gray-400" title={title}>
+        {formatNumber(machine.consumption_liters)} L /{' '}
+        {formatNumber(machine.consumption_distance)} {unit}
+      </p>
+    </>
+  );
 }
 
 function Skeleton() {
@@ -55,19 +164,14 @@ function Skeleton() {
 
 function EntryRow({ machine, selectedDate, onSave }) {
   const [liters, setLiters] = useState('');
-  const [givenBy, setGivenBy] = useState('');
-  const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const litersRef = useRef(null);
-  const givenByRef = useRef(null);
-  const noteRef = useRef(null);
 
   const label = machineLabel(machine);
   const litersValue = parseDecimalInput(liters);
-  const canSubmit =
-    litersValue !== null && litersValue > 0 && Boolean(givenBy.trim());
+  const canSubmit = litersValue !== null && litersValue > 0;
   const lastInfo = [machine.last_given_by, machine.last_note]
     .filter(Boolean)
     .join(' · ');
@@ -81,21 +185,12 @@ function EntryRow({ machine, selectedDate, onSave }) {
       return;
     }
 
-    const provider = givenBy.trim();
-    if (!provider) {
-      toast.error(`${label}: yakıtı veren bilgisini girin`);
-      givenByRef.current?.focus();
-      return;
-    }
-
     setSaving(true);
     setSaved(false);
 
     try {
-      await onSave(machine, litersValue, provider, note.trim());
+      await onSave(machine, litersValue);
       setLiters('');
-      setGivenBy('');
-      setNote('');
       setSaved(true);
     } catch {
       // Hata mesajı sayfadaki toast ile gösterilir; girilen değerler korunur.
@@ -107,17 +202,6 @@ function EntryRow({ machine, selectedDate, onSave }) {
   const handleKeyDown = (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
-
-    if (event.currentTarget === litersRef.current) {
-      givenByRef.current?.focus();
-      return;
-    }
-
-    if (event.currentTarget === givenByRef.current) {
-      noteRef.current?.focus();
-      return;
-    }
-
     handleSubmit();
   };
 
@@ -229,36 +313,12 @@ function EntryRow({ machine, selectedDate, onSave }) {
         />
       </td>
 
-      <td className="px-2 py-2.5 align-top">
-        <input
-          ref={givenByRef}
-          type="text"
-          autoComplete="off"
-          aria-label={`${label} yakıtı veren`}
-          placeholder="Ad / firma"
-          maxLength={150}
-          value={givenBy}
-          disabled={saving}
-          onChange={handleChange(setGivenBy)}
-          onKeyDown={handleKeyDown}
-          className={INPUT_CLASS}
-        />
+      <td className="px-3 py-2.5 align-top">
+        <MeterCell machine={machine} />
       </td>
 
-      <td className="px-2 py-2.5 align-top">
-        <input
-          ref={noteRef}
-          type="text"
-          autoComplete="off"
-          aria-label={`${label} not`}
-          placeholder="Not (opsiyonel)"
-          maxLength={1000}
-          value={note}
-          disabled={saving}
-          onChange={handleChange(setNote)}
-          onKeyDown={handleKeyDown}
-          className={INPUT_CLASS}
-        />
+      <td className="px-3 py-2.5 align-top">
+        <ConsumptionCell machine={machine} />
       </td>
 
       <td className="px-2 py-2.5 align-top">
@@ -271,7 +331,7 @@ function EntryRow({ machine, selectedDate, onSave }) {
               ? 'bg-emerald-600 text-white hover:bg-emerald-700'
               : 'bg-blue-600 text-white hover:bg-blue-700'
           } disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500`}
-          title="Litre ve yakıtı veren bilgisini girip kaydedin (Enter)"
+          title="Litre değerini girip kaydedin (Enter)"
         >
           {saving ? (
             <>
@@ -393,19 +453,19 @@ export default function FuelLogEntryTable({
               </ResizableTh>
               <ResizableTh
                 resize={resize}
-                columnId="given_by"
-                label="Yakıtı Veren"
-                className="px-2 py-2.5 text-left font-semibold text-blue-700"
+                columnId="meter"
+                label="Güncel KM / Saat"
+                className="px-3 py-2.5 text-left font-semibold text-blue-700"
               >
-                Yakıtı Veren
+                Güncel KM / Saat
               </ResizableTh>
               <ResizableTh
                 resize={resize}
-                columnId="note"
-                label="Not"
-                className="px-2 py-2.5 text-left font-semibold text-blue-700"
+                columnId="consumption"
+                label="Ortalama Yakıt"
+                className="px-3 py-2.5 text-left font-semibold text-blue-700"
               >
-                Not
+                Ortalama Yakıt
               </ResizableTh>
               <ResizableTh
                 resize={resize}

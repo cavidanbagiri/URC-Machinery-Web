@@ -4,6 +4,7 @@ import settingSlice from './setting_slice.js'
 import lookupReducer from './lookup_slice';    // ← YENİ
 import machineReducer from './machine_slice';  // ← YENİ
 import maintenanceReducer from './maintenance_slice';
+import documentTrackingReducer from './document_tracking_slice';
 import repairReducer from './repair_slice';
 import dailyFaultReducer from './daily_fault_slice';
 import purchaseRequestReducer from './purchase_request_slice';
@@ -14,6 +15,7 @@ import forumReducer from './forum_slice';
 import tireReducer from './tire_slice';
 import meterLogReducer from './meter_log_slice';
 import fuelLogReducer from './fuel_log_slice';
+import rentalMachineReducer from './rental_machine_slice';
 
 const store = configureStore({
   reducer: {
@@ -22,6 +24,7 @@ const store = configureStore({
     lookup: lookupReducer,
     machine: machineReducer,
     maintenance: maintenanceReducer,
+    documentTracking: documentTrackingReducer,
     repair: repairReducer,
     dailyFault: dailyFaultReducer,
     purchaseRequest: purchaseRequestReducer,
@@ -32,6 +35,7 @@ const store = configureStore({
     tire: tireReducer,
     meterLog: meterLogReducer,
     fuelLog: fuelLogReducer,
+    rentalMachine: rentalMachineReducer,
   },
 });
 

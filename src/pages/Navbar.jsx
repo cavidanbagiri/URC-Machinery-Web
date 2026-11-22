@@ -12,6 +12,8 @@ import { PiWrenchLight } from "react-icons/pi";
 import {
   HiOutlineChevronDoubleLeft,
   HiOutlineChevronDoubleRight,
+  HiOutlineClipboardDocumentList,
+  HiOutlineKey,
   HiOutlineWrenchScrewdriver,
 } from "react-icons/hi2";
 import { GiCrane } from "react-icons/gi";
@@ -21,11 +23,13 @@ import logo from '../assets/main_logo.png'
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
   { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
+  { to: '/rental_machines', label: 'Kiralık Makineler', icon: HiOutlineKey },
   { to: '/repair', label: 'Arızalı Ekipman', icon: PiWrenchLight },
   // {* Dont need to show daily faults *}
   // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
-  { to: '/tires', label: 'Lastik Takibi', icon: RxColorWheel },
   { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
+  { to: '/tires', label: 'Lastik Takibi', icon: RxColorWheel },
+  { to: '/document_tracking', label: 'Evrak Takip Tablosu', icon: HiOutlineClipboardDocumentList },
   { to: '/meter_logs', label: 'Güncel KM ve Motor Saatleri', icon: IoSpeedometerOutline },
   { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: FaGasPump },
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },

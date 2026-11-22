@@ -36,7 +36,7 @@ const MAINTENANCE_COLUMN_WIDTHS = {
   mark_model: 190,
   has_plan: 140,
   last_service: 140,
-  current_counter: 150,
+  current_counter: 170,
   remaining: 140,
   actions: 170,
 };
@@ -98,6 +98,74 @@ function remainingClass(remaining, threshold, statusCode) {
     return 'font-semibold text-amber-600';
   }
   return 'text-gray-700';
+}
+
+const isNumber = (value) => value !== null && value !== undefined;
+
+/**
+ * "Güncel KM / Saat": the newest reading of **Güncel KM ve Motor Saatleri**
+ * (`machine_meter_logs`) when it is the freshest source of the counter.
+ * The plan's own counter is the fallback for machines without a daily reading
+ * (or when the plan counter is newer — see `resolve_current_counter`).
+ */
+function CounterCell({ item }) {
+  if (item.has_plan && item.counter_source === 'meter') {
+    return (
+      <span
+        className="inline-flex flex-col"
+        title={`Güncel KM ve Motor Saatleri kaydı${
+          item.meter_log_date ? ` (${formatDate(item.meter_log_date)})` : ''
+        }`}
+      >
+        <span className="font-medium text-gray-900">
+          {formatCounter(item.meter_km, 'km')}
+        </span>
+        <span className="text-gray-600">
+          {formatCounter(item.meter_engine_hours, 'hour')}
+        </span>
+        {item.meter_log_date && (
+          <span className="text-[11px] text-gray-400">
+            {formatDate(item.meter_log_date)}
+          </span>
+        )}
+      </span>
+    );
+  }
+
+  if (item.has_plan && isNumber(item.current_counter)) {
+    return (
+      <span
+        className="inline-flex flex-col"
+        title="Plan sayacı (güncel KM / saat kaydı yok veya plan sayacı daha yeni)"
+      >
+        <span className="font-medium text-gray-900">
+          {formatCounter(item.current_counter, item.usage_unit)}
+        </span>
+        {item.current_counter_date && (
+          <span className="text-[11px] text-gray-400">
+            {formatDate(item.current_counter_date)}
+          </span>
+        )}
+      </span>
+    );
+  }
+
+  if (isNumber(item.meter_km) || isNumber(item.meter_engine_hours)) {
+    // Plan yok ama günlük KM / saat kaydı var: yine de göster.
+    return (
+      <span
+        className="inline-flex flex-col"
+        title="Güncel KM ve Motor Saatleri kaydı"
+      >
+        <span className="text-gray-700">{formatCounter(item.meter_km, 'km')}</span>
+        <span className="text-gray-500">
+          {formatCounter(item.meter_engine_hours, 'hour')}
+        </span>
+      </span>
+    );
+  }
+
+  return <span className="text-gray-400">—</span>;
 }
 
 export default function MaintenanceTable({
@@ -200,7 +268,7 @@ export default function MaintenanceTable({
       filter: { kind: 'select', key: 'has_plan', options: HAS_PLAN_OPTIONS },
     },
     { id: 'last_service', label: 'Son Bakım' },
-    { id: 'current_counter', label: 'Güncel Sayaç' },
+    { id: 'current_counter', label: 'Güncel KM / Saat' },
     { id: 'remaining', label: 'Kalan', sortable: true },
     { id: 'actions', label: 'İşlemler', align: 'right' },
   ];
@@ -386,12 +454,7 @@ export default function MaintenanceTable({
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
-                    <p>{formatCounter(item.current_counter, item.usage_unit)}</p>
-                    {item.current_counter_date && (
-                      <p className="text-[11px] text-gray-500">
-                        {formatDate(item.current_counter_date)}
-                      </p>
-                    )}
+                    <CounterCell item={item} />
                   </td>
 
                   <td

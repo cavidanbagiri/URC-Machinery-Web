@@ -477,13 +477,13 @@ export default function RepairTable({
                             <CheckCircleIcon className="h-4 w-4" />
                           </ActionButton>
 
-                          {/* <ActionButton
+                          <ActionButton
                             title="Tamiri iptal et"
                             onClick={() => onCancel(item)}
                             tone="red"
                           >
                             <XCircleIcon className="h-4 w-4" />
-                          </ActionButton> */}
+                          </ActionButton> 
                         </>
                       )}
 

@@ -1,10 +1,5 @@
 // src/components/maintenance/MaintenanceSummaryCards.jsx
-import {
-  AlertTriangle,
-  CalendarDays,
-  ClipboardList,
-  Clock,
-} from 'lucide-react';
+import { AlertTriangle, ClipboardList, Clock } from 'lucide-react';
 
 function SummaryCard({ label, value, hint, icon: Icon, tone, onClick }) {
   const tones = {
@@ -70,8 +65,8 @@ export default function MaintenanceSummaryCards({
 }) {
   if (loading && !summary) {
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
             className="h-[74px] animate-pulse rounded-xl bg-gray-100 ring-1 ring-gray-200/60"
@@ -87,28 +82,19 @@ export default function MaintenanceSummaryCards({
     unplanned: 0,
     inactive: 0,
     completed: 0,
-    completed_today: 0,
     overdue: 0,
     due_soon: 0,
     needs_attention: 0,
   };
-  const todayLabel = new Date().toLocaleDateString('tr-TR');
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <SummaryCard
         label="Toplam Bakım"
         value={data.completed}
         hint="Şimdiye kadar tamamlanan bakımlar"
         icon={ClipboardList}
         tone="gray"
-      />
-      <SummaryCard
-        label="Günlük Bakım"
-        value={data.completed_today}
-        hint={`${todayLabel} tarihli bakımlar`}
-        icon={CalendarDays}
-        tone="blue"
       />
       <SummaryCard
         label="Yaklaşan Bakım"

@@ -33,6 +33,8 @@ const initialFilters = {
   territory_id: '',
   type_id: '',
   company_id: '',
+  // YYYY-MM-DD: o gün KM/saat kaydı girilen veya bakım işlemi yapılan makineler.
+  updated_on: '',
   include_inactive: false,
 };
 

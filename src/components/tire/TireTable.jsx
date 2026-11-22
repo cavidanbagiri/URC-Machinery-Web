@@ -6,6 +6,8 @@ import {
   ArrowPathIcon,
   ClockIcon,
   DocumentPlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
@@ -15,7 +17,7 @@ import useColumnResize from '../ui/useColumnResize';
 import { setFilter } from '../../stores/tire_slice';
 import { fetchLookupIfNeeded } from '../../stores/lookup_slice';
 import { formatDate } from '../../utils/repair';
-import { formatFileSize } from '../../utils/tire';
+import { formatFileSize, formatTireBrand } from '../../utils/tire';
 
 function DocumentCell({
   item,
@@ -131,6 +133,40 @@ function HistoryButton({ item, onShowHistory }) {
   );
 }
 
+function RowActions({ item, busy, onEdit, onDelete }) {
+  const deleting = busy?.tireId === item.id && busy?.action === 'delete';
+
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <button
+        type="button"
+        onClick={() => onEdit?.(item)}
+        disabled={deleting}
+        title="Lastik kaydını düzenle"
+        aria-label="Lastik kaydını düzenle"
+        className="rounded-lg border border-gray-200 p-1.5 text-gray-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <PencilSquareIcon className="h-4 w-4" />
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onDelete?.(item)}
+        disabled={deleting}
+        title="Lastik kaydını sil"
+        aria-label="Lastik kaydını sil"
+        className="rounded-lg border border-gray-200 p-1.5 text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {deleting ? (
+          <ArrowPathIcon className="h-4 w-4 animate-spin" />
+        ) : (
+          <TrashIcon className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+}
+
 function Skeleton() {
   return (
     <div className="divide-y divide-gray-100">
@@ -160,6 +196,7 @@ const TIRE_COLUMN_WIDTHS = {
   km_hour: 130,
   documents: 220,
   history: 130,
+  actions: 110,
 };
 
 const EMPTY_TEXT =
@@ -176,6 +213,9 @@ export default function TireTable({
   onDownloadDocument,
   onDeleteDocument,
   documentBusy,
+  onEdit,
+  onDelete,
+  rowBusy,
 }) {
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.tire.filters);
@@ -222,6 +262,7 @@ export default function TireTable({
     { id: 'km_hour', label: 'Motor Saati / KM' },
     { id: 'documents', label: 'Evrak' },
     { id: 'history', label: 'Eski Kayıtlar' },
+    { id: 'actions', label: 'İşlemler' },
   ];
 
   // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
@@ -283,7 +324,9 @@ export default function TireTable({
                   resize={resize}
                   columnId={column.id}
                   label={column.label}
-                  className="px-4 py-2.5 text-left font-medium"
+                  className={`px-4 py-2.5 font-medium ${
+                    column.id === 'actions' ? 'text-right' : 'text-left'
+                  }`}
                 >
                   {column.filter ? (
                     <ColumnFilterHeader
@@ -337,8 +380,11 @@ export default function TireTable({
                 </td>
 
                 <td className="px-4 py-2.5 text-[12px] text-gray-700">
-                  <p className="max-w-[12rem] truncate" title={item.brand_model || ''}>
-                    {item.brand_model || '—'}
+                  <p
+                    className="max-w-[12rem] truncate"
+                    title={formatTireBrand(item.brand_model)}
+                  >
+                    {formatTireBrand(item.brand_model)}
                   </p>
                 </td>
 
@@ -372,6 +418,15 @@ export default function TireTable({
 
                 <td className="whitespace-nowrap px-4 py-2.5">
                   <HistoryButton item={item} onShowHistory={onShowHistory} />
+                </td>
+
+                <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                  <RowActions
+                    item={item}
+                    busy={rowBusy}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                  />
                 </td>
               </tr>
             ))}

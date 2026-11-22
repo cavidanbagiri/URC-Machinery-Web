@@ -35,3 +35,12 @@ export function tireSpecLabel(item) {
   const parts = [item.brand_model, item.size].filter(Boolean);
   return parts.length ? parts.join(' · ') : '—';
 }
+
+/**
+ * Tabloda marka / model değeri büyük harfle gösterilir. `tr-TR` seçilir ki
+ * "michelin" → "MİCHELİN", "lastik" → "LASTİK" olsun (noktalı/noktasız i).
+ */
+export function formatTireBrand(value) {
+  if (!value) return '—';
+  return String(value).toLocaleUpperCase('tr-TR');
+}

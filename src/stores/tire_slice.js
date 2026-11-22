@@ -27,7 +27,7 @@ const initialState = {
   error: null,
   listRequestId: null,
 
-  // Cards above the table: all changes + today's changes
+  // Cards above the table: all changes + this month's changes
   summary: null,
   summaryLoading: false,
   summaryError: null,
@@ -44,6 +44,9 @@ const initialState = {
 
   // { tireId, documentId, action: 'upload' | 'delete' } while a PDF request runs
   documentBusy: null,
+
+  // { tireId, action: 'delete' } while a row action (düzenle / sil) runs
+  rowBusy: null,
 
   // "Eski kayıtlar" panel of one record
   history: { ...initialHistory },
@@ -124,6 +127,29 @@ export const createTireChange = createAsyncThunk(
       return await TireService.createChange(payload);
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Lastik kaydı oluşturulamadı'));
+    }
+  }
+);
+
+export const updateTireChange = createAsyncThunk(
+  'tire/updateChange',
+  async ({ tireId, payload }, { rejectWithValue }) => {
+    try {
+      return await TireService.updateChange(tireId, payload);
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Lastik kaydı güncellenemedi'));
+    }
+  }
+);
+
+export const deleteTireChange = createAsyncThunk(
+  'tire/deleteChange',
+  async ({ tireId }, { rejectWithValue }) => {
+    try {
+      await TireService.deleteChange(tireId);
+      return tireId;
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Lastik kaydı silinemedi'));
     }
   }
 );
@@ -269,6 +295,42 @@ const tireSlice = createSlice({
       })
       .addCase(createTireChange.rejected, (state, action) => {
         state.mutating = false;
+        state.mutationError = action.payload;
+      });
+
+    builder
+      .addCase(updateTireChange.pending, (state) => {
+        state.mutating = true;
+        state.mutationError = null;
+      })
+      .addCase(updateTireChange.fulfilled, (state, action) => {
+        state.mutating = false;
+        applyItem(state, action.payload);
+      })
+      .addCase(updateTireChange.rejected, (state, action) => {
+        state.mutating = false;
+        state.mutationError = action.payload;
+      });
+
+    builder
+      .addCase(deleteTireChange.pending, (state, action) => {
+        state.mutationError = null;
+        state.rowBusy = { tireId: action.meta.arg.tireId, action: 'delete' };
+      })
+      .addCase(deleteTireChange.fulfilled, (state, action) => {
+        state.rowBusy = null;
+        const before = state.items.length;
+        state.items = state.items.filter((row) => row.id !== action.payload);
+        if (state.items.length !== before) {
+          state.total = Math.max(0, state.total - 1);
+        }
+        // Silinen kaydın "Eski kayıtlar" paneli açık kalmasın.
+        if (state.history.tireId === action.payload) {
+          state.history = { ...initialHistory };
+        }
+      })
+      .addCase(deleteTireChange.rejected, (state, action) => {
+        state.rowBusy = null;
         state.mutationError = action.payload;
       });
 

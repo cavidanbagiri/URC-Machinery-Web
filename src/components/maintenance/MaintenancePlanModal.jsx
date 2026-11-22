@@ -41,8 +41,11 @@ export default function MaintenancePlanModal({ open, onClose, machine, onSaved }
       interval_value: machine.interval_value ?? '',
       last_counter: machine.last_counter ?? '',
       last_maintenance_date: machine.last_maintenance_date || '',
-      current_counter: machine.current_counter ?? '',
-      current_counter_date: machine.current_counter_date || '',
+      // `current_counter` is the effective counter (the daily KM / saat value
+      // when it is newer); the plan modal keeps editing its own value.
+      current_counter: machine.plan_counter ?? machine.current_counter ?? '',
+      current_counter_date:
+        machine.plan_counter_date || machine.current_counter_date || '',
       warning_threshold: machine.warning_threshold ?? '',
       is_active: machine.has_plan ? machine.is_active !== false : true,
       notes: machine.notes || '',

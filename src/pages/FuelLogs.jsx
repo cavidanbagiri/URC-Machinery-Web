@@ -4,11 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import {
   ArrowPathIcon,
+  BuildingOffice2Icon,
   CalendarDaysIcon,
   ChartBarIcon,
-  FireIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
+  MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { FaGasPump } from 'react-icons/fa';
 
@@ -29,15 +30,20 @@ const SEARCH_FIELDS = [
 ];
 
 const SUMMARY_THEMES = {
-  amber: {
-    card: 'border-amber-200 bg-gradient-to-br from-amber-50 to-white',
-    icon: 'bg-amber-100 text-amber-700',
-    value: 'text-amber-900',
+  slate: {
+    card: 'border-slate-200 bg-gradient-to-br from-slate-50 to-white',
+    icon: 'bg-slate-100 text-slate-700',
+    value: 'text-slate-900',
   },
   sky: {
     card: 'border-sky-200 bg-gradient-to-br from-sky-50 to-white',
     icon: 'bg-sky-100 text-sky-700',
     value: 'text-sky-900',
+  },
+  violet: {
+    card: 'border-violet-200 bg-gradient-to-br from-violet-50 to-white',
+    icon: 'bg-violet-100 text-violet-700',
+    value: 'text-violet-900',
   },
   emerald: {
     card: 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-white',
@@ -116,7 +122,7 @@ export default function FuelLogs() {
   }, [overview.machines]);
 
   const handleSave = useCallback(
-    async (machine, liters, givenBy, note) => {
+    async (machine, liters) => {
       if (selectedDate > todayISO()) {
         toast.error('Gelecek bir tarih için kayıt yapılamaz');
         throw new Error('Gelecek tarih');
@@ -128,8 +134,8 @@ export default function FuelLogs() {
             machine_id: machine.machine_id,
             fuel_date: selectedDate,
             liters,
-            given_by: givenBy,
-            note: note || null,
+            // "Yakıtı veren" artık sorulmuyor: sunucu oturumdaki kullanıcının
+            // adını yazar.
           })
         ).unwrap();
 
@@ -151,12 +157,15 @@ export default function FuelLogs() {
     [dispatch, selectedDate]
   );
 
-  const weekHint = overview.week_start
-    ? `${formatDate(overview.week_start)} – ${formatDate(selectedDate)}`
-    : 'Son 7 gün';
   const monthHint = overview.month_start
     ? `${formatDate(overview.month_start)} – ${formatDate(selectedDate)}`
     : 'Ay başından itibaren';
+  const previousMonthHint =
+    overview.previous_month_start && overview.previous_month_end
+      ? `${formatDate(overview.previous_month_start)} – ${formatDate(
+          overview.previous_month_end
+        )}`
+      : 'Geçen ayın tamamı';
 
   return (
     <div className="space-y-4 p-3">
@@ -203,23 +212,30 @@ export default function FuelLogs() {
         </div>
       </div>
 
-      <div className="grid gap-3 px-1 sm:grid-cols-3">
+      <div className="grid gap-3 px-1 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
-          label="Günlük Verilen"
-          value={overview.daily_total}
-          hint={formatDate(selectedDate)}
-          icon={FireIcon}
-          theme="amber"
+          label="Geçen Ay Toplam"
+          value={overview.previous_month_total}
+          hint={previousMonthHint}
+          icon={CalendarDaysIcon}
+          theme="slate"
         />
         <SummaryCard
-          label="Haftalık Verilen"
-          value={overview.weekly_total}
-          hint={weekHint}
-          icon={CalendarDaysIcon}
+          label="SRU · Güncel Ay"
+          value={overview.sru_monthly_total}
+          hint={`SRU şantiyesi · ${monthHint}`}
+          icon={BuildingOffice2Icon}
           theme="sky"
         />
         <SummaryCard
-          label="Aylık Verilen"
+          label="DCU · Güncel Ay"
+          value={overview.dcu_monthly_total}
+          hint={`DCU şantiyesi · ${monthHint}`}
+          icon={MapPinIcon}
+          theme="violet"
+        />
+        <SummaryCard
+          label="Güncel Ay Verilen"
           value={overview.monthly_total}
           hint={monthHint}
           icon={ChartBarIcon}
@@ -232,8 +248,8 @@ export default function FuelLogs() {
         <p>
           Kayıtlar kalıcıdır: mevcut bir giriş güncellenmez veya silinmez. Aynı
           makineye gün içinde birden fazla yakıt girişi yapılabilir; düzeltme için
-          yeni kayıt ekleyin. Günlük toplam ve üstteki özet kutuları otomatik
-          hesaplanır.
+          yeni kayıt ekleyin. Güncel KM / saat bilgisi sayaç kayıtlarından, ortalama
+          yakıt tüketimi ise sayaç farkına göre sunucuda otomatik hesaplanır.
         </p>
       </div>
 
