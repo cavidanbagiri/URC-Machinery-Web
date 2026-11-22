@@ -9,7 +9,6 @@ import {
 
 import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
-import StatusBadge from '../machines/StatusBadge';
 import { formatDate, formatNumber } from '../../utils/maintenance';
 import { latestEntryForDate, parseDecimalInput } from '../../utils/meterLog';
 
@@ -19,8 +18,8 @@ const METER_LOG_COLUMN_WIDTHS = {
   machine: 230,
   type: 150,
   brand_model: 180,
-  territory: 130,
-  status: 120,
+  month_change: 160,
+  last_change: 150,
   last_km: 120,
   last_engine_hours: 130,
   new_km: 140,
@@ -35,6 +34,65 @@ const INPUT_CLASS =
 
 function machineLabel(machine) {
   return machine.identification_no || machine.plate_no || `#${machine.machine_id}`;
+}
+
+// "Son Gün/KM" ve "1 Aylık Toplam" hücreleri: KM ve motor saati farkı alt alta.
+// Pozitif fark "+" ile gösterilir; hesaplanamayan fark "—" olur.
+function formatChange(value) {
+  if (value === null || value === undefined) return null;
+
+  const text = formatNumber(value);
+  return value > 0 ? `+${text}` : text;
+}
+
+function daySpan(fromDate, toDate) {
+  if (!fromDate || !toDate) return null;
+
+  const start = Date.parse(`${fromDate}T00:00:00Z`);
+  const end = Date.parse(`${toDate}T00:00:00Z`);
+  if (Number.isNaN(start) || Number.isNaN(end)) return null;
+
+  return Math.round((end - start) / 86400000);
+}
+
+// Tooltip: hangi iki tarih arasındaki fark ve kaç günlük dönem.
+function changeTitle(fromDate, toDate) {
+  if (!fromDate || !toDate) return '';
+
+  const range = `${formatDate(fromDate)} → ${formatDate(toDate)}`;
+  const span = daySpan(fromDate, toDate);
+
+  return span > 0 ? `${range} (${span} gün)` : range;
+}
+
+function ChangeCell({ km, engineHours, emphasis = false }) {
+  const kmText = formatChange(km);
+  const hourText = formatChange(engineHours);
+
+  if (kmText === null && hourText === null) {
+    return <p className="pt-0.5 text-xs text-gray-300">—</p>;
+  }
+
+  const valueClass = emphasis
+    ? 'font-semibold text-gray-900'
+    : 'font-semibold text-gray-800';
+
+  return (
+    <div className="space-y-0.5">
+      <p className="flex items-center justify-between gap-1 text-[11px]">
+        <span className="text-[9px] font-semibold uppercase text-gray-400">
+          KM
+        </span>
+        <span className={valueClass}>{kmText ?? '—'}</span>
+      </p>
+      <p className="flex items-center justify-between gap-1 text-[11px]">
+        <span className="text-[9px] font-semibold uppercase text-gray-400">
+          Saat
+        </span>
+        <span className={valueClass}>{hourText ?? '—'}</span>
+      </p>
+    </div>
+  );
 }
 
 function Skeleton() {
@@ -168,19 +226,27 @@ function EntryRow({ machine, selectedDate, onSave }) {
         )}
       </td>
 
-      <td className="px-3 py-2.5 align-top text-[12px] text-gray-700">
-        <p className="truncate" title={machine.territory_name || ''}>
-          {machine.territory_name || '—'}
-        </p>
+      <td
+        className="px-3 py-2.5 align-top"
+        title={changeTitle(
+          machine.month_change_from_date,
+          machine.last_log_date
+        )}
+      >
+        <ChangeCell
+          km={machine.month_change_km}
+          engineHours={machine.month_change_engine_hours}
+          emphasis
+        />
       </td>
 
-      <td className="px-3 py-2.5 align-top">
-        <StatusBadge
-          status={
-            machine.status_name
-              ? { name: machine.status_name, color: machine.status_color }
-              : null
-          }
+      <td
+        className="px-3 py-2.5 align-top"
+        title={changeTitle(machine.last_change_from_date, machine.last_log_date)}
+      >
+        <ChangeCell
+          km={machine.last_change_km}
+          engineHours={machine.last_change_engine_hours}
         />
       </td>
 
@@ -345,19 +411,21 @@ export default function MeterLogEntryTable({
               </ResizableTh>
               <ResizableTh
                 resize={resize}
-                columnId="territory"
-                label="Bölge"
-                className="px-3 py-2.5 text-left font-semibold"
+                columnId="month_change"
+                label="1 Aylık Toplam"
+                title="Son 30 günün ilk okumasından bugüne fark — en fazla 1 aylık (KM / motor saati). Tek günlük veride — görünür."
+                className="px-3 py-2.5 text-right font-semibold"
               >
-                Bölge
+                1 Aylık Toplam
               </ResizableTh>
               <ResizableTh
                 resize={resize}
-                columnId="status"
-                label="Durum"
-                className="px-3 py-2.5 text-left font-semibold"
+                columnId="last_change"
+                label="Son Gün/KM"
+                title="Güncel okuma ile bir önceki günün okuması arasındaki fark"
+                className="px-3 py-2.5 text-right font-semibold"
               >
-                Durum
+                Son Gün/KM
               </ResizableTh>
               <ResizableTh
                 resize={resize}

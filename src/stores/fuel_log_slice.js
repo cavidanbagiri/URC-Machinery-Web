@@ -15,12 +15,17 @@ const initialState = {
     previous_month_total: 0,
     sru_monthly_total: 0,
     dcu_monthly_total: 0,
+    rental_total: 0,
+    rental_daily_total: 0,
+    rental_monthly_total: 0,
     machines: [],
+    rental_machines: [],
   },
   loading: false,
   error: null,
   listRequestId: null,
   savingMachineId: null,
+  savingRentalId: null,
   mutationError: null,
 };
 
@@ -66,6 +71,38 @@ function applySavedEntry(state, entry) {
   }
 }
 
+/**
+ * Kiralik tabda kaydedilen litreleri aninda yansitir. Ayni makine tablosunda
+ * oldugu gibi kesin degerler sayfa yenilendiginde sunucudan gelir.
+ */
+function applySavedRentalEntry(state, entry) {
+  const { overview } = state;
+
+  // Kullanici kayit sirasinda baska bir gune gectiyse eski cevabi yansitma.
+  if (overview.fuel_date !== entry.fuel_date) return;
+
+  const rental = (overview.rental_machines || []).find(
+    (item) => item.rental_id === entry.rental_id
+  );
+  if (!rental) return;
+
+  const liters = Number(entry.liters) || 0;
+
+  rental.day_liters = (Number(rental.day_liters) || 0) + liters;
+  rental.day_entry_count = (Number(rental.day_entry_count) || 0) + 1;
+  rental.monthly_liters = (Number(rental.monthly_liters) || 0) + liters;
+  rental.total_liters = (Number(rental.total_liters) || 0) + liters;
+  rental.total_entry_count = (Number(rental.total_entry_count) || 0) + 1;
+  rental.last_given_by = entry.given_by;
+  rental.last_note = entry.note;
+  rental.last_created_at = entry.created_at;
+
+  overview.rental_daily_total = (Number(overview.rental_daily_total) || 0) + liters;
+  overview.rental_monthly_total =
+    (Number(overview.rental_monthly_total) || 0) + liters;
+  overview.rental_total = (Number(overview.rental_total) || 0) + liters;
+}
+
 export const fetchFuelLogOverview = createAsyncThunk(
   'fuelLog/fetchOverview',
   async (params = {}, { rejectWithValue }) => {
@@ -86,6 +123,19 @@ export const createFuelLog = createAsyncThunk(
       return await FuelLogService.createLog(payload);
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Mazot kaydı kaydedilemedi'));
+    }
+  }
+);
+
+export const createRentalFuelLog = createAsyncThunk(
+  'fuelLog/createRentalLog',
+  async (payload, { rejectWithValue }) => {
+    try {
+      return await FuelLogService.createRentalLog(payload);
+    } catch (err) {
+      return rejectWithValue(
+        errorMessage(err, 'Kiralık makine mazot kaydı kaydedilemedi')
+      );
     }
   }
 );
@@ -127,6 +177,20 @@ const fuelLogSlice = createSlice({
       })
       .addCase(createFuelLog.rejected, (state, action) => {
         state.savingMachineId = null;
+        state.mutationError = action.payload;
+      });
+
+    builder
+      .addCase(createRentalFuelLog.pending, (state, action) => {
+        state.savingRentalId = action.meta.arg.rental_id;
+        state.mutationError = null;
+      })
+      .addCase(createRentalFuelLog.fulfilled, (state, action) => {
+        state.savingRentalId = null;
+        applySavedRentalEntry(state, action.payload);
+      })
+      .addCase(createRentalFuelLog.rejected, (state, action) => {
+        state.savingRentalId = null;
         state.mutationError = action.payload;
       });
   },

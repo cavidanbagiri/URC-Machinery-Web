@@ -24,18 +24,18 @@ import logo from '../assets/main_logo.png'
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
   { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
-  { to: '/rental_machines', label: 'Kiralık Makineler', icon: HiOutlineKey },
   { to: '/repair', label: 'Arızalı Ekipman', icon: PiWrenchLight },
-  { to: '/isg', label: 'ISG', icon: HiOutlineShieldExclamation },
-  // {* Dont need to show daily faults *}
-  // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
   { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
   { to: '/tires', label: 'Lastik Takibi', icon: RxColorWheel },
-  { to: '/document_tracking', label: 'Evrak Takip Tablosu', icon: HiOutlineClipboardDocumentList },
   { to: '/meter_logs', label: 'Güncel KM ve Motor Saatleri', icon: IoSpeedometerOutline },
   { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: FaGasPump },
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },
   { to: '/stock', label: 'Stok', icon: BsBoxSeam },
+  { to: '/rental_machines', label: 'Kiralık Makineler', icon: HiOutlineKey },
+  { to: '/isg', label: 'ISG', icon: HiOutlineShieldExclamation },
+  // {* Dont need to show daily faults *}
+  // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
+  { to: '/document_tracking', label: 'Evrak Takip Tablosu', icon: HiOutlineClipboardDocumentList },
   // Ambar modülü devre dışı; kod duruyor, menüde gösterilmiyor.
   // { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
   { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },

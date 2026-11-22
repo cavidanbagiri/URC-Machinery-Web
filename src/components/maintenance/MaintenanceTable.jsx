@@ -21,6 +21,7 @@ import {
   formatCounter,
   formatDate,
   formatNumber,
+  isTrailerTypeName,
   unitLabel,
 } from '../../utils/maintenance';
 
@@ -238,7 +239,11 @@ export default function MaintenanceTable({
       filter: {
         kind: 'select',
         key: 'type_id',
-        options: lookups.type_transport || [],
+        // Dorseler Bakım listesinde yok (motor saati / KM'si yok), bu yüzden
+        // tip filtresinde de seçenek olarak çıkmaz.
+        options: (lookups.type_transport || []).filter(
+          (type) => !isTrailerTypeName(type.name)
+        ),
       },
     },
     {

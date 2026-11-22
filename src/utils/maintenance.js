@@ -107,3 +107,17 @@ export function toNullableText(value) {
   if (value === '' || value === null || value === undefined) return null;
   return String(value).trim() || null;
 }
+
+// ---- TIR dorseleri -------------------------------------------------------
+// Dorse (Tır Dorse tipi / TD-... kodlu) bir makine değil, çekilen ekipmandır:
+// kendi motor saati / KM sayacı yoktur. Backend onları Bakım listesinden
+// çıkarır (`repositories/machine_kind_lookup.py`); buradaki yardımcı ise "Tip"
+// filtresinden o tipi gizler ki seçildiğinde boş sonuç çıkmasın.
+export const TRAILER_TYPE_KEYWORD = 'dorse';
+
+/** Tip adı bir dorse mi ("Tır Dorse", "Dorse", "TIR DORSE"). */
+export function isTrailerTypeName(name) {
+  return String(name || '')
+    .toLocaleLowerCase('tr')
+    .includes(TRAILER_TYPE_KEYWORD);
+}

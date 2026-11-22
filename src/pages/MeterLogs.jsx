@@ -104,6 +104,10 @@ export default function MeterLogs() {
             km
           )} km / ${formatNumber(engineHours)} saat kaydedildi`
         );
+
+        // "Son Gün/KM" ve "1 Aylık Toplam" farkları sunucuda hesaplanır;
+        // yeni okuma sonrası tabloyu tazele ki sütunlar anında güncellensin.
+        dispatch(fetchMeterLogOverview({ days: 7, end_date: selectedDate }));
       } catch (err) {
         toast.error(String(err || 'KM / motor saati kaydedilemedi'));
         throw err;

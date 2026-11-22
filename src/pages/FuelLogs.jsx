@@ -5,16 +5,23 @@ import toast, { Toaster } from 'react-hot-toast';
 import {
   ArrowPathIcon,
   BuildingOffice2Icon,
+  BuildingStorefrontIcon,
   CalendarDaysIcon,
   ChartBarIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
   MapPinIcon,
+  TruckIcon,
 } from '@heroicons/react/24/outline';
 import { FaGasPump } from 'react-icons/fa';
 
 import FuelLogEntryTable from '../components/fuellog/FuelLogEntryTable';
-import { createFuelLog, fetchFuelLogOverview } from '../stores/fuel_log_slice';
+import RentalFuelLogTable from '../components/fuellog/RentalFuelLogTable';
+import {
+  createFuelLog,
+  createRentalFuelLog,
+  fetchFuelLogOverview,
+} from '../stores/fuel_log_slice';
 import { formatDate, formatNumber, todayISO } from '../utils/maintenance';
 
 const SEARCH_FIELDS = [
@@ -27,6 +34,14 @@ const SEARCH_FIELDS = [
   'car_model_name',
   'territory_name',
   'company_name',
+];
+
+// Kiralık ekipmanın elle girilen üç alanı + seçilen güne göre durum etiketi.
+const RENTAL_SEARCH_FIELDS = [
+  'equipment_name',
+  'company_name',
+  'site_name',
+  'status_label',
 ];
 
 const SUMMARY_THEMES = {
@@ -49,6 +64,16 @@ const SUMMARY_THEMES = {
     card: 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-white',
     icon: 'bg-emerald-100 text-emerald-700',
     value: 'text-emerald-900',
+  },
+  amber: {
+    card: 'border-amber-200 bg-gradient-to-br from-amber-50 to-white',
+    icon: 'bg-amber-100 text-amber-700',
+    value: 'text-amber-900',
+  },
+  teal: {
+    card: 'border-teal-200 bg-gradient-to-br from-teal-50 to-white',
+    icon: 'bg-teal-100 text-teal-700',
+    value: 'text-teal-900',
   },
 };
 
@@ -80,6 +105,40 @@ function SummaryCard({ label, value, hint, icon: Icon, theme }) {
   );
 }
 
+const TABS = [
+  { id: 'own', label: 'Kendi Makineler', icon: TruckIcon },
+  { id: 'rental', label: 'Kiralık Makineler', icon: BuildingStorefrontIcon },
+];
+
+/** Tablo üstündeki sekme: hangi defterin düzenlendiğini belirler. */
+function TabButton({ tab, active, count, onClick }) {
+  const Icon = tab.icon;
+
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+        active
+          ? 'bg-blue-600 text-white shadow-sm'
+          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+      }`}
+    >
+      <Icon className="h-4 w-4" />
+      {tab.label}
+      <span
+        className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+          active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+        }`}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
 export default function FuelLogs() {
   const dispatch = useDispatch();
   const { overview, loading, error, mutationError } = useSelector(
@@ -88,6 +147,8 @@ export default function FuelLogs() {
 
   const [selectedDate, setSelectedDate] = useState(todayISO);
   const [search, setSearch] = useState('');
+  // Tablo üstündeki sekmeler: varsayılan kendi makinelerimiz.
+  const [activeTab, setActiveTab] = useState('own');
 
   useEffect(() => {
     dispatch(fetchFuelLogOverview({ fuel_date: selectedDate }));
@@ -120,6 +181,30 @@ export default function FuelLogs() {
       { entryCount: 0, fueledMachines: 0 }
     );
   }, [overview.machines]);
+
+  // Kiralık sekme: arama, ekipman / firma / şantiye / durum alanlarında çalışır.
+  const rentals = useMemo(() => {
+    const list = overview.rental_machines || [];
+    if (!term) return list;
+
+    return list.filter((rental) =>
+      RENTAL_SEARCH_FIELDS.some((field) => {
+        const value = rental[field];
+        return value && String(value).toLocaleLowerCase('tr-TR').includes(term);
+      })
+    );
+  }, [overview.rental_machines, term]);
+
+  const { rentalEntryCount, fueledRentals } = useMemo(() => {
+    return (overview.rental_machines || []).reduce(
+      (totals, rental) => ({
+        rentalEntryCount: totals.rentalEntryCount + (rental.day_entry_count || 0),
+        fueledRentals:
+          totals.fueledRentals + (rental.day_entry_count > 0 ? 1 : 0),
+      }),
+      { rentalEntryCount: 0, fueledRentals: 0 }
+    );
+  }, [overview.rental_machines]);
 
   const handleSave = useCallback(
     async (machine, liters) => {
@@ -157,6 +242,38 @@ export default function FuelLogs() {
     [dispatch, selectedDate]
   );
 
+  const handleSaveRental = useCallback(
+    async (rental, liters) => {
+      if (selectedDate > todayISO()) {
+        toast.error('Gelecek bir tarih için kayıt yapılamaz');
+        throw new Error('Gelecek tarih');
+      }
+
+      try {
+        await dispatch(
+          createRentalFuelLog({
+            rental_id: rental.rental_id,
+            fuel_date: selectedDate,
+            liters,
+            // Kiralık satırda da "Yakıtı veren" sorulmaz; sunucu oturumdaki
+            // kullanıcının adını yazar.
+          })
+        ).unwrap();
+
+        const label = rental.equipment_name || `#${rental.rental_id}`;
+        toast.success(
+          `${label} · ${formatDate(selectedDate)}: ${formatNumber(liters)} L eklendi`
+        );
+
+        dispatch(fetchFuelLogOverview({ fuel_date: selectedDate }));
+      } catch (err) {
+        toast.error(String(err || 'Kiralık makine mazot kaydı kaydedilemedi'));
+        throw err;
+      }
+    },
+    [dispatch, selectedDate]
+  );
+
   const monthHint = overview.month_start
     ? `${formatDate(overview.month_start)} – ${formatDate(selectedDate)}`
     : 'Ay başından itibaren';
@@ -182,8 +299,10 @@ export default function FuelLogs() {
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
-            {overview.machines.length} makine · {fueledMachines} makinede{' '}
-            {entryCount} kayıt · {formatDate(selectedDate)}
+            {activeTab === 'own'
+              ? `${overview.machines.length} makine · ${fueledMachines} makinede ${entryCount} kayıt`
+              : `${(overview.rental_machines || []).length} kiralık makine · ${fueledRentals} makinede ${rentalEntryCount} kayıt`}{' '}
+            · {formatDate(selectedDate)}
           </p>
         </div>
 
@@ -212,35 +331,68 @@ export default function FuelLogs() {
         </div>
       </div>
 
-      <div className="grid gap-3 px-1 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard
-          label="Geçen Ay Toplam"
-          value={overview.previous_month_total}
-          hint={previousMonthHint}
-          icon={CalendarDaysIcon}
-          theme="slate"
-        />
-        <SummaryCard
-          label="SRU · Güncel Ay"
-          value={overview.sru_monthly_total}
-          hint={`SRU şantiyesi · ${monthHint}`}
-          icon={BuildingOffice2Icon}
-          theme="sky"
-        />
-        <SummaryCard
-          label="DCU · Güncel Ay"
-          value={overview.dcu_monthly_total}
-          hint={`DCU şantiyesi · ${monthHint}`}
-          icon={MapPinIcon}
-          theme="violet"
-        />
-        <SummaryCard
-          label="Güncel Ay Verilen"
-          value={overview.monthly_total}
-          hint={monthHint}
-          icon={ChartBarIcon}
-          theme="emerald"
-        />
+      <div className="space-y-3">
+        <div className="grid gap-3 px-1 sm:grid-cols-3 xl:grid-cols-6">
+          <SummaryCard
+            label="Geçen Ay Toplam"
+            value={overview.previous_month_total}
+            hint={previousMonthHint}
+            icon={CalendarDaysIcon}
+            theme="slate"
+          />
+          <SummaryCard
+            label="SRU · Güncel Ay"
+            value={overview.sru_monthly_total}
+            hint={`SRU şantiyesi · ${monthHint}`}
+            icon={BuildingOffice2Icon}
+            theme="sky"
+          />
+          <SummaryCard
+            label="DCU · Güncel Ay"
+            value={overview.dcu_monthly_total}
+            hint={`DCU şantiyesi · ${monthHint}`}
+            icon={MapPinIcon}
+            theme="violet"
+          />
+          <SummaryCard
+            label="Güncel Ay Verilen"
+            value={overview.monthly_total}
+            hint={monthHint}
+            icon={ChartBarIcon}
+            theme="emerald"
+          />
+          <SummaryCard
+            label="Kiralık · Toplam Verilen"
+            value={overview.rental_total ?? 0}
+            hint={`${formatDate(selectedDate)} dahil tüm kiralık ekipman`}
+            icon={TruckIcon}
+            theme="amber"
+          />
+          <SummaryCard
+            label="Kiralık · Güncel Ay"
+            value={overview.rental_monthly_total ?? 0}
+            hint={`Kiralık ekipman · ${monthHint}`}
+            icon={CalendarDaysIcon}
+            theme="teal"
+          />
+        </div>
+
+        <div className="grid gap-3 px-1 sm:grid-cols-2">
+          {/* <SummaryCard
+            label="Kiralık · Toplam Verilen"
+            value={overview.rental_total ?? 0}
+            hint={`${formatDate(selectedDate)} dahil tüm kiralık ekipman`}
+            icon={TruckIcon}
+            theme="amber"
+          />
+          <SummaryCard
+            label="Kiralık · Güncel Ay"
+            value={overview.rental_monthly_total ?? 0}
+            hint={`Kiralık ekipman · ${monthHint}`}
+            icon={CalendarDaysIcon}
+            theme="teal"
+          /> */}
+        </div>
       </div>
 
       <div className="mx-1 flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50/70 px-3 py-2 text-xs text-amber-900">
@@ -250,6 +402,9 @@ export default function FuelLogs() {
           makineye gün içinde birden fazla yakıt girişi yapılabilir; düzeltme için
           yeni kayıt ekleyin. Güncel KM / saat bilgisi sayaç kayıtlarından, ortalama
           yakıt tüketimi ise sayaç farkına göre sunucuda otomatik hesaplanır.
+          Tablonun üstündeki <strong>Kiralık Makineler</strong> sekmesi dışarıdan
+          kiralanan ekipmanın mazotunu ayrı defterde tutar; kiralık ekipmanın filo
+          numarası ve sayacı olmadığı için yalnızca toplam litre izlenir.
         </p>
       </div>
 
@@ -260,28 +415,72 @@ export default function FuelLogs() {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-        <div className="relative">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Makine, plaka, marka, bölge ara..."
-            className="w-72 rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
+        {/* Tablo üstündeki sekmeler: varsayılan "Kendi Makineler". */}
+        <div
+          className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm"
+          role="tablist"
+          aria-label="Mazot defteri"
+        >
+          {TABS.map((tab) => (
+            <TabButton
+              key={tab.id}
+              tab={tab}
+              active={activeTab === tab.id}
+              count={
+                tab.id === 'own'
+                  ? overview.machines.length
+                  : (overview.rental_machines || []).length
+              }
+              onClick={() => setActiveTab(tab.id)}
+            />
+          ))}
         </div>
 
-        <span className="text-xs text-gray-400">
-          {machines.length} / {overview.machines.length} makine
-        </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={
+                activeTab === 'own'
+                  ? 'Makine, plaka, marka, bölge ara...'
+                  : 'Ekipman, firma, şantiye ara...'
+              }
+              aria-label={
+                activeTab === 'own' ? 'Makine ara' : 'Kiralık makine ara'
+              }
+              className="w-72 rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+
+          <span className="text-xs text-gray-400">
+            {activeTab === 'own'
+              ? `${machines.length} / ${overview.machines.length} makine`
+              : `${rentals.length} / ${
+                  (overview.rental_machines || []).length
+                } kiralık makine`}
+          </span>
+        </div>
       </div>
 
-      <FuelLogEntryTable
-        machines={machines}
-        loading={loading}
-        selectedDate={selectedDate}
-        onSave={handleSave}
-      />
+      {activeTab === 'own' ? (
+        <FuelLogEntryTable
+          machines={machines}
+          loading={loading}
+          selectedDate={selectedDate}
+          onSave={handleSave}
+        />
+      ) : (
+        <RentalFuelLogTable
+          rentals={rentals}
+          loading={loading}
+          selectedDate={selectedDate}
+          onSave={handleSaveRental}
+          dailyTotal={overview.rental_daily_total ?? 0}
+        />
+      )}
     </div>
   );
 }
