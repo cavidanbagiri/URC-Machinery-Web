@@ -14,6 +14,7 @@ import {
   HiOutlineChevronDoubleRight,
   HiOutlineClipboardDocumentList,
   HiOutlineKey,
+  HiOutlineShieldExclamation,
   HiOutlineWrenchScrewdriver,
 } from "react-icons/hi2";
 import { GiCrane } from "react-icons/gi";
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
   { to: '/rental_machines', label: 'Kiralık Makineler', icon: HiOutlineKey },
   { to: '/repair', label: 'Arızalı Ekipman', icon: PiWrenchLight },
+  { to: '/isg', label: 'ISG', icon: HiOutlineShieldExclamation },
   // {* Dont need to show daily faults *}
   // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
   { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },

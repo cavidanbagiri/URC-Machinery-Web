@@ -16,6 +16,7 @@ import tireReducer from './tire_slice';
 import meterLogReducer from './meter_log_slice';
 import fuelLogReducer from './fuel_log_slice';
 import rentalMachineReducer from './rental_machine_slice';
+import isgReducer from './isg_slice';
 
 const store = configureStore({
   reducer: {
@@ -36,6 +37,7 @@ const store = configureStore({
     meterLog: meterLogReducer,
     fuelLog: fuelLogReducer,
     rentalMachine: rentalMachineReducer,
+    isg: isgReducer,
   },
 });
 

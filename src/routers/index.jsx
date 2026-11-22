@@ -12,6 +12,7 @@ import Maintenance from '../pages/Maintenance'
 import MeterLogs from '../pages/MeterLogs'
 import FuelLogs from '../pages/FuelLogs'
 import RentalMachines from '../pages/RentalMachines'
+import Isg from '../pages/Isg'
 import Repair from '../pages/Repair'
 import DailyFaults from '../pages/DailyFaults'
 import Tires from '../pages/Tires'
@@ -96,6 +97,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <RentalMachines />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'isg',
+        element: (
+          <ProtectedRoute>
+            <Isg />
           </ProtectedRoute>
         ),
       },
