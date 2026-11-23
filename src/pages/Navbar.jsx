@@ -9,6 +9,27 @@ import { FaGasPump } from "react-icons/fa";
 import { IoSettingsOutline, IoSpeedometerOutline } from "react-icons/io5";
 import { IoIosLogIn, IoIosLogOut } from "react-icons/io";
 import { PiWrenchLight } from "react-icons/pi";
+import { CiDeliveryTruck } from "react-icons/ci";
+import { PiScrewdriverLight } from "react-icons/pi";
+import { TfiHome } from "react-icons/tfi";
+
+import { PiTireThin } from "react-icons/pi";
+import { PiSpeedometerThin } from "react-icons/pi";
+import { PiGasPumpThin } from "react-icons/pi";
+import { PiShoppingCartSimpleLight } from "react-icons/pi";
+import { PiGasPumpLight } from "react-icons/pi";
+import { PiSpeedometerLight } from "react-icons/pi";
+import { PiWarehouseLight } from "react-icons/pi";
+import { PiTimerLight } from "react-icons/pi";
+import { PiClipboardTextLight } from "react-icons/pi";
+import { PiHardHatLight } from "react-icons/pi";
+import { CiSettings } from "react-icons/ci";
+import { CiHome } from "react-icons/ci";
+
+
+
+
+
 import {
   HiOutlineChevronDoubleLeft,
   HiOutlineChevronDoubleRight,
@@ -22,23 +43,23 @@ import { GiCrane } from "react-icons/gi";
 import logo from '../assets/main_logo.png'
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: RxDashboard },
-  { to: '/common_cars', label: 'Tum Makineler', icon: GiCrane },
+  { to: '/dashboard', label: 'Dashboard', icon: CiHome },
+  { to: '/common_cars', label: 'Tum Makineler', icon: CiDeliveryTruck },
   { to: '/repair', label: 'Arızalı Ekipman', icon: PiWrenchLight },
-  { to: '/maintenance', label: 'Bakım', icon: HiOutlineWrenchScrewdriver },
-  { to: '/tires', label: 'Lastik Takibi', icon: RxColorWheel },
-  { to: '/meter_logs', label: 'Güncel KM ve Motor Saatleri', icon: IoSpeedometerOutline },
-  { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: FaGasPump },
-  { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: BsCartCheck },
-  { to: '/stock', label: 'Stok', icon: BsBoxSeam },
-  { to: '/rental_machines', label: 'Kiralık Makineler', icon: HiOutlineKey },
-  { to: '/isg', label: 'ISG', icon: HiOutlineShieldExclamation },
+  { to: '/maintenance', label: 'Bakım', icon: PiScrewdriverLight },
+  { to: '/tires', label: 'Lastik Takibi', icon: PiTireThin },
+  { to: '/meter_logs', label: 'Güncel KM ve Motor Saatleri', icon: PiSpeedometerLight },
+  { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: PiGasPumpLight },
+  { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: PiShoppingCartSimpleLight },
+  { to: '/stock', label: 'Stok', icon: PiWarehouseLight },
+  { to: '/rental_machines', label: 'Kiralık Makineler', icon: PiTimerLight },
+  { to: '/isg', label: 'ISG', icon: PiHardHatLight },
   // {* Dont need to show daily faults *}
   // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },
-  { to: '/document_tracking', label: 'Evrak Takip Tablosu', icon: HiOutlineClipboardDocumentList },
+  { to: '/document_tracking', label: 'Evrak Takip Tablosu', icon: PiClipboardTextLight },
   // Ambar modülü devre dışı; kod duruyor, menüde gösterilmiyor.
   // { to: '/warehouse_stock', label: 'Depo Stoku', icon: BsBoxSeam },
-  { to: '/settings', label: 'Ayarlar', icon: IoSettingsOutline },
+  { to: '/settings', label: 'Ayarlar', icon: CiSettings },
   // { to: '/forum', label: 'Forum', icon: BsChatDots },
   // { to: '/notifications', label: 'Bildirimler', icon: BsBell },
 ];
@@ -66,7 +87,7 @@ function NavItem({ item, expanded, onShowTooltip, onHideTooltip, onNavigate }) {
         onClick={onNavigate}
         {...tooltipHandlers}
         className={({ isActive }) =>
-          `flex w-full items-center gap-3 rounded-lg py-2 2xl:py-3 text-sm no-underline transition-colors ${
+          `flex w-full items-center gap-3 rounded-lg py-2.5 2xl:py-3 text-sm no-underline transition-colors ${
             expanded ? 'px-3' : 'justify-center px-0'
           } ${
             isActive
