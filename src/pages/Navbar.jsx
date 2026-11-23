@@ -66,7 +66,7 @@ function NavItem({ item, expanded, onShowTooltip, onHideTooltip, onNavigate }) {
         onClick={onNavigate}
         {...tooltipHandlers}
         className={({ isActive }) =>
-          `flex w-full items-center gap-3 rounded-lg py-3 text-sm no-underline transition-colors ${
+          `flex w-full items-center gap-3 rounded-lg py-2 2xl:py-3 text-sm no-underline transition-colors ${
             expanded ? 'px-3' : 'justify-center px-0'
           } ${
             isActive
