@@ -1,11 +1,4 @@
-// src/components/dashboard/MaintenanceStatusChart.jsx
-//
-// Bakım durumu dağılımı (gecikmiş / yaklaşıyor / veri uyarısı / uygun / ...).
-// Kaynak: GET /maintenance/summary → by_status
-//
-// Görsel: "activity ring" tarzı RadialBar — her durum bir halka, halka yayının
-// uzunluğu o durumdaki makine sayısıyla orantılı (domain sabit: en büyük değer).
-// Legend, uzun Türkçe etiketler kırpılabilsin ve satırlar tıklanabilsin diye
+
 // Recharts'ın legend'ı yerine elle çiziliyor.
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -128,13 +121,13 @@ export default function MaintenanceStatusChart() {
                   className="h-2 w-2 shrink-0 rounded-full"
                   style={{ backgroundColor: item.fill }}
                 />
-                <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-gray-700">
+                <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-gray-700">
                   {item.name}
                 </span>
-                <span className="shrink-0 text-[11px] font-semibold tabular-nums text-gray-900">
+                <span className="shrink-0 text-[15px] font-semibold tabular-nums text-gray-900">
                   {item.value}
                 </span>
-                <span className="w-7 shrink-0 text-right text-[10px] tabular-nums text-gray-400">
+                <span className="w-7 shrink-0 text-right text-[14px] tabular-nums text-gray-400">
                   {percent}%
                 </span>
               </button>

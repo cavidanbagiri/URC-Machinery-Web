@@ -78,40 +78,32 @@ export default function DashboardPage() {
           {errorMessage}
         </div>
       )}
-      {/* 1. satır (test): solda pivot tablo, sağda 2×2 KPI kartları + mazot grafiği.
-          lg'de satır yüksekliği sabit (840px): 15+ bölge sütunu olan pivot artık
-          satırı büyütemiyor, tablo kendi içinde kaydırılıyor. Sağ kolon kalan
-          yüksekliği KPI kartları + Mazot dağılımı ile tamamen dolduruyor. */}
-      <div className="grid grid-cols-1 gap-6 lg:h-[840px] lg:grid-cols-2 lg:grid-rows-[840px]">
-        <PivotTable />
-        <div className="flex min-h-0 flex-col gap-6">
+
+      <div className="grid grid-cols-1 gap-6  lg:grid-cols-2">
+        {/* <PivotTable /> */}
           <KpiCards columns={2} />
-          <div className="min-h-[260px] flex-1">
+        <div className="flex min-h-0 flex-col gap-6">
+          <div className=" flex-1">
             <FuelDistributionChart />
           </div>
         </div>
       </div>
 
-      {/* 2. satır (test): durum, bakım ve tamir grafikleri yan yana */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="min-h-[360px] xl:h-[480px]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 ">
+        <div className="min-h-[360px] xl:h-[400px]">
           <StatusChart />
         </div>
-        <div className="min-h-[360px] xl:h-[480px]">
+        <div className="min-h-[360px] xl:h-[400px]">
           <MaintenanceStatusChart />
-        </div>
-        <div className="min-h-[360px] xl:h-[480px]">
-          <RepairTypeChart />
         </div>
       </div>
 
-      {/* 3. satır (test): bekleyen yedek parça, forum ve garaj yükü yan yana */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 ">
         <div className="min-h-[320px] xl:h-[400px]">
           <PendingSpareParts />
         </div>
         <div className="min-h-[320px] xl:h-[400px]">
-          <OpenForumTopics />
+          <RepairTypeChart />
         </div>
         <div className="min-h-[320px] xl:h-[400px]">
           <GarageLoadCard />
