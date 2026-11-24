@@ -3,26 +3,37 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import { BsTools } from 'react-icons/bs';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import {
+  ArchiveBoxIcon,
+  ArrowPathIcon,
+  WrenchScrewdriverIcon,
+} from '@heroicons/react/24/outline';
 import { useSearchParams } from 'react-router-dom';
 
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import MaintenanceService from '../services/MaintenanceService';
 import {
   fetchMaintenance,
+  fetchMaintenanceRecords,
   fetchMaintenanceSummary,
   resetFilters,
+  resetRecordFilters,
   resetSort,
   setFilters,
   setSort,
+  setTab,
 } from '../stores/maintenance_slice';
 import { formatDate } from '../utils/maintenance';
 
+import SegmentedTabs from '../components/ui/SegmentedTabs';
 import MaintenanceSummaryCards from '../components/maintenance/MaintenanceSummaryCards';
 import MaintenanceAdvancedFilters from '../components/maintenance/MaintenanceAdvancedFilters';
 import MaintenanceDateFilter from '../components/maintenance/MaintenanceDateFilter';
 import MaintenanceTable from '../components/maintenance/MaintenanceTable';
 import MaintenancePagination from '../components/maintenance/MaintenancePagination';
+import MaintenanceArchiveFilters from '../components/maintenance/MaintenanceArchiveFilters';
+import MaintenanceArchiveTable from '../components/maintenance/MaintenanceArchiveTable';
+import MaintenanceArchivePagination from '../components/maintenance/MaintenanceArchivePagination';
 import MaintenancePlanModal from '../components/maintenance/MaintenancePlanModal';
 import MaintenanceReadingModal from '../components/maintenance/MaintenanceReadingModal';
 import MaintenanceCompleteModal from '../components/maintenance/MaintenanceCompleteModal';
@@ -40,6 +51,8 @@ export default function Maintenance() {
     filters,
     sort_by,
     sort_order,
+    tab,
+    records,
     loading,
     error,
     summary,
@@ -66,6 +79,15 @@ export default function Maintenance() {
 
   const hasActiveFilters = activeFilterCount > 0;
 
+  // "Mevcut": makine listesi (plan + durum) · "Arşiv": yapılan bakımlar.
+  const isArchive = tab === 'archive';
+
+  const recordFilterCount = Object.values(records.filters).filter(
+    (value) => value !== '' && value !== null && value !== undefined
+  ).length;
+
+  const hasActiveRecordFilters = recordFilterCount > 0;
+
   const isFirstRender = useRef(true);
 
   // Lookup'ları bir kez yükle
@@ -86,6 +108,9 @@ export default function Maintenance() {
     const status = searchParams.get('status');
     if (!status) return;
 
+    // Derin bağlantı makine listesine aittir: arşiv sekmesinden gelinmişse
+    // "Mevcut" sekmesine dönülür.
+    dispatch(setTab('current'));
     dispatch(resetFilters());
     dispatch(setFilters({ status }));
   }, [dispatch, searchParams]);
@@ -111,6 +136,10 @@ export default function Maintenance() {
   }, []);
 
   const refreshAll = () => {
+    if (isArchive) {
+      dispatch(fetchMaintenanceRecords());
+      return;
+    }
     dispatch(fetchMaintenance());
     dispatch(fetchMaintenanceSummary());
   };
@@ -118,6 +147,17 @@ export default function Maintenance() {
   const handleSaved = () => {
     refreshAll();
   };
+
+  // Arşiv sekmesi: kayıtlar sekme ilk açıldığında, filtre / sayfa / boyut
+  // değiştiğinde yüklenir. Tek effect + kısa debounce sayesinde yazarken istek
+  // fırtınası oluşmaz ve sayfa değişiminde tek istek gider.
+  useEffect(() => {
+    if (tab !== 'archive') return undefined;
+    const timeout = setTimeout(() => {
+      dispatch(fetchMaintenanceRecords());
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [dispatch, tab, records.filters, records.offset, records.limit]);
 
   const handleSelectSummaryFilters = (nextFilters) => {
     // Summary counts are calculated over the whole dataset, so a card must
@@ -230,87 +270,159 @@ export default function Maintenance() {
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
-            Toplam {summary?.total ?? total} makine ·{' '}
-            {summary?.planned ?? 0} planlı · {summary?.unplanned ?? 0} plansız
-            {filters.updated_on && (
+            {isArchive ? (
+              `${records.total} tamamlanmış bakım kaydı · en yeni önce`
+            ) : (
               <>
-                {' '}
-                · {formatDate(filters.updated_on)} tarihinde güncellenen{' '}
-                <b className="font-semibold text-gray-700">{total}</b> makine
+                Toplam {summary?.total ?? total} makine ·{' '}
+                {summary?.planned ?? 0} planlı · {summary?.unplanned ?? 0}{' '}
+                plansız
+                {filters.updated_on && (
+                  <>
+                    {' '}
+                    · {formatDate(filters.updated_on)} tarihinde güncellenen{' '}
+                    <b className="font-semibold text-gray-700">{total}</b>{' '}
+                    makine
+                  </>
+                )}
               </>
             )}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <MaintenanceDateFilter />
+          {/* Tarih filtresi makine listesine aittir (güncelleme tarihi). */}
+          {!isArchive && <MaintenanceDateFilter />}
 
           <button
             type="button"
             onClick={refreshAll}
-            disabled={loading}
+            disabled={isArchive ? records.loading : loading}
             className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ArrowPathIcon
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${
+                (isArchive ? records.loading : loading) ? 'animate-spin' : ''
+              }`}
             />
             Yenile
           </button>
         </div>
       </div>
 
-      <div className="px-1">
-        <MaintenanceSummaryCards
-          summary={summary}
-          loading={summaryLoading}
-          onSelectFilters={handleSelectSummaryFilters}
-        />
-      </div>
+      {!isArchive && (
+        <div className="px-1">
+          <MaintenanceSummaryCards
+            summary={summary}
+            loading={summaryLoading}
+            onSelectFilters={handleSelectSummaryFilters}
+          />
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3 px-2">
-        <div className="flex items-center gap-2">
-          <MaintenanceAdvancedFilters />
+        <div className="flex flex-wrap items-center gap-2">
+          <SegmentedTabs
+            ariaLabel="Bakım kayıtları"
+            value={isArchive ? 'archive' : 'current'}
+            onChange={(value) => dispatch(setTab(value))}
+            tabs={[
+              {
+                id: 'current',
+                label: 'Mevcut',
+                count: summary?.total ?? total,
+                icon: WrenchScrewdriverIcon,
+              },
+              {
+                id: 'archive',
+                label: 'Arşiv',
+                count: summary?.completed ?? records.total,
+                icon: ArchiveBoxIcon,
+              },
+            ]}
+          />
 
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="text-xs font-medium text-red-600 hover:underline"
-            >
-              Filtreleri temizle ({activeFilterCount})
-            </button>
+          {isArchive ? (
+            hasActiveRecordFilters && (
+              <button
+                type="button"
+                onClick={() => dispatch(resetRecordFilters())}
+                className="text-xs font-medium text-red-600 hover:underline"
+              >
+                Filtreleri temizle ({recordFilterCount})
+              </button>
+            )
+          ) : (
+            <>
+              <MaintenanceAdvancedFilters />
+
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="text-xs font-medium text-red-600 hover:underline"
+                >
+                  Filtreleri temizle ({activeFilterCount})
+                </button>
+              )}
+            </>
           )}
         </div>
 
         <p className="text-[11px] text-gray-400">
-          Filtrelemek için sütun başlığına tıklayın
+          {isArchive
+            ? 'Tamamlanan bakımlar (sayaç kayıtları hariç)'
+            : 'Filtrelemek için sütun başlığına tıklayın'}
         </p>
       </div>
 
-      {error && (
+      {isArchive && <MaintenanceArchiveFilters />}
+
+      {!isArchive && error && (
         <div className="mx-1 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
           {String(error)}
         </div>
       )}
 
-      <div className="px-1">
-        <MaintenanceTable
-          items={items}
-          loading={loading}
-          hasActiveFilters={hasActiveFilters}
-          onOpenFilters={handleResetFilters}
-          onResetFilters={handleResetFilters}
-          onEditPlan={openPlan}
-          onReading={openReading}
-          onComplete={openComplete}
-          onHistory={openHistory}
-          sortBy={sort_by}
-          sortOrder={sort_order}
-          onSortChange={toggleRemainingSort}
-        />
+      {isArchive && records.error && (
+        <div className="mx-1 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {String(records.error)}
+        </div>
+      )}
 
-        <MaintenancePagination />
-      </div>
+      {isArchive ? (
+        <div className="px-1">
+          <MaintenanceArchiveTable
+            items={records.items}
+            loading={records.loading}
+            hasActiveFilters={hasActiveRecordFilters}
+            onResetFilters={() => dispatch(resetRecordFilters())}
+            onViewDocument={handleViewDocument}
+            onDownloadDocument={handleDownloadDocument}
+          />
+
+          <MaintenanceArchivePagination />
+        </div>
+      ) : (
+        <div className="px-1">
+          <MaintenanceTable
+            items={items}
+            loading={loading}
+            hasActiveFilters={hasActiveFilters}
+            onOpenFilters={handleResetFilters}
+            onResetFilters={handleResetFilters}
+            onEditPlan={openPlan}
+            onReading={openReading}
+            onComplete={openComplete}
+            onHistory={openHistory}
+            sortBy={sort_by}
+            sortOrder={sort_order}
+            onSortChange={toggleRemainingSort}
+          />
+
+          <MaintenancePagination />
+        </div>
+      )}
 
       <MaintenancePlanModal
         open={planOpen}

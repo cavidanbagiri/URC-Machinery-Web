@@ -196,7 +196,7 @@ const Navbar = ({ expanded = false, onToggle = () => {}, onClose = () => {} }) =
             className={`shrink-0 object-cover object-left ${expanded ? 'h-9 w-9' : 'h-8 w-8'}`}
           />
           {expanded && (
-            <span className="truncate text-sm font-semibold tracking-wide text-gray-800">
+            <span className="truncate text-xl font-semibold tracking-wide text-gray-800">
               URC Machinery
             </span>
           )}

@@ -3,7 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import { BsWrench } from 'react-icons/bs';
-import { ArrowPathIcon, PlusIcon } from '@heroicons/react/24/outline';
+import {
+  ArchiveBoxIcon,
+  ArrowPathIcon,
+  PlusIcon,
+  WrenchScrewdriverIcon,
+} from '@heroicons/react/24/outline';
 import { useSearchParams } from 'react-router-dom';
 
 import RepairService from '../services/RepairService';
@@ -13,11 +18,13 @@ import {
   fetchRepairSummary,
   fetchRepairs,
   resetFilters,
+  setArchive,
   setFilters,
   uploadRepairDocument,
 } from '../stores/repair_slice';
 import { validateRepairPdf } from '../utils/repair';
 
+import SegmentedTabs from '../components/ui/SegmentedTabs';
 import RepairSummaryCards from '../components/repair/RepairSummaryCards';
 import RepairAdvancedFilters from '../components/repair/RepairAdvancedFilters';
 import RepairTable from '../components/repair/RepairTable';
@@ -47,6 +54,7 @@ export default function Repair() {
     limit,
     offset,
     filters,
+    archive,
     loading,
     error,
     summary,
@@ -106,6 +114,11 @@ export default function Repair() {
 
     if (!status && !repairTypeId) return;
 
+    // Kapanmış bir durum isteniyorsa (ör. /repair?status=tamamlandi) arşiv
+    // sekmesi açılır. Sekme değişimi durum filtresini temizlediği için önce
+    // sekme, sonra filtre uygulanır.
+    if (status) dispatch(setArchive(status !== 'tamirde'));
+
     dispatch(resetFilters());
     dispatch(
       setFilters({
@@ -121,7 +134,7 @@ export default function Repair() {
       dispatch(fetchRepairs());
     }, 400);
     return () => clearTimeout(timeout);
-  }, [dispatch, filters]);
+  }, [dispatch, filters, archive]);
 
   useEffect(() => {
     if (isFirstRender.current) return;
@@ -142,6 +155,12 @@ export default function Repair() {
   };
 
   const handleSelectSummaryFilters = (nextFilters) => {
+    // Kart kapanmış tamirleri sayıyorsa arşiv sekmesine geçilir; "tamirde"
+    // filtresi mevcut listeye döner. Sekme, durum filtresini temizlediği için
+    // önce sekme ayarlanır.
+    if (nextFilters?.status) {
+      dispatch(setArchive(nextFilters.status !== 'tamirde'));
+    }
     dispatch(resetFilters());
     dispatch(setFilters(nextFilters));
   };
@@ -291,8 +310,13 @@ export default function Repair() {
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
-            {summary?.total ?? total} kayıt · {summary?.active ?? 0} tamirde ·{' '}
-            {summary?.overdue ?? 0} gecikmiş
+            {archive
+              ? `${total} kayıt · ${summary?.completed ?? 0} tamamlandı · ${
+                  summary?.cancelled ?? 0
+                } iptal edildi`
+              : `${summary?.total ?? total} kayıt · ${
+                  summary?.active ?? 0
+                } tamirde · ${summary?.overdue ?? 0} gecikmiş`}
           </p>
         </div>
 
@@ -330,7 +354,27 @@ export default function Repair() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 px-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <SegmentedTabs
+            ariaLabel="Arıza kayıtları"
+            value={archive ? 'archive' : 'current'}
+            onChange={(value) => dispatch(setArchive(value === 'archive'))}
+            tabs={[
+              {
+                id: 'current',
+                label: 'Mevcut',
+                count: summary?.active ?? total,
+                icon: WrenchScrewdriverIcon,
+              },
+              {
+                id: 'archive',
+                label: 'Arşiv',
+                count: (summary?.completed ?? 0) + (summary?.cancelled ?? 0),
+                icon: ArchiveBoxIcon,
+              },
+            ]}
+          />
+
           <RepairAdvancedFilters />
 
           {hasActiveFilters && (

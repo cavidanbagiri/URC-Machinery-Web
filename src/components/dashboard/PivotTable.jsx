@@ -40,14 +40,14 @@ export default function PivotTable() {
 
   return (
     <div style={{ fontFamily: 'Inter' }}
-    className="flex h-[480px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+    className="flex h-full min-h-[480px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5">
         <div>
           <h2 className="text-base font-semibold text-gray-900">
             Ekipman Kod Tanımları
           </h2>
-          <p className="mt-0.5 text-xs text-gray-500">Bölgeye göre dağılım</p>
+          {/* <p className="mt-0.5 text-xs text-gray-500">Bölgeye göre dağılım</p> */}
         </div>
         <div className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">
           Toplam: {grand_total}

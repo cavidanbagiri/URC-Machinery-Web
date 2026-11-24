@@ -125,6 +125,7 @@ export default function RepairTable({
 }) {
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.repair.filters);
+  const archive = useSelector((s) => s.repair.archive);
   const lookups = useSelector((s) => s.lookup.data);
   const [notePreview, setNotePreview] = useState(null);
 
@@ -168,9 +169,22 @@ export default function RepairTable({
       ? 'due_soon'
       : filters.status;
 
+  // "Mevcut" sekmesi açık tamirleri, "Arşiv" sekmesi kapanmış kayıtları
+  // listeler; durum seçenekleri de sekmeye göre değişir.
+  const statusFilterOptions = archive
+    ? [
+        { value: 'tamamlandi', label: 'Tamamlandı' },
+        { value: 'iptal', label: 'İptal edildi' },
+      ]
+    : [
+        { value: 'tamirde', label: 'Tamirde' },
+        { value: 'overdue', label: 'Yalnızca gecikmiş' },
+        { value: 'due_soon', label: 'Yaklaşan (≤3 gün)' },
+      ];
+
   const handleFilterChange = (key, value) => {
     if (key === 'status') {
-      if (value === 'overdue' || value === 'due_soon') {
+      if (!archive && (value === 'overdue' || value === 'due_soon')) {
         dispatch(
           setFilters({
             status: 'tamirde',
@@ -194,13 +208,7 @@ export default function RepairTable({
         kind: 'select',
         key: 'status',
         value: statusFilterValue,
-        options: [
-          // The page only lists equipment that is still waiting/under repair,
-          // so "Tamamlandı" / "İptal edildi" are not offered any more.
-          { value: 'tamirde', label: 'Tamirde' },
-          { value: 'overdue', label: 'Yalnızca gecikmiş' },
-          { value: 'due_soon', label: 'Yaklaşan (≤3 gün)' },
-        ],
+        options: statusFilterOptions,
       },
     },
     {
@@ -258,11 +266,17 @@ export default function RepairTable({
     },
     {
       id: 'estimated_exit',
-      label: 'Tahmini Çıkış',
-      filter: {
-        kind: 'dateRange',
-        keys: ['exit_date_from', 'exit_date_to'],
-      },
+      label: archive ? 'Çıkış' : 'Tahmini Çıkış',
+      // Arşivde gerçek çıkış tarihi gösterilir; bu yüzden başlık filtresi
+      // ("tahmini çıkış" aralığı) yalnızca "Mevcut" sekmesinde sunulur.
+      ...(archive
+        ? {}
+        : {
+            filter: {
+              kind: 'dateRange',
+              keys: ['exit_date_from', 'exit_date_to'],
+            },
+          }),
     },
     {
       id: 'notes',
@@ -336,7 +350,9 @@ export default function RepairTable({
                   <p className="mt-1 text-sm text-gray-500">
                     {hasActiveFilters
                       ? 'Filtreleri değiştirin veya temizleyin'
-                      : 'Henüz tamir kaydı bulunmuyor'}
+                      : archive
+                        ? 'Arşivde kapanmış tamir kaydı bulunmuyor'
+                        : 'Henüz tamir kaydı bulunmuyor'}
                   </p>
                   {hasActiveFilters && (
                     <button
@@ -406,14 +422,16 @@ export default function RepairTable({
                   <td className="whitespace-nowrap px-4 py-2.5 text-[12px]">
                     <p
                       className={
-                        item.is_overdue
+                        !archive && item.is_overdue
                           ? 'font-semibold text-red-600'
                           : 'text-gray-700'
                       }
                     >
-                      {formatDate(item.estimated_exit_date)}
+                      {archive
+                        ? formatDate(item.exit_date)
+                        : formatDate(item.estimated_exit_date)}
                     </p>
-                    {remaining && (
+                    {!archive && remaining && (
                       <p
                         className={`text-[11px] ${
                           item.is_overdue

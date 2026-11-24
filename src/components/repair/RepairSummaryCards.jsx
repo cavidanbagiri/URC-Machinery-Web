@@ -185,6 +185,7 @@ export default function RepairSummaryCards({
         hint="Şimdiye kadar tamamlanan"
         icon={CheckCircle2}
         tone="green"
+        onClick={() => onSelectFilters?.({ status: 'tamamlandi' })}
       />
       <SummaryCard
         label="Günlük Tamir"

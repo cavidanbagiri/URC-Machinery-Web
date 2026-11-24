@@ -81,13 +81,23 @@ function SkeletonCard() {
   );
 }
 
-function KpiCard({ label, value, suffix, icon: Icon, color = 'gray', percent, onClick, isTotal = false }) {
+function KpiCard({
+  label,
+  value,
+  suffix,
+  icon: Icon,
+  color = 'gray',
+  percent,
+  onClick,
+  isTotal = false,
+  className = '',
+}) {
   const c = colorTokens[color] || colorTokens.gray;
 
   return (
     <button
       onClick={onClick}
-      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-5 text-left ring-1 transition-all duration-200 ${c.bg} ${c.ring} ${c.hoverBg} hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gray-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
+      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-5 text-left ring-1 transition-all duration-200 ${c.bg} ${c.ring} ${c.hoverBg} hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gray-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${className}`}
     >
       {/* Yumşaq gradient — dərinlik üçün */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/60 to-transparent" />
@@ -139,9 +149,20 @@ function KpiCard({ label, value, suffix, icon: Icon, color = 'gray', percent, on
   );
 }
 
-export default function KpiCards() {
+export default function KpiCards({ columns = 4 }) {
   const navigate = useNavigate();
   const { total, byStatus, loading } = useSelector((s) => s.dashboard);
+
+  // Dashboard'daki test yerleşimi 2 kolon ister: 2 kart üstte, 2 kart altta.
+  // Diğer kullanımlarda eski (responsive) davranış korunur.
+  const twoColumns = columns === 2;
+  const gridClass = twoColumns
+    ? 'grid grid-cols-2 content-start gap-4'
+    : 'grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4';
+  // 4 statü 2×2'yi zaten dolduruyorsa "Genel" kartı tam satır kaplar,
+  // böylece yarım boş hücre kalmaz.
+  const totalClassName =
+    twoColumns && byStatus.length % 2 === 0 ? 'col-span-2' : '';
 
   const goToMachines = (statusId = null) => {
     navigate(statusId ? `/common_cars?status_id=${statusId}` : '/common_cars');
@@ -149,7 +170,7 @@ export default function KpiCards() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+      <div className={gridClass}>
         {Array.from({ length: 5 }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -158,8 +179,7 @@ export default function KpiCards() {
   }
 
   return (
-    <div style={{ fontFamily: 'Inter' }}
-    className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+    <div style={{ fontFamily: 'Inter' }} className={gridClass}>
       <KpiCard
         label="Genel"
         value={total}
@@ -167,6 +187,7 @@ export default function KpiCards() {
         icon={Car}
         color="blue"
         isTotal
+        className={totalClassName}
         onClick={() => goToMachines()}
       />
 

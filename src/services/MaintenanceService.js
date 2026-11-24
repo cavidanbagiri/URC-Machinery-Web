@@ -33,6 +33,17 @@ class MaintenanceService {
     return res.data;
   }
 
+  /**
+   * Arşiv sekmesi: bütün makinelerin tamamlanmış bakım kayıtları (sayfalı).
+   * `search`, `date_from`, `date_to`, `usage_unit` filtrelerini destekler.
+   */
+  async fetchRecords(params = {}) {
+    const res = await $api.get('/maintenance/records', {
+      params: cleanParams(params),
+    });
+    return res.data;
+  }
+
   async upsertSettings(machineId, payload) {
     const res = await $api.put(`/maintenance/settings/${machineId}`, payload);
     return res.data;

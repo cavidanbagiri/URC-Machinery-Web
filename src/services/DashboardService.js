@@ -11,6 +11,17 @@ class DashboardService {
     const res = await $api.get('/machines/statistics/pivot');
     return res.data;
   }
+
+  /**
+   * Dashboard'daki **Mazot Dagilimi** grafigi: son `days` gunun SRU / DCU /
+   * kiralik mazot toplamlari (gun basina bir bar grubu).
+   */
+  async fetchFuelDistribution(days = 7) {
+    const res = await $api.get('/fuel-logs/statistics/daily', {
+      params: { days },
+    });
+    return res.data;
+  }
 }
 
 export default new DashboardService();

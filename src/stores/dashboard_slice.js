@@ -27,7 +27,12 @@ const emptyOverview = {
   overdueRepairs: { items: [], total: 0, error: null },
   forum: { items: [], total: 0, error: null },
   lowStock: { items: [], total: 0, error: null },
+  // Mazot dağılımı grafiği (SRU / DCU / kiralık, son 7 gün).
+  fuel: { data: null, error: null },
 };
+
+// Dashboard'daki mazot grafiğinin penceresi (gün).
+const FUEL_DISTRIBUTION_DAYS = 7;
 
 /** İçinde bulunulan ayın ilk günü (`YYYY-MM-01`) — "bu ay arıza" sayacı için. */
 export function monthStartISO(date = new Date()) {
@@ -126,6 +131,7 @@ export const fetchDashboardOverview = createAsyncThunk(
         overdueMaintenance,
         overdueRepairs,
         forum,
+        fuel,
       ] = await Promise.allSettled([
         RepairService.fetchSummary(),
         MaintenanceService.fetchSummary(),
@@ -159,6 +165,7 @@ export const fetchDashboardOverview = createAsyncThunk(
           limit: COMPACT_LIMIT,
           offset: 0,
         }),
+        DashboardService.fetchFuelDistribution(FUEL_DISTRIBUTION_DAYS),
       ]);
 
       const recent = settledList(recentFaults);
@@ -179,6 +186,7 @@ export const fetchDashboardOverview = createAsyncThunk(
           overdueRepairs: settledList(overdueRepairs),
           forum: settledList(forum),
           lowStock: EMPTY_LOW_STOCK,
+          fuel: settledData(fuel),
         },
         updatedAt: new Date().toISOString(),
       };

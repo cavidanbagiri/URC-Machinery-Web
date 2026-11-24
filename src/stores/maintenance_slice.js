@@ -38,6 +38,15 @@ const initialFilters = {
   include_inactive: false,
 };
 
+// "Arşiv" sekmesinin filtreleri: yapılan bakım kayıtları (maintenance_records)
+// üzerinde çalışır, makine listesinin filtrelerinden bağımsızdır.
+const initialRecordFilters = {
+  search: '',
+  date_from: '',
+  date_to: '',
+  usage_unit: '',
+};
+
 const initialState = {
   items: [],
   total: 0,
@@ -47,9 +56,24 @@ const initialState = {
   // Sıralama filtrelerden ayrı tutulur: "Kalan" kolonu için asc/desc.
   sort_by: '',
   sort_order: '',
+  // "current": makine listesi · "archive": yapılan bakımlar.
+  tab: 'current',
   loading: false,
   error: null,
   listRequestId: null,
+
+  // Arşiv sekmesi: kendi sayfalama ve filtre durumu (makine listesiyle
+  // karışmasın diye ayrı tutulur).
+  records: {
+    items: [],
+    total: 0,
+    limit: 50,
+    offset: 0,
+    filters: { ...initialRecordFilters },
+    loading: false,
+    error: null,
+    requestId: null,
+  },
 
   summary: null,
   summaryLoading: false,
@@ -108,6 +132,22 @@ export const fetchMaintenanceSummary = createAsyncThunk(
       return await MaintenanceService.fetchSummary();
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Bakım özeti yüklenemedi'));
+    }
+  }
+);
+
+export const fetchMaintenanceRecords = createAsyncThunk(
+  'maintenance/fetchMaintenanceRecords',
+  async (_, { getState, rejectWithValue }) => {
+    const { records } = getState().maintenance;
+    try {
+      return await MaintenanceService.fetchRecords({
+        limit: records.limit,
+        offset: records.offset,
+        ...records.filters,
+      });
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Bakım arşivi yüklenemedi'));
     }
   }
 );
@@ -181,6 +221,27 @@ const maintenanceSlice = createSlice({
       state.filters = { ...initialFilters };
       state.offset = 0;
     },
+    setTab(state, action) {
+      const tab = action.payload === 'archive' ? 'archive' : 'current';
+      if (state.tab === tab) return;
+      state.tab = tab;
+    },
+    setRecordFilter(state, action) {
+      const { key, value } = action.payload;
+      state.records.filters[key] = value;
+      state.records.offset = 0;
+    },
+    resetRecordFilters(state) {
+      state.records.filters = { ...initialRecordFilters };
+      state.records.offset = 0;
+    },
+    setRecordLimit(state, action) {
+      state.records.limit = action.payload;
+      state.records.offset = 0;
+    },
+    setRecordOffset(state, action) {
+      state.records.offset = action.payload;
+    },
     setSort(state, action) {
       const { field = '', order = 'asc' } = action.payload || {};
       state.sort_by = field;
@@ -242,6 +303,28 @@ const maintenanceSlice = createSlice({
       .addCase(fetchMaintenanceSummary.rejected, (state, action) => {
         state.summaryLoading = false;
         state.summaryError = action.payload;
+      });
+
+    // ---------- ARCHIVE (completed maintenances) ----------
+    builder
+      .addCase(fetchMaintenanceRecords.pending, (state, action) => {
+        state.records.loading = true;
+        state.records.error = null;
+        state.records.requestId = action.meta.requestId;
+      })
+      .addCase(fetchMaintenanceRecords.fulfilled, (state, action) => {
+        // Hızlı filtre değişimlerinde eski (geç gelen) yanıtı yok say.
+        if (action.meta.requestId !== state.records.requestId) return;
+        state.records.loading = false;
+        state.records.items = action.payload.items;
+        state.records.total = action.payload.total;
+        state.records.limit = action.payload.limit;
+        state.records.offset = action.payload.offset;
+      })
+      .addCase(fetchMaintenanceRecords.rejected, (state, action) => {
+        if (action.meta.requestId !== state.records.requestId) return;
+        state.records.loading = false;
+        state.records.error = action.payload;
       });
 
     // ---------- HISTORY ----------
@@ -321,6 +404,11 @@ export const {
   setFilter,
   setFilters,
   resetFilters,
+  setTab,
+  setRecordFilter,
+  resetRecordFilters,
+  setRecordLimit,
+  setRecordOffset,
   setSort,
   resetSort,
   setLimit,

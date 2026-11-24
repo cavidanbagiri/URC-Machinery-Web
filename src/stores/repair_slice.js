@@ -28,6 +28,9 @@ const initialState = {
   limit: 100,
   offset: 0,
   filters: { ...initialFilters },
+  // "Mevcut" (açık tamirler) / "Arşiv" (kapanmış tamirler) sekmesi. Filtreden
+  // ayrı tutulur: sekme yalnızca listeyi böler, sütun filtreleri değişmez.
+  archive: false,
   loading: false,
   error: null,
   listRequestId: null,
@@ -87,9 +90,15 @@ function applyItem(state, item) {
 export const fetchRepairs = createAsyncThunk(
   'repair/fetchRepairs',
   async (_, { getState, rejectWithValue }) => {
-    const { limit, offset, filters } = getState().repair;
+    const { limit, offset, filters, archive } = getState().repair;
     try {
-      return await RepairService.fetchRepairs({ limit, offset, ...filters });
+      return await RepairService.fetchRepairs({
+        limit,
+        offset,
+        ...filters,
+        // Arşiv sekmesi kapanmış kayıtları ister; "Mevcut" varsayılanı korur.
+        archived: archive ? true : undefined,
+      });
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Tamir listesi yüklenemedi'));
     }
@@ -270,6 +279,16 @@ const repairSlice = createSlice({
     resetFilters(state) {
       state.filters = { ...initialFilters };
       state.offset = 0;
+    },
+    setArchive(state, action) {
+      const archive = Boolean(action.payload);
+      if (state.archive === archive) return;
+      state.archive = archive;
+      state.offset = 0;
+      // Durum filtresi sekmeye özgüdür: "Mevcut" açık tamirleri, "Arşiv"
+      // kapanmış kayıtları listeler. Sekme değişince önceki durum filtresi
+      // (ve gecikmiş/yaklaşan kısayolları) temizlenir.
+      state.filters = { ...state.filters, status: '', overdue: false, due_soon: false };
     },
     setLimit(state, action) {
       state.limit = action.payload;
@@ -459,6 +478,7 @@ export const {
   setFilter,
   setFilters,
   resetFilters,
+  setArchive,
   setLimit,
   setOffset,
   clearMutationError,
