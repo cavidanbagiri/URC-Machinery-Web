@@ -26,8 +26,8 @@ import {
 } from '../ui/tableStyles';
 import { setFilter } from '../../stores/document_tracking_slice';
 import {
-  DOCUMENT_DATE_FIELDS,
   DOCUMENT_DATE_LABELS,
+  DOCUMENT_TABLE_DATE_FIELDS,
   dateToneClass,
   dateToneTitle,
   formatDate,
@@ -36,7 +36,9 @@ import {
 //: Başlık hücresi — hizalama ortak tokenla birlikte verilir.
 const HEAD_CLASS = `text-left ${TABLE_HEAD_CELL}`;
 
-const COLUMN_COUNT = 4 + DOCUMENT_DATE_FIELDS.length + 1;
+// 4 sabit kolon (Makine ID, Şantiye, Tipi, Marka Model) + tarih kolonları +
+// İşlem. Tarih kolonları tabloda gösterilenlerden sayılır ("Lizing" hariç).
+const COLUMN_COUNT = 4 + DOCUMENT_TABLE_DATE_FIELDS.length + 1;
 
 const DOCUMENT_COLUMN_WIDTHS = {
   machine: 150,
@@ -49,7 +51,6 @@ const DOCUMENT_COLUMN_WIDTHS = {
   partial_technical_inspection_date: 145,
   full_technical_inspection_date: 140,
   hazardous_production_facility_date: 145,
-  leasing_date: 110,
   equipment_control_date: 130,
   actions: 165,
 };
@@ -170,7 +171,7 @@ export default function DocumentTrackingTable({
         ],
       },
     },
-    ...DOCUMENT_DATE_FIELDS.map((field) => ({
+    ...DOCUMENT_TABLE_DATE_FIELDS.map((field) => ({
       id: field,
       label: DOCUMENT_DATE_LABELS[field],
     })),
@@ -324,7 +325,7 @@ export default function DocumentTrackingTable({
                     </p>
                   </td>
 
-                  {DOCUMENT_DATE_FIELDS.map((field) => (
+                  {DOCUMENT_TABLE_DATE_FIELDS.map((field) => (
                     <td key={field} className={TABLE_CELL}>
                       {rowEditing ? (
                         <input

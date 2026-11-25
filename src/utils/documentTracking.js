@@ -1,7 +1,9 @@
 // src/utils/documentTracking.js
 
-// Keep this list in the same order as the table columns and the backend
-// DOCUMENT_DATE_FIELDS tuple.
+// Keep this list in the same order as the backend DOCUMENT_DATE_FIELDS tuple.
+// Bu liste aynı zamanda düzenleme taslağını (`draftFromItem`) ve kaydetme
+// gövdesini (`payloadFromDraft`) üretir; tabloda gösterilmese bile alan burada
+// kaldığı için mevcut "Lizing" tarihleri güncellemede silinmez.
 export const DOCUMENT_DATE_FIELDS = [
   'compulsory_traffic_insurance_date',
   'inspection_end_date',
@@ -12,6 +14,14 @@ export const DOCUMENT_DATE_FIELDS = [
   'leasing_date',
   'equipment_control_date',
 ];
+
+// Evrak takip tablosunda artık gösterilmeyen tarih alanları ("Lizing" kolonu ve
+// satır hücreleri kaldırıldı). Sadece görünüm süzülür; API sözleşmesi aynı kalır.
+const HIDDEN_TABLE_DATE_FIELDS = new Set(['leasing_date']);
+
+export const DOCUMENT_TABLE_DATE_FIELDS = DOCUMENT_DATE_FIELDS.filter(
+  (field) => !HIDDEN_TABLE_DATE_FIELDS.has(field)
+);
 
 export const DOCUMENT_DATE_LABELS = {
   compulsory_traffic_insurance_date: 'Zorunlu Trafik Sigortası / ОСАГО',
