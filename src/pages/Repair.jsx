@@ -362,7 +362,7 @@ export default function Repair() {
             tabs={[
               {
                 id: 'current',
-                label: 'Mevcut',
+                label: 'Devam eden',
                 count: summary?.active ?? total,
                 icon: WrenchScrewdriverIcon,
               },

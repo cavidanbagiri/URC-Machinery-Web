@@ -273,7 +273,7 @@ export default function RepairTable({
     },
     {
       id: 'fault_location',
-      label: 'Arıza Yeri',
+      label: 'Arıza Tanımı',
       filter: {
         kind: 'text',
         key: 'fault_location',

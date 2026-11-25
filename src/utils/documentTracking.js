@@ -14,14 +14,14 @@ export const DOCUMENT_DATE_FIELDS = [
 ];
 
 export const DOCUMENT_DATE_LABELS = {
-  compulsory_traffic_insurance_date: 'Zorunlu Trafik',
-  inspection_end_date: 'Muayene (Bitiş Tarihi)',
-  passenger_transport_license_date: 'Yolcu Taşıma Lisansı',
-  partial_technical_inspection_date: 'Kısmi Teknik Muayene',
-  full_technical_inspection_date: 'Tam Teknik Muayene',
-  hazardous_production_facility_date: 'Tehlikeli Üretim Tesisi',
+  compulsory_traffic_insurance_date: 'Zorunlu Trafik Sigortası / ОСАГО',
+  inspection_end_date: 'Muayene / Тех.осмотр',
+  passenger_transport_license_date: 'Yolcu Taşıma Lisansı / Лицензия',
+  partial_technical_inspection_date: 'Kısmi Teknik Muayene / ЧТО',
+  full_technical_inspection_date: 'Tam Teknik Muayene / ПТО',
+  hazardous_production_facility_date: 'Kaldırma Ekipmanları Sigortası / ОПО',
   leasing_date: 'Lizing',
-  equipment_control_date: 'Ekipman Kontrolü',
+  equipment_control_date: 'Metan Gazı Kontrolu / Проверка Газ метана',
 };
 
 function parseDateOnly(value) {

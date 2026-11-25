@@ -329,7 +329,7 @@ export default function Maintenance() {
             tabs={[
               {
                 id: 'current',
-                label: 'Mevcut',
+                label: 'Güncel Liste',
                 count: summary?.total ?? total,
                 icon: WrenchScrewdriverIcon,
               },
