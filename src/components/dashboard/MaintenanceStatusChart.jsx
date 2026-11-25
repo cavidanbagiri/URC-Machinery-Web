@@ -51,7 +51,7 @@ export default function MaintenanceStatusChart() {
           : 'Bakım planı dağılımı'
       }
       icon={Activity}
-      action={{ label: 'Tümü', onClick: () => navigate('/maintenance') }}
+      action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/maintenance') }}
       loading={overviewLoading}
       error={error}
       empty={items.length === 0}

@@ -132,7 +132,7 @@ export default function FuelDistributionChart() {
           : 'Son 7 günün mazot dağılımı'
       }
       icon={Fuel}
-      action={{ label: 'Tümü', onClick: () => navigate('/fuel_logs') }}
+      action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/fuel_logs') }}
       loading={overviewLoading}
       error={error}
       empty={items.length === 0 || !hasFuel}

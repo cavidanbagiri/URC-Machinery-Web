@@ -62,7 +62,7 @@ export default function RepairTypeChart() {
         data ? `Toplam ${data.total} kayıt · ${data.active} aktif` : 'Arıza tipine göre kayıtlar'
       }
       icon={Gauge}
-      action={{ label: 'Tümü', onClick: () => navigate('/repair') }}
+      action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/repair') }}
       loading={overviewLoading}
       error={error}
       empty={items.length === 0}

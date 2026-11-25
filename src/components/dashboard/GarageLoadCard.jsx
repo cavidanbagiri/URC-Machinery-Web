@@ -37,7 +37,7 @@ export default function GarageLoadCard() {
       subtitle="Tamirdeki ekipmanın dağılımı"
       icon={Warehouse}
       action={{
-        label: 'Tümü',
+        label: 'Ayrıntıları gör',
         onClick: () => navigate('/repair?status=tamirde'),
       }}
       loading={overviewLoading}

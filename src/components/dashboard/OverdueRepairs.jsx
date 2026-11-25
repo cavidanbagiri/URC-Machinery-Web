@@ -35,7 +35,7 @@ export default function OverdueRepairs() {
       subtitle="Tahmini çıkış tarihi geçen kayıtlar"
       icon={Wrench}
       action={{
-        label: 'Tümü',
+        label: 'Ayrıntıları gör',
         onClick: () => navigate('/repair?status=tamirde'),
       }}
       loading={overviewLoading}

@@ -3,9 +3,6 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { RefreshCw } from 'lucide-react';
-
-
 import {
   fetchStatusStatistics,
   fetchPivotStatistics,
@@ -14,9 +11,7 @@ import {
 import { fetchCurrentUser, fetchTeamMembers } from '../stores/user_slice';
 import KpiCards from '../components/dashboard/KpiCards';
 import FuelDistributionChart from '../components/dashboard/FuelDistributionChart';
-import TeamAvatarStack from '../components/dashboard/TeamAvatarStack';
 import StatusChart from '../components/dashboard/StatusChart';
-import PivotTable from '../components/dashboard/PivotTable';
 import UserSummary from '../components/dashboard/UserSummary';
 import MaintenanceStatusChart from '../components/dashboard/MaintenanceStatusChart';
 import RepairTypeChart from '../components/dashboard/RepairTypeChart';
@@ -26,7 +21,7 @@ import UpcomingMaintenance from '../components/dashboard/UpcomingMaintenance';
 import OverdueRepairs from '../components/dashboard/OverdueRepairs';
 // import DepotOverview from '../components/dashboard/DepotOverview';
 import PendingSpareParts from '../components/dashboard/PendingSpareParts';
-import OpenForumTopics from '../components/dashboard/OpenForumTopics';
+import LastUpdatedBadge from '../components/dashboard/LastUpdatedBadge';
 
 export default function DashboardPage() {
   const dispatch = useDispatch();
@@ -36,6 +31,7 @@ export default function DashboardPage() {
     loading,
     pivotLoading,
     overviewLoading,
+    overviewUpdatedAt,
   } = useSelector((s) => s.dashboard);
   const { user } = useSelector((s) => s.auth);
 
@@ -43,13 +39,11 @@ export default function DashboardPage() {
     dispatch(fetchStatusStatistics());
     dispatch(fetchPivotStatistics());
     dispatch(fetchDashboardOverview());
-    // The header shows the team's photos, so a refresh reloads them too.
     dispatch(fetchTeamMembers());
   }, [dispatch]);
 
   useEffect(() => {
     refresh();
-    // Keep the header badge (photo, name, position) in sync with the database.
     dispatch(fetchCurrentUser());
   }, [refresh, dispatch]);
 
@@ -57,7 +51,15 @@ export default function DashboardPage() {
   const errorMessage = error || overviewError;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-6">
+
+      {/* <div className='flex justify-between w-full '>
+        <LastUpdatedBadge
+          updatedAt={overviewUpdatedAt}
+          refreshing={refreshing}
+          onRefresh={refresh}
+        />
+      </div> */}
 
       <div style={{ fontFamily: 'Inter' }} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 ">
@@ -68,6 +70,11 @@ export default function DashboardPage() {
 
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <UserSummary user={user} />
+           <LastUpdatedBadge
+          updatedAt={overviewUpdatedAt}
+          refreshing={refreshing}
+          onRefresh={refresh}
+        />
         </div>
       </div>
 

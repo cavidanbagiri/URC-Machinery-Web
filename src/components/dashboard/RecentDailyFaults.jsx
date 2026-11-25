@@ -31,7 +31,7 @@ export default function RecentDailyFaults() {
       title="Son Günlük Arızalar"
       subtitle="En yeni kayıtlar"
       icon={CalendarDays}
-      action={{ label: 'Tümü', onClick: () => navigate('/daily_faults') }}
+      action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/daily_faults') }}
       loading={overviewLoading}
       error={error}
       empty={rows.length === 0}

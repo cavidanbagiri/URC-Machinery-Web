@@ -41,14 +41,14 @@ export default function StatusChart() {
 
   return (
     <SectionCard
-      title="Durum Dağılımı"
+      title="Aktif/Arıza Oranı"
       subtitle={
         machineTotal > 0
           ? `${items.length} durum · ${machineTotal} makine`
           : 'Makine durum dağılımı'
       }
       icon={PieIcon}
-      action={{ label: 'Tümü', onClick: () => navigate('/common_cars') }}
+      action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/common_cars') }}
       loading={loading}
       empty={items.length === 0}
       emptyIcon={PieIcon}

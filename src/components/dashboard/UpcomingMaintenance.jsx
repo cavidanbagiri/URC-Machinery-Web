@@ -49,7 +49,7 @@ export default function UpcomingMaintenance() {
       subtitle="Kalan değere göre en acil kayıtlar"
       icon={AlertTriangle}
       action={{
-        label: 'Tümü',
+        label: 'Ayrıntıları gör',
         onClick: () => navigate('/maintenance?status=gecikmis'),
       }}
       loading={overviewLoading}

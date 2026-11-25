@@ -36,7 +36,7 @@ export default function PendingSpareParts() {
       subtitle={`${total} talep teslim bekliyor`}
       icon={ShoppingCart}
       action={{
-        label: 'Tümü',
+        label: 'Ayrıntıları gör',
         onClick: () => navigate('/purchase_requests?status=firma_bekleniyor'),
       }}
       loading={overviewLoading}
