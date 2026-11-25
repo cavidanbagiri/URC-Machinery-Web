@@ -1,14 +1,30 @@
 // src/components/machines/MachineTable.jsx
 import { useDispatch, useSelector } from 'react-redux';
+import { ExclamationTriangleIcon, TruckIcon } from '@heroicons/react/24/outline';
 import FlaticonIcon from '../ui/FlaticonIcon';
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import MachineSkeleton from './MachineSkeleton';
 import StatusBadge from './StatusBadge';
 import { setFilter } from '../../stores/machine_slice';
 
-const COLUMN_COUNT = 11;
+//: 11 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 12;
 
 // Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
 // sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
@@ -82,7 +98,7 @@ export default function MachineTable({
   // Skeleton göstər
   if (loading && items.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         <MachineSkeleton rows={5} />
       </div>
     );
@@ -164,30 +180,45 @@ export default function MachineTable({
 
   // Menü içeriği `filter.kind` ile belirlenir (select / text).
   return (
-    <div className=" bg-white">
-      {/* Header */}
-      {/* <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-        <div>
-          <h2 className="text-base font-semibold text-gray-900">Siyahı</h2>
-          <p className="text-xs text-gray-500">Cəmi: {total} maşın</p>
+    <div className={TABLE_CARD}>
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500">
+            <TruckIcon className="h-3.5 w-3.5" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Makine Listesi
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
+            {items.length}
+          </span>
         </div>
-      </div> */}
 
-      {/* Table */}
+        {resize.isCustomized && (
+          <button
+            type="button"
+            onClick={resize.resetAll}
+            className="shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            Sütun genişliklerini sıfırla
+          </button>
+        )}
+      </div>
+
       <div className="overflow-x-auto">
         <ResizableTable
           resize={resize}
           columnIds={columnIds}
-          className="rounded-lg"
+          filler
           style={{ fontFamily: 'Inter' }}
         >
-          <thead className="bg-gray-100 text-[11px] uppercase text-gray-700 rounded-lg">
-            <tr>
+          <thead className={TABLE_HEAD}>
+            <tr className="border-b border-slate-200">
               <ResizableTh
                 resize={resize}
                 columnId="select"
                 label="Seç"
-                className="px-4 py-2 text-left font-medium"
+                className={`text-left ${TABLE_HEAD_CELL}`}
               >
                 <span className="sr-only">Seç</span>
               </ResizableTh>
@@ -198,7 +229,7 @@ export default function MachineTable({
                   resize={resize}
                   columnId={column.id}
                   label={column.label}
-                  className="whitespace-nowrap px-6 py-2 text-left font-medium"
+                  className={`text-left ${TABLE_HEAD_CELL}`}
                 >
                   {column.filter ? (
                     <ColumnFilterHeader
@@ -212,153 +243,158 @@ export default function MachineTable({
                   )}
                 </ResizableTh>
               ))}
+
+              <TableFillerTh />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100" >
+
+          <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
-                  <p className="text-sm font-medium text-gray-900">
-                    Sonuç bulunamadı
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {hasActiveFilters
-                      ? 'Filtreleri değiştirin veya temizleyin'
-                      : 'Henüz hiçbir makine eklenmemiş'}
-                  </p>
-                  {hasActiveFilters && (
-                    <button
-                      type="button"
-                      onClick={onOpenFilters}
-                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      Filtreleri temizle
-                    </button>
-                  )}
+                <td colSpan={COLUMN_COUNT} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <ExclamationTriangleIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Sonuç bulunamadı
+                    </p>
+                    <p className="mt-1 text-[12px] text-slate-500">
+                      {hasActiveFilters
+                        ? 'Filtreleri değiştirin veya temizleyin'
+                        : 'Henüz hiçbir makine eklenmemiş'}
+                    </p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={onOpenFilters}
+                        className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Filtreleri temizle
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             )}
+
             {items.map((machine) => {
               const photo = primaryPhotoOf(machine);
               const photoCount = machine.photos?.length || 0;
+              const isSelected = selectedId === machine.id;
+              const detailCell = {
+                onClick: () => handleDetail(machine),
+                className: `${TABLE_CELL} text-slate-700`,
+              };
 
               return (
-              <tr
-                key={machine.id}
-                className={
-                  selectedId === machine.id
-                    ? 'bg-blue-50 hover:bg-blue-50 '
-                    : 'hover:bg-gray-50'
-                }
-              >
-                <td className="w-10 whitespace-nowrap px-4 py-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedId === machine.id}
-                    onChange={() => onSelect(machine.id)}
-                    className="h-4 w-4 cursor-pointer accent-blue-600"
-                    aria-label="Makineyi seç"
-                  />
-                </td>
-                {/* Fotoğraf — ana fotoğraf, tıklayınca detay açılır */}
-                <td className="whitespace-nowrap px-6 py-2">
-                  <button
-                    type="button"
-                    onClick={() => onOpenDetail?.(machine)}
-                    disabled={!onOpenDetail}
-                    title={
-                      photo?.url
-                        ? 'Fotoğrafı büyüt'
-                        : 'Fotoğraf yok — detaydan yükleyin'
-                    }
-                    aria-label={`${machine.identification_no || 'Makine'} fotoğrafı`}
-                    className="group relative block h-10 w-14 overflow-hidden rounded-md border border-gray-200 bg-gray-50 disabled:cursor-default"
+                <tr
+                  key={machine.id}
+                  className={`${TABLE_ROW} ${
+                    isSelected ? 'bg-blue-50/70 hover:bg-blue-50/70' : ''
+                  }`}
+                >
+                  <td className={`${TABLE_CELL} w-10`}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => onSelect(machine.id)}
+                      className="h-4 w-4 cursor-pointer accent-blue-600"
+                      aria-label="Makineyi seç"
+                    />
+                  </td>
+
+                  {/* Fotoğraf — ana fotoğraf, tıklayınca detay açılır */}
+                  <td className={TABLE_CELL}>
+                    <button
+                      type="button"
+                      onClick={() => onOpenDetail?.(machine)}
+                      disabled={!onOpenDetail}
+                      title={
+                        photo?.url
+                          ? 'Fotoğrafı büyüt'
+                          : 'Fotoğraf yok — detaydan yükleyin'
+                      }
+                      aria-label={`${machine.identification_no || 'Makine'} fotoğrafı`}
+                      className="group relative block h-10 w-14 overflow-hidden rounded-md border border-slate-200 bg-slate-50 disabled:cursor-default"
+                    >
+                      {photo?.url ? (
+                        <img
+                          src={photo.url}
+                          alt={`${machine.identification_no || 'Makine'} fotoğrafı`}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition duration-200 group-hover:scale-105"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-slate-300">
+                          <FlaticonIcon name="picture" size="md" />
+                        </span>
+                      )}
+                      {photoCount > 1 && (
+                        <span className="absolute bottom-0 right-0 rounded-tl bg-slate-900/60 px-1 text-[10px] font-medium leading-4 text-white">
+                          {photoCount}
+                        </span>
+                      )}
+                    </button>
+                  </td>
+
+                  <td className={TABLE_CELL}>
+                    <StatusBadge status={getStatus(machine.status_id)} />
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className={`cursor-pointer hover:underline ${TABLE_PRIMARY}`}>
+                      {machine.identification_no || '—'}
+                    </span>
+                  </td>
+
+                  <td
+                    {...detailCell}
+                    className={`${TABLE_CELL} font-mono tabular-nums text-slate-700`}
                   >
-                    {photo?.url ? (
-                      <img
-                        src={photo.url}
-                        alt={`${machine.identification_no || 'Makine'} fotoğrafı`}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition duration-200 group-hover:scale-105"
-                      />
-                    ) : (
-                      <span className="flex h-full w-full items-center justify-center text-gray-300">
-                        <FlaticonIcon name="picture" size="md" />
-                      </span>
-                    )}
-                    {photoCount > 1 && (
-                      <span className="absolute bottom-0 right-0 rounded-tl bg-black/60 px-1 text-[10px] font-medium leading-4 text-white">
-                        {photoCount}
-                      </span>
-                    )}
-                  </button>
-                </td>
-                <td className="whitespace-nowrap px-6 py-2">
-                  <StatusBadge status={getStatus(machine.status_id)} />
-                </td>
-                <td
-                onClick={()=>{
-                  handleDetail(machine)
-                }}
-                className="whitespace-nowrap px-6 py-2 text-[11px] font-medium text-gray-900">
-                  <span className='cursor-pointer hover:underline '>{machine.identification_no || '—'}</span>
-                </td>
-                <td onClick={()=>{
-                  handleDetail(machine)
-                }}
-                 style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[11px] font-mono text-gray-700">
-                  <span className='cursor-pointer hover:underline '>{machine.plate_no || '—'}</span>                                      
-                </td>
-                <td onClick={()=>{
-                  handleDetail(machine)
-                }}
-                 style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  <span className='cursor-pointer hover:underline '>
-                    {lookupName('territory', machine.territory_id)}
-                  </span>
-                </td>
-                <td onClick={()=>{
-                  handleDetail(machine)
-                }}
-                 style={{ fontFamily: 'Inter' }} className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  <span className='cursor-pointer hover:underline '>
-                  {lookupName('car_mark', machine.car_mark_id)}
-                  </span>
-                </td>
-                <td onClick={()=>{
-                  handleDetail(machine)
-                }}
-                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  <span className='cursor-pointer hover:underline '>
-                  {lookupName('car_model', machine.car_model_id)}
-                  </span>  
-                </td>
-                <td onClick={()=>{
-                  handleDetail(machine)
-                }}
-                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  <span className='cursor-pointer hover:underline '>
-                  {machine.vin_no || '—'}
-                  </span>
-                </td>
-                <td onClick={()=>{
-                  handleDetail(machine)
-                }}
-                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  <span className='cursor-pointer hover:underline '>
-                    {extractYear(machine.production_year)}
-                  </span>
-                </td>
-                <td
-                onClick={()=>{
-                  handleDetail(machine)
-                }}
-                 className="whitespace-nowrap px-6 py-2 text-[12px] text-gray-700">
-                  {/* {lookupName('company', machine.company_id)} */}
-                  <span className='cursor-pointer hover:underline '>{lookupName('company', machine.company_id)}</span>
-                </td>
-                
-              </tr>
+                    <span className="cursor-pointer hover:underline">
+                      {machine.plate_no || '—'}
+                    </span>
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className="cursor-pointer hover:underline">
+                      {lookupName('territory', machine.territory_id)}
+                    </span>
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className="cursor-pointer hover:underline">
+                      {lookupName('car_mark', machine.car_mark_id)}
+                    </span>
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className="cursor-pointer hover:underline">
+                      {lookupName('car_model', machine.car_model_id)}
+                    </span>
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className="cursor-pointer hover:underline">
+                      {machine.vin_no || '—'}
+                    </span>
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className="cursor-pointer tabular-nums hover:underline">
+                      {extractYear(machine.production_year)}
+                    </span>
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className="cursor-pointer hover:underline">
+                      {lookupName('company', machine.company_id)}
+                    </span>
+                  </td>
+
+                  <TableFillerTd />
+                </tr>
               );
             })}
           </tbody>

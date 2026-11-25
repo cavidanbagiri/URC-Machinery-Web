@@ -1,12 +1,27 @@
 // src/components/warehouse/PendingReceiptTable.jsx
 import { ArrowPathIcon, InboxArrowDownIcon } from '@heroicons/react/24/outline';
 
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_MUTED,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import { formatDate, formatQuantity } from '../../utils/warehouse';
 
-const HEAD_CLASS =
-  'whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500';
+//: Başlık hücresi — hizalama ortak tokenla birlikte verilir.
+const HEAD_CLASS = `text-left ${TABLE_HEAD_CELL}`;
 
 // Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
 // sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
@@ -21,6 +36,9 @@ const PENDING_RECEIPT_COLUMN_WIDTHS = {
   action: 140,
 };
 const PENDING_RECEIPT_COLUMN_IDS = Object.keys(PENDING_RECEIPT_COLUMN_WIDTHS);
+
+//: 8 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 9;
 
 export default function PendingReceiptTable({
   items,
@@ -42,55 +60,74 @@ export default function PendingReceiptTable({
 
   if (loading && items.length === 0) {
     return (
-      <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="flex gap-4 px-6 py-3">
-            <div className="h-5 w-6 animate-pulse rounded bg-gray-100" />
-            <div className="h-5 w-52 animate-pulse rounded bg-gray-100" />
-            <div className="h-5 w-32 animate-pulse rounded bg-gray-100" />
-            <div className="h-5 flex-1 animate-pulse rounded bg-gray-100" />
-            <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
+      <div className={TABLE_CARD}>
+        <div>
+          <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50/90 px-4 py-3">
+            <div className="h-2.5 w-8 animate-pulse rounded bg-slate-200/80" />
+            <div className="h-2.5 w-40 animate-pulse rounded bg-slate-200/80" />
+            <div className="h-2.5 w-28 animate-pulse rounded bg-slate-200/80" />
+            <div className="h-2.5 flex-1 animate-pulse rounded bg-slate-200/80" />
           </div>
-        ))}
+          <div className="divide-y divide-slate-100">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex items-center gap-4 px-4 py-3">
+                <div className="h-4 w-4 animate-pulse rounded bg-slate-100" />
+                <div className="h-3 w-52 animate-pulse rounded bg-slate-100" />
+                <div className="h-3 w-32 animate-pulse rounded bg-slate-100" />
+                <div className="h-3 flex-1 animate-pulse rounded bg-slate-100" />
+                <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center shadow-sm">
-        <InboxArrowDownIcon className="mx-auto h-10 w-10 text-gray-300" />
-        <p className="mt-2 text-sm font-medium text-gray-900">
-          Depoya alınacak kalem yok
-        </p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Arama kriterini değiştirin'
-            : 'Satın alma talepleri "Geldi" olarak işaretlendiğinde kalemler burada listelenir'}
-        </p>
-        {hasActiveFilters && (
+  const allSelected =
+    items.length > 0 &&
+    items.every((item) => selectedIds.includes(item.request_item_id));
+
+  return (
+    <div className={TABLE_CARD}>
+      {loading && (
+        <div className="h-0.5 w-full overflow-hidden bg-blue-100">
+          <div className="h-full w-1/3 animate-pulse bg-blue-500" />
+        </div>
+      )}
+
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500">
+            <InboxArrowDownIcon className="h-3.5 w-3.5" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Depoya Alınacaklar
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
+            {items.length}
+          </span>
+        </div>
+
+        {resize.isCustomized && (
           <button
             type="button"
-            onClick={onResetFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+            onClick={resize.resetAll}
+            className="shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
           >
-            Aramayı temizle
+            Sütun genişliklerini sıfırla
           </button>
         )}
       </div>
-    );
-  }
 
-  const allSelected = items.every((item) =>
-    selectedIds.includes(item.request_item_id)
-  );
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <ResizableTable resize={resize} columnIds={PENDING_RECEIPT_COLUMN_IDS}>
-          <thead className="bg-gray-50">
-            <tr>
+        <ResizableTable
+          resize={resize}
+          columnIds={PENDING_RECEIPT_COLUMN_IDS}
+          filler
+        >
+          <thead className={TABLE_HEAD}>
+            <tr className="border-b border-slate-200">
               <ResizableTh
                 resize={resize}
                 columnId="select"
@@ -102,7 +139,7 @@ export default function PendingReceiptTable({
                   checked={allSelected}
                   onChange={onToggleAll}
                   aria-label="Tümünü seç"
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 cursor-pointer rounded border-slate-300 accent-blue-600"
                 />
               </ResizableTh>
               <ResizableTh
@@ -161,10 +198,41 @@ export default function PendingReceiptTable({
               >
                 İşlem
               </ResizableTh>
+
+              <TableFillerTh />
             </tr>
           </thead>
 
-          <tbody className="text-sm text-gray-800">
+          <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
+            {!loading && items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <InboxArrowDownIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Depoya alınacak kalem yok
+                    </p>
+                    <p className="mt-1 text-[12px] text-slate-500">
+                      {hasActiveFilters
+                        ? 'Arama kriterini değiştirin'
+                        : 'Satın alma talepleri "Geldi" olarak işaretlendiğinde kalemler burada listelenir'}
+                    </p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={onResetFilters}
+                        className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Aramayı temizle
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
+
             {items.map((item) => {
               const checked = selectedIds.includes(item.request_item_id);
               const busy = busyId === item.request_item_id;
@@ -172,25 +240,23 @@ export default function PendingReceiptTable({
               return (
                 <tr
                   key={item.request_item_id}
-                  className={`border-t border-gray-100 align-top ${
-                    checked ? 'bg-blue-50/40' : 'hover:bg-gray-50'
+                  className={`${TABLE_ROW} align-top ${
+                    checked ? 'bg-blue-50/60 hover:bg-blue-50/60' : ''
                   }`}
                 >
-                  <td className="px-4 py-2.5">
+                  <td className={TABLE_CELL}>
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => onToggleSelect(item.request_item_id)}
                       aria-label={`${item.request_title} kalemini seç`}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 cursor-pointer rounded border-slate-300 accent-blue-600"
                     />
                   </td>
 
-                  <td className="px-4 py-2.5">
-                    <p className="text-[13px] font-medium text-gray-900">
-                      {item.request_title}
-                    </p>
-                    <p className="text-[11px] text-gray-500">
+                  <td className={TABLE_CELL}>
+                    <p className={TABLE_PRIMARY}>{item.request_title}</p>
+                    <p className={TABLE_MUTED}>
                       STF/HTF: {item.stf_htf_no}
                       {item.request_type_name
                         ? ` · ${item.request_type_name}`
@@ -199,37 +265,37 @@ export default function PendingReceiptTable({
                     </p>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className={TABLE_CELL}>
                     <p>{item.machine_label}</p>
                     {item.garage_request_no && (
-                      <p className="text-[11px] text-gray-500">
+                      <p className={TABLE_MUTED}>
                         Garaj No: {item.garage_request_no}
                       </p>
                     )}
                   </td>
 
-                  <td className="px-4 py-2.5">
-                    <p className="text-[12px] font-medium text-gray-900">
+                  <td className={TABLE_CELL}>
+                    <p className="text-[12px] font-semibold text-slate-900">
                       {item.part_number || '—'}
                     </p>
-                    <p className="text-[11px] text-gray-500">
+                    <p className={TABLE_MUTED}>
                       {item.description_tr || item.description_ru || '—'}
                     </p>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-900">
+                  <td className={`${TABLE_CELL} tabular-nums text-slate-900`}>
                     {formatQuantity(item.quantity)} {item.unit}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className={`${TABLE_CELL} tabular-nums`}>
                     {formatDate(item.request_date)}
                   </td>
 
-                  <td className="px-4 py-2.5 text-[12px]">
+                  <td className={TABLE_CELL}>
                     {item.stock_item_id ? (
                       <>
-                        <p className="text-gray-900">{item.stock_item_name}</p>
-                        <p className="text-[11px] text-gray-500">
+                        <p className="text-slate-900">{item.stock_item_name}</p>
+                        <p className={TABLE_MUTED}>
                           Mevcut {formatQuantity(item.stock_item_quantity)}{' '}
                           {item.unit}
                         </p>
@@ -241,12 +307,12 @@ export default function PendingReceiptTable({
                     )}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                  <td className={`${TABLE_CELL} text-right`}>
                     <button
                       type="button"
                       onClick={() => onReceive(item)}
                       disabled={busy}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-[12px] font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-[12px] font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {busy ? (
                         <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
@@ -256,6 +322,8 @@ export default function PendingReceiptTable({
                       Depoya Al
                     </button>
                   </td>
+
+                  <TableFillerTd />
                 </tr>
               );
             })}

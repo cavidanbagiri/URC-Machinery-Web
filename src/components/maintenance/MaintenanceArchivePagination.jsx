@@ -51,13 +51,13 @@ export default function MaintenanceArchivePagination() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-between gap-4 px-2 py-4 md:flex-row">
+    <div className="flex flex-col items-center justify-between gap-3 px-1 py-3 md:flex-row">
       <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1 || loading}
-          className="rounded-lg border border-gray-300 p-2 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="Önceki sayfa"
         >
           <ChevronLeftIcon className="h-4 w-4" />
@@ -65,8 +65,11 @@ export default function MaintenanceArchivePagination() {
 
         {pageNumbers(totalPages, currentPage).map((page, index) =>
           page === '...' ? (
-            <span key={`dots-${index}`} className="px-2 text-sm text-gray-400">
-              ...
+            <span
+              key={`dots-${index}`}
+              className="px-1.5 text-[12px] text-slate-400"
+            >
+              …
             </span>
           ) : (
             <button
@@ -74,10 +77,10 @@ export default function MaintenanceArchivePagination() {
               key={page}
               onClick={() => goToPage(page)}
               disabled={loading}
-              className={`min-w-[36px] rounded-full border px-2 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`h-7 min-w-[28px] rounded-md border px-2 text-[12px] font-medium tabular-nums transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 page === currentPage
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  ? 'border-slate-900 bg-slate-900 text-white'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               {page}
@@ -89,29 +92,25 @@ export default function MaintenanceArchivePagination() {
           type="button"
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages || loading}
-          className="rounded-lg border border-gray-300 p-2 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="Sonraki sayfa"
         >
           <ChevronRightIcon className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="flex items-center gap-4 text-sm text-gray-600">
-        <span>
-          <span className="font-medium text-gray-900">{fromItem}</span>
+      <div className="flex items-center gap-3 text-[11px] text-slate-500">
+        <span className="tabular-nums">
+          <span className="font-semibold text-slate-700">{fromItem}</span>
           {' – '}
-          <span className="font-medium text-gray-900">{toItem}</span>
+          <span className="font-semibold text-slate-700">{toItem}</span>
           {' / '}
-          <span className="font-medium text-gray-900">{total}</span>
+          <span className="font-semibold text-slate-700">{total}</span>
+          <span className="ml-1">kayıt</span>
         </span>
 
-        <div className="flex items-center gap-2">
-          <label
-            className="text-xs text-gray-500"
-            htmlFor="maintenance-archive-page-size"
-          >
-            Sayfa boyutu:
-          </label>
+        <div className="flex items-center gap-1.5">
+          <label htmlFor="maintenance-archive-page-size">Sayfa boyutu</label>
           <select
             id="maintenance-archive-page-size"
             value={limit}
@@ -119,7 +118,7 @@ export default function MaintenanceArchivePagination() {
               dispatch(setRecordLimit(Number(event.target.value)))
             }
             disabled={loading}
-            className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
+            className="rounded-md border border-slate-200 bg-white py-1 pl-1.5 pr-6 text-[11px] text-slate-600 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
           >
             {[20, 50, 100].map((size) => (
               <option key={size} value={size}>

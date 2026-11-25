@@ -104,7 +104,7 @@ export default function IsgEvidenceCell({
         className={`inline-flex cursor-pointer items-center gap-1 rounded-full border border-dashed px-2 py-0.5 text-[11px] font-medium transition ${
           missingForClosure
             ? 'border-amber-400 bg-amber-50 text-amber-800 hover:border-amber-500 hover:bg-amber-100'
-            : 'border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-700'
+            : 'border-slate-300 text-slate-600 hover:border-blue-400 hover:text-blue-700'
         } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
       >
         {uploading ? (

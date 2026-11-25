@@ -19,12 +19,20 @@
 // Tablo genişliği = görünür sütunların toplamı, `min-width: 100%` ile panel
 // genişken tablo alanı doldurur; sütunlar toplamı panelden büyükse mevcut
 // `overflow-x-auto` kabuğu yatay kaydırma verir.
+//
+// `filler`: mutlak (piksel) sütun genişliğini garanti eder. Tablo panelden
+// genişken fazlalık, genişliği belirtilmemiş **dolgu sütununa** gider; ada
+// sahip sütunlar sürüklenen pikselde kalır (aksi halde tarayıcı fazla alanı
+// sütunlara paylaştırır ve daraltma görsel olarak geri "şişer"). Dolgu
+// sütunu için başlıkta <TableFillerTh />, her satırda <TableFillerTd />
+// render edilmelidir.
 import ColumnResizeHandle from './ColumnResizeHandle';
 import { MIN_COLUMN_WIDTH } from './useColumnResize';
 
 export default function ResizableTable({
   resize,
   columnIds,
+  filler = false,
   className = '',
   style,
   children,
@@ -46,11 +54,25 @@ export default function ResizableTable({
             style={{ width: `${resize.widths[id] ?? MIN_COLUMN_WIDTH}px` }}
           />
         ))}
+
+        {/* Genişliği belirtilmemiş dolgu sütunu: `min-width: 100%` ile oluşan
+            fazla alanı tek başına emer, sütunlar pikselinde kalır. */}
+        {filler && <col />}
       </colgroup>
 
       {children}
     </table>
   );
+}
+
+/** `filler` açıkken başlık satırının sonuna eklenen boş hücre. */
+export function TableFillerTh({ className = '' }) {
+  return <th aria-hidden="true" className={`p-0 ${className}`.trim()} />;
+}
+
+/** `filler` açıkken her gövde satırının sonuna eklenen boş hücre. */
+export function TableFillerTd({ className = '' }) {
+  return <td aria-hidden="true" className={`p-0 ${className}`.trim()} />;
 }
 
 /**

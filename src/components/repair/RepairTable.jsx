@@ -4,25 +4,39 @@ import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowPathIcon,
-  ChatBubbleLeftEllipsisIcon,
   CheckCircleIcon,
-  ClockIcon,
   DocumentTextIcon,
   PencilSquareIcon,
+  WrenchIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 
 import StatusBadge from '../machines/StatusBadge';
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import {
   setFilter,
   setFilters,
 } from '../../stores/repair_slice';
 import { durationLabel, formatDate, remainingLabel } from '../../utils/repair';
 
-const COLUMN_COUNT = 9;
+//: 9 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 10;
 
 // Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
 // sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
@@ -56,12 +70,12 @@ function NotePreview({ preview }) {
         width: preview.width,
         transform: preview.placement === 'top' ? 'translateY(-100%)' : undefined,
       }}
-      className="pointer-events-none z-50 rounded-xl border border-gray-200 bg-white p-3 shadow-xl"
+      className="pointer-events-none z-50 rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
     >
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
         Güncel durum / not
       </p>
-      <p className="mt-1 whitespace-pre-line break-words text-[12px] leading-snug text-gray-700">
+      <p className="mt-1 whitespace-pre-line break-words text-[12px] leading-snug text-slate-700">
         {preview.text}
       </p>
     </div>,
@@ -73,7 +87,7 @@ function ActionButton({ title, onClick, tone = 'blue', children }) {
   const tones = {
     blue: 'text-blue-600 hover:bg-blue-50',
     green: 'text-emerald-600 hover:bg-emerald-50',
-    gray: 'text-gray-500 hover:bg-gray-100',
+    gray: 'text-slate-500 hover:bg-slate-100',
     red: 'text-red-600 hover:bg-red-50',
     amber: 'text-amber-600 hover:bg-amber-50',
   };
@@ -95,16 +109,25 @@ function ActionButton({ title, onClick, tone = 'blue', children }) {
 
 function Skeleton() {
   return (
-    <div className="divide-y divide-gray-100">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex gap-4 px-6 py-3">
-          <div className="h-5 w-20 animate-pulse rounded-full bg-gray-100" />
-          <div className="h-5 w-28 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 flex-1 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-        </div>
-      ))}
+    <div>
+      <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50/90 px-4 py-3">
+        <div className="h-2.5 w-12 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-20 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 flex-1 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+      </div>
+      <div className="divide-y divide-slate-100">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4 px-4 py-3">
+            <div className="h-5 w-20 animate-pulse rounded-full bg-slate-100" />
+            <div className="h-3 w-28 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 flex-1 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -119,8 +142,6 @@ export default function RepairTable({
   onCloseRepair,
   onCancel,
   onReopen,
-  onNote,
-  onHistory,
   onDocuments,
 }) {
   const dispatch = useDispatch();
@@ -293,17 +314,41 @@ export default function RepairTable({
 
   if (loading && items.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         <Skeleton />
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className={TABLE_CARD}>
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500">
+            <WrenchIcon className="h-3.5 w-3.5" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            {archive ? 'Tamir Arşivi' : 'Tamir Kayıtları'}
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
+            {items.length}
+          </span>
+        </div>
+
+        {resize.isCustomized && (
+          <button
+            type="button"
+            onClick={resize.resetAll}
+            className="shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            Sütun genişliklerini sıfırla
+          </button>
+        )}
+      </div>
+
       {loading && (
-        <div className="h-0.5 w-full overflow-hidden bg-blue-100">
-          <div className="h-full w-1/3 animate-pulse bg-blue-500" />
+        <div className="h-0.5 w-full overflow-hidden bg-slate-100">
+          <div className="h-full w-1/3 animate-pulse bg-slate-400" />
         </div>
       )}
 
@@ -311,17 +356,18 @@ export default function RepairTable({
         <ResizableTable
           resize={resize}
           columnIds={columnIds}
+          filler
           style={{ fontFamily: 'Inter' }}
         >
-          <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
-            <tr>
+          <thead className={TABLE_HEAD}>
+            <tr className="border-b border-slate-200">
               {headerColumns.map((column) => (
                 <ResizableTh
                   key={column.id}
                   resize={resize}
                   columnId={column.id}
                   label={column.label}
-                  className={`px-4 py-2.5 font-medium ${
+                  className={`${TABLE_HEAD_CELL} ${
                     column.align === 'right' ? 'text-right' : 'text-left'
                   }`}
                 >
@@ -338,31 +384,38 @@ export default function RepairTable({
                   )}
                 </ResizableTh>
               ))}
+
+              <TableFillerTh />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
             {items.length === 0 && (
               <tr>
-                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
-                  <p className="text-sm font-medium text-gray-900">
-                    Sonuç bulunamadı
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {hasActiveFilters
-                      ? 'Filtreleri değiştirin veya temizleyin'
-                      : archive
-                        ? 'Arşivde kapanmış tamir kaydı bulunmuyor'
-                        : 'Henüz tamir kaydı bulunmuyor'}
-                  </p>
-                  {hasActiveFilters && (
-                    <button
-                      type="button"
-                      onClick={onResetFilters || onOpenFilters}
-                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      Filtreleri temizle
-                    </button>
-                  )}
+                <td colSpan={COLUMN_COUNT} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <WrenchIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Sonuç bulunamadı
+                    </p>
+                    <p className="mt-1 text-[12px] text-slate-500">
+                      {hasActiveFilters
+                        ? 'Filtreleri değiştirin veya temizleyin'
+                        : archive
+                          ? 'Arşivde kapanmış tamir kaydı bulunmuyor'
+                          : 'Henüz tamir kaydı bulunmuyor'}
+                    </p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={onResetFilters || onOpenFilters}
+                        className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Filtreleri temizle
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             )}
@@ -372,59 +425,57 @@ export default function RepairTable({
               const documentCount = item.documents?.length || 0;
 
               return (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-4 py-2.5 ">
+                <tr key={item.id} className={TABLE_ROW}>
+                  <td className={TABLE_CELL}>
                     <StatusBadge status={item.status_detail} />
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5">
-                    <p className="text-[12px] font-medium text-gray-900">
+                  <td className={TABLE_CELL}>
+                    <p className={TABLE_PRIMARY}>
                       {item.identification_no || `Makine #${item.machine_id}`}
                     </p>
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-slate-500">
                       {[item.plate_no, item.territory_name]
                         .filter(Boolean)
                         .join(' · ') || '—'}
                     </p>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700 min-w-32">
+                  <td className={TABLE_CELL}>
                     {item.repair_type_name || '—'}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700 min-w-32">
-                    {
-                      item.garage_service_name === 'Garaj'
-                      ?
-                      <span className='bg-orange-200 text-orange-700 py-0.5 px-2 rounded-md'>{item.garage_service_name}</span>
-                      :
-                      <span className='bg-green-200  text-green-700 py-0.5 px-2 rounded-md'>{item.garage_service_name}</span>
-                    }
-                    {/* {item.garage_service_name || '—'} */}
-                  </td>
-
-                  <td className="max-w-[220px] px-4 py-2.5 text-[12px] text-gray-700">
-                    <p className="truncate">{item.fault_location || '—'}</p>
-                    {item.notes && (
-                      <p className="truncate text-[11px] text-gray-400">
-                        {/* {item.notes} */}
-                      </p>
+                  <td className={TABLE_CELL}>
+                    {item.garage_service_name === 'Garaj' ? (
+                      <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+                        {item.garage_service_name}
+                      </span>
+                    ) : (
+                      <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                        {item.garage_service_name}
+                      </span>
                     )}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className={`${TABLE_CELL} max-w-[220px]`}>
+                    <p className="max-w-[220px] truncate">
+                      {item.fault_location || '—'}
+                    </p>
+                  </td>
+
+                  <td className={TABLE_CELL}>
                     <p>{formatDate(item.entry_date)}</p>
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-slate-500">
                       {durationLabel(item.duration_days)}
                     </p>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px]">
+                  <td className={TABLE_CELL}>
                     <p
                       className={
                         !archive && item.is_overdue
                           ? 'font-semibold text-red-600'
-                          : 'text-gray-700'
+                          : 'text-slate-700'
                       }
                     >
                       {archive
@@ -436,7 +487,7 @@ export default function RepairTable({
                         className={`text-[11px] ${
                           item.is_overdue
                             ? 'font-medium text-red-600'
-                            : 'text-gray-500'
+                            : 'text-slate-500'
                         }`}
                       >
                         {remaining}
@@ -445,25 +496,25 @@ export default function RepairTable({
                   </td>
 
                     {/* Makinelerin guncel ariza ariza yerinden cikip guncel durum isimli yeni column asagisinda gonderildi */}
-                  <td className="min-w-[150px] max-w-[200px] px-4 py-2.5 align-top text-[12px] text-gray-700">
+                  <td className={`${TABLE_CELL} align-top`}>
                     {/* {formatDate(item.exit_date)} */}
                     {item.notes ? (
                       <p
-                        className="line-clamp-2 whitespace-pre-line break-words text-gray-800"
+                        className="line-clamp-2 whitespace-pre-line break-words text-slate-800"
                         onMouseEnter={(event) => showNotePreview(event, item.notes)}
                         onMouseLeave={hideNotePreview}
                       >
                         {item.notes}
                       </p>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-slate-400">—</span>
                     )}
                   </td>
 
                   {/* <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
                   </td> */}
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                  <td className={`${TABLE_CELL} text-right`}>
                     <div className="flex items-center justify-end gap-1">
                       <ActionButton
                         title={
@@ -533,6 +584,8 @@ export default function RepairTable({
                       </ActionButton> */}
                     </div>
                   </td>
+
+                  <TableFillerTd />
                 </tr>
               );
             })}

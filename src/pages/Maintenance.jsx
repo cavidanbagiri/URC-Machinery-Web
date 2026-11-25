@@ -262,14 +262,14 @@ export default function Maintenance() {
             style={{ fontFamily: 'Inter' }}
             className="flex items-center gap-2"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 ring-1 ring-slate-200/70">
               <BsTools className="h-4 w-4" />
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
               Periyodik Bakım
             </h1>
           </div>
-          <p className="mt-1.5 text-sm text-gray-500">
+          <p className="mt-1.5 text-sm text-slate-500">
             {isArchive ? (
               `${records.total} tamamlanmış bakım kaydı · en yeni önce`
             ) : (
@@ -281,7 +281,7 @@ export default function Maintenance() {
                   <>
                     {' '}
                     · {formatDate(filters.updated_on)} tarihinde güncellenen{' '}
-                    <b className="font-semibold text-gray-700">{total}</b>{' '}
+                    <b className="font-semibold text-slate-700">{total}</b>{' '}
                     makine
                   </>
                 )}
@@ -298,7 +298,7 @@ export default function Maintenance() {
             type="button"
             onClick={refreshAll}
             disabled={isArchive ? records.loading : loading}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ArrowPathIcon
               className={`h-4 w-4 ${
@@ -369,7 +369,7 @@ export default function Maintenance() {
           )}
         </div>
 
-        <p className="text-[11px] text-gray-400">
+        <p className="text-[11px] text-slate-400">
           {isArchive
             ? 'Tamamlanan bakımlar (sayaç kayıtları hariç)'
             : 'Filtrelemek için sütun başlığına tıklayın'}

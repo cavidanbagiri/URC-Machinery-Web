@@ -1,14 +1,36 @@
-// src/components/purchaserequest/ServiceRequestTable.jsx
+﻿// src/components/purchaserequest/ServiceRequestTable.jsx
 import { useDispatch, useSelector } from 'react-redux';
-import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowPathIcon,
+  TrashIcon,
+  WrenchScrewdriverIcon,
+} from '@heroicons/react/24/outline';
 
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import ColumnVisibilityMenu from '../ui/ColumnVisibilityMenu';
 import useColumnResize from '../ui/useColumnResize';
 import useColumnVisibility from '../ui/useColumnVisibility';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_MUTED,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import { setServiceFilter } from '../../stores/purchase_request_slice';
 import { formatDate, machineLabel } from '../../utils/repair';
+
+//: Başlık hücresi — hizalama ortak tokenla birlikte verilir.
+const HEAD_CLASS = `text-left ${TABLE_HEAD_CELL}`;
 
 // Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
 // sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
@@ -24,15 +46,25 @@ const SERVICE_COLUMN_WIDTHS = {
 
 function Skeleton() {
   return (
-    <div className="divide-y divide-gray-100">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex gap-4 px-6 py-3">
-          <div className="h-5 w-40 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 flex-1 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-20 animate-pulse rounded bg-gray-100" />
-        </div>
-      ))}
+    <div>
+      <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50/90 px-4 py-3">
+        <div className="h-2.5 w-32 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-24 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 flex-1 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+      </div>
+      <div className="divide-y divide-slate-100">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4 px-4 py-3">
+            <div className="h-3 w-40 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-16 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 flex-1 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -116,7 +148,7 @@ export default function ServiceRequestTable({
 
   if (loading && items.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         <Skeleton />
       </div>
     );
@@ -131,33 +163,47 @@ export default function ServiceRequestTable({
             type="button"
             onClick={resize.resetAll}
             title="Tüm sütunları varsayılan genişliğe döndür"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 transition hover:bg-slate-50"
           >
-            <ArrowPathIcon className="h-4 w-4 text-gray-400" />
+            <ArrowPathIcon className="h-4 w-4 text-slate-400" />
             Genişlikleri sıfırla
           </button>
         )}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         {loading && (
           <div className="h-0.5 w-full overflow-hidden bg-blue-100">
             <div className="h-full w-1/3 animate-pulse bg-blue-500" />
           </div>
         )}
 
+        <div className={TABLE_TOOLBAR}>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500">
+              <WrenchScrewdriverIcon className="h-3.5 w-3.5" />
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Servis / Hizmet Talepleri
+            </span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
+              {items.length}
+            </span>
+          </div>
+        </div>
+
         {visibility.allHidden ? (
-          <div className="px-4 py-12 text-center">
-            <p className="text-sm font-medium text-gray-900">
+          <div className="px-6 py-16 text-center">
+            <p className="text-sm font-semibold text-slate-900">
               Tüm sütunlar gizli
             </p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-[12px] text-slate-500">
               Görünür sütun kalmadı. Sütunları tekrar açabilirsiniz.
             </p>
             <button
               type="button"
               onClick={visibility.showAll}
-              className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+              className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
             >
               Tüm sütunları göster
             </button>
@@ -167,10 +213,10 @@ export default function ServiceRequestTable({
             <ResizableTable
               resize={resize}
               columnIds={visibleColumnIds}
-              style={{ fontFamily: 'Inter' }}
+              filler
             >
-              <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
-                <tr>
+              <thead className={TABLE_HEAD}>
+                <tr className="border-b border-slate-200">
                   {headerColumns.map((column) => (
                     <ResizableTh
                       key={column.id}
@@ -179,9 +225,9 @@ export default function ServiceRequestTable({
                       label={column.label}
                       className={columnClass(
                         column.id,
-                        `px-4 py-2.5 font-medium ${
-                          column.align === 'right' ? 'text-right' : 'text-left'
-                        }`
+                        column.align === 'right'
+                          ? `${TABLE_HEAD_CELL} text-right`
+                          : HEAD_CLASS
                       )}
                     >
                       {column.filter ? (
@@ -192,133 +238,125 @@ export default function ServiceRequestTable({
                           onChange={handleFilterChange}
                           align={column.align}
                         />
+                      ) : column.id === 'actions' ? (
+                        <span className="sr-only">{column.label}</span>
                       ) : (
                         column.label
                       )}
                     </ResizableTh>
                   ))}
+
+                  <TableFillerTh />
                 </tr>
               </thead>
 
-              <tbody className="text-sm text-gray-800">
-              {items.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={Math.max(visibility.visibleCount, 1)}
-                    className="px-4 py-12 text-center"
-                  >
-                    <p className="text-sm font-medium text-gray-900">
-                      Sonuç bulunamadı
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {hasActiveFilters
-                        ? 'Filtreleri değiştirin veya temizleyin'
-                        : 'Henüz servis/hizmet talebi bulunmuyor'}
-                    </p>
-                    {hasActiveFilters && (
-                      <button
-                        type="button"
-                        onClick={onResetFilters}
-                        className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-                      >
-                        Filtreleri temizle
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              )}
-              {items.map((item) => {
-                const deleting =
-                  rowBusy?.scope === 'serviceRequests' &&
-                  rowBusy?.id === item.id &&
-                  rowBusy?.action === 'delete';
-
-                return (
-                  <tr
-                    key={item.id}
-                    className="border-t border-gray-100 align-top hover:bg-gray-50"
-                  >
+              <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
+                {items.length === 0 && (
+                  <tr>
                     <td
-                      className={columnClass('service_form', 'px-4 py-2.5')}
+                      colSpan={Math.max(visibility.visibleCount, 1) + 1}
+                      className="px-6 py-16 text-center"
                     >
-                      <p className="text-[13px] font-medium text-gray-900">
-                        {item.title}
-                      </p>
-                      <p className="text-[11px] text-gray-500">
-                        No: {item.service_form_no}
-                      </p>
-                    </td>
-
-                    <td
-                      className={columnClass('identification_no', 'px-4 py-2.5')}
-                    >
-                      <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-700">
-                        {machineLabel(item) || '—'}
-                      </span>
-                    </td>
-
-                    <td
-                      className={columnClass(
-                        'company_name',
-                        'whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700'
-                      )}
-                    >
-                      {item.company_name}
-                    </td>
-
-                    <td
-                      className={columnClass(
-                        'service_description',
-                        'max-w-md px-4 py-2.5 text-[12px] text-gray-700'
-                      )}
-                    >
-                      <p className="line-clamp-2" title={item.service_description}>
-                        {item.service_description}
-                      </p>
-                    </td>
-
-                    <td
-                      className={columnClass(
-                        'request_date',
-                        'whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700'
-                      )}
-                    >
-                      {formatDate(item.request_date)}
-                    </td>
-
-                    <td
-                      className={columnClass(
-                        'created_by',
-                        'whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-500'
-                      )}
-                    >
-                      {item.created_by_name || '—'}
-                    </td>
-
-                    <td
-                      className={columnClass(
-                        'actions',
-                        'whitespace-nowrap px-4 py-2.5 text-right'
-                      )}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => onDelete(item)}
-                        disabled={deleting}
-                        title="Talebi sil"
-                        aria-label={`${item.title} talebini sil`}
-                        className="rounded-lg p-1.5 text-red-600 transition hover:bg-red-50 disabled:opacity-40"
-                      >
-                        {deleting ? (
-                          <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <TrashIcon className="h-4 w-4" />
+                      <div className="flex flex-col items-center">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                          <WrenchScrewdriverIcon className="h-5 w-5" />
+                        </span>
+                        <p className="mt-3 text-sm font-semibold text-slate-900">
+                          Sonuç bulunamadı
+                        </p>
+                        <p className="mt-1 text-[12px] text-slate-500">
+                          {hasActiveFilters
+                            ? 'Filtreleri değiştirin veya temizleyin'
+                            : 'Henüz servis/hizmet talebi bulunmuyor'}
+                        </p>
+                        {hasActiveFilters && (
+                          <button
+                            type="button"
+                            onClick={onResetFilters}
+                            className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                          >
+                            Filtreleri temizle
+                          </button>
                         )}
-                      </button>
+                      </div>
                     </td>
                   </tr>
-                );
-              })}
+                )}
+                {items.map((item) => {
+                  const deleting =
+                    rowBusy?.scope === 'serviceRequests' &&
+                    rowBusy?.id === item.id &&
+                    rowBusy?.action === 'delete';
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`${TABLE_ROW} align-top ${loading ? 'opacity-60' : ''}`}
+                    >
+                      <td className={columnClass('service_form', TABLE_CELL)}>
+                        <p className={`truncate ${TABLE_PRIMARY}`}>
+                          {item.title}
+                        </p>
+                        <p className={`truncate ${TABLE_MUTED}`}>
+                          No: {item.service_form_no}
+                        </p>
+                      </td>
+
+                      <td className={columnClass('identification_no', TABLE_CELL)}>
+                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                          {machineLabel(item) || '—'}
+                        </span>
+                      </td>
+
+                      <td
+                        className={columnClass(
+                          'company_name',
+                          `${TABLE_CELL} text-slate-600`
+                        )}
+                      >
+                        {item.company_name}
+                      </td>
+
+                      <td className={columnClass('service_description', TABLE_CELL)}>
+                        <p
+                          className="line-clamp-2 text-[12px] text-slate-600"
+                          title={item.service_description}
+                        >
+                          {item.service_description}
+                        </p>
+                      </td>
+
+                      <td className={columnClass('request_date', TABLE_CELL)}>
+                        <span className="tabular-nums">
+                          {formatDate(item.request_date)}
+                        </span>
+                      </td>
+
+                      <td className={columnClass('created_by', TABLE_MUTED)}>
+                        {item.created_by_name || '—'}
+                      </td>
+
+                      <td className={columnClass('actions', `${TABLE_CELL} text-right`)}>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(item)}
+                          disabled={deleting}
+                          title="Talebi sil"
+                          aria-label={`${item.title} talebini sil`}
+                          className="rounded-md p-1.5 text-red-600 transition hover:bg-red-50 disabled:opacity-40"
+                        >
+                          {deleting ? (
+                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <TrashIcon className="h-4 w-4" />
+                          )}
+                        </button>
+                      </td>
+
+                      <TableFillerTd />
+                    </tr>
+                  );
+                })}
               </tbody>
             </ResizableTable>
           </div>

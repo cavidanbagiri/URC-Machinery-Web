@@ -3,16 +3,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
+  ClipboardDocumentListIcon,
   DocumentPlusIcon,
+  ExclamationTriangleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_MUTED,
+  TABLE_NUM,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import { setFilter } from '../../stores/daily_fault_slice';
 import { formatDate } from '../../utils/repair';
 import { changedPartLabel, formatFileSize } from '../../utils/dailyFault';
+
+//: 8 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 9;
 
 /**
  * "Değişen Parça" cell: the structured part ("315/80 R22.5 · 2 Adet") sits on
@@ -25,7 +46,7 @@ function ChangedPartCell({ item }) {
   if (!partLabel) {
     return (
       <p className="max-w-[14rem] truncate" title={note}>
-        {note || '—'}
+        {note || <span className="text-slate-300">—</span>}
       </p>
     );
   }
@@ -33,13 +54,13 @@ function ChangedPartCell({ item }) {
   return (
     <>
       <p
-        className="max-w-[14rem] truncate text-[13px] font-medium text-gray-900"
+        className="max-w-[14rem] truncate text-[12px] font-medium text-slate-800"
         title={partLabel}
       >
         {partLabel}
       </p>
       {note && (
-        <p className="max-w-[14rem] truncate text-[11px] text-gray-500" title={note}>
+        <p className={`max-w-[14rem] truncate ${TABLE_MUTED}`} title={note}>
           {note}
         </p>
       )}
@@ -59,7 +80,7 @@ function DocumentCell({
   const inputId = `daily-fault-document-${item.id}`;
 
   return (
-    <div className="flex min-w-[13rem] flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5">
       {(item.documents || []).map((document) => {
         const deleting =
           busy?.action === 'delete' && busy?.documentId === document.id;
@@ -67,7 +88,7 @@ function DocumentCell({
         return (
           <span
             key={document.id}
-            className="inline-flex max-w-full items-center gap-1 rounded-full border border-blue-100 bg-blue-50 py-0.5 pl-2 pr-1 text-[11px] text-blue-800"
+            className="inline-flex max-w-full items-center gap-1 rounded-full border border-blue-100 bg-blue-50/80 py-0.5 pl-2 pr-1 text-[11px] text-blue-800"
           >
             <button
               type="button"
@@ -110,7 +131,7 @@ function DocumentCell({
 
       <label
         htmlFor={inputId}
-        className={`inline-flex cursor-pointer items-center gap-1 rounded-full border border-dashed border-gray-300 px-2 py-0.5 text-[11px] font-medium text-gray-600 transition hover:border-blue-400 hover:text-blue-700 ${
+        className={`inline-flex cursor-pointer items-center gap-1 rounded-full border border-dashed border-slate-300 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition hover:border-blue-400 hover:text-blue-700 ${
           uploading ? 'pointer-events-none opacity-60' : ''
         }`}
       >
@@ -139,14 +160,23 @@ function DocumentCell({
 
 function Skeleton() {
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-slate-100">
+      <div className="flex gap-4 bg-slate-50/90 px-4 py-3">
+        {[56, 96, 72, 104, 120].map((width) => (
+          <div
+            key={width}
+            className="h-3 animate-pulse rounded-full bg-slate-200/80"
+            style={{ width }}
+          />
+        ))}
+      </div>
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex gap-4 px-6 py-3">
-          <div className="h-5 w-20 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-28 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 flex-1 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-32 animate-pulse rounded-full bg-gray-100" />
+        <div key={index} className="flex items-center gap-4 px-4 py-3.5">
+          <div className="h-5 w-20 animate-pulse rounded-full bg-slate-100" />
+          <div className="h-5 w-28 animate-pulse rounded bg-slate-100" />
+          <div className="h-5 w-24 animate-pulse rounded bg-slate-100" />
+          <div className="h-5 flex-1 animate-pulse rounded bg-slate-100" />
+          <div className="h-5 w-32 animate-pulse rounded-full bg-slate-100" />
         </div>
       ))}
     </div>
@@ -237,59 +267,60 @@ export default function DailyFaultTable({
 
   if (loading && items.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         <Skeleton />
       </div>
     );
   }
 
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-900">Sonuç bulunamadı</p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Filtreleri değiştirin veya temizleyin'
-            : 'Henüz günlük arıza kaydı bulunmuyor'}
-        </p>
-        {hasActiveFilters ? (
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-          >
-            Filtreleri temizle
-          </button>
-        ) : (
-          <p className="mt-2 text-xs text-gray-400">{EMPTY_TEXT}</p>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className={TABLE_CARD}>
       {loading && (
         <div className="h-0.5 w-full overflow-hidden bg-blue-100">
           <div className="h-full w-1/3 animate-pulse bg-blue-500" />
         </div>
       )}
 
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500">
+            <ClipboardDocumentListIcon className="h-3.5 w-3.5" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Arıza Kayıtları
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
+            {items.length}
+          </span>
+        </div>
+
+        {resize.isCustomized && (
+          <button
+            type="button"
+            onClick={resize.resetAll}
+            className="shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            Sütun genişliklerini sıfırla
+          </button>
+        )}
+      </div>
+
       <div className="overflow-x-auto">
         <ResizableTable
           resize={resize}
           columnIds={columnIds}
+          filler
           style={{ fontFamily: 'Inter' }}
         >
-          <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
-            <tr>
+          <thead className={TABLE_HEAD}>
+            <tr className="border-b border-slate-200">
               {headerColumns.map((column) => (
                 <ResizableTh
                   key={column.id}
                   resize={resize}
                   columnId={column.id}
                   label={column.label}
-                  className="px-4 py-2.5 text-left font-medium"
+                  className={`text-left ${TABLE_HEAD_CELL}`}
                 >
                   {column.filter ? (
                     <ColumnFilterHeader
@@ -303,45 +334,82 @@ export default function DailyFaultTable({
                   )}
                 </ResizableTh>
               ))}
+
+              <TableFillerTh />
             </tr>
           </thead>
 
-          <tbody className="text-sm text-gray-800">
+          <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <ExclamationTriangleIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Sonuç bulunamadı
+                    </p>
+                    <p className="mt-1 text-[12px] text-slate-500">
+                      {hasActiveFilters
+                        ? 'Filtreleri değiştirin veya temizleyin'
+                        : 'Henüz günlük arıza kaydı bulunmuyor'}
+                    </p>
+                    {hasActiveFilters ? (
+                      <button
+                        type="button"
+                        onClick={onResetFilters}
+                        className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Filtreleri temizle
+                      </button>
+                    ) : (
+                      <p className="mt-2 text-[11px] text-slate-400">
+                        {EMPTY_TEXT}
+                      </p>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
             {items.map((item) => (
-              <tr
-                key={item.id}
-                className="border-t border-gray-100 align-top hover:bg-gray-50"
-              >
-                <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
-                  {formatDate(item.fault_date)}
+              <tr key={item.id} className={`${TABLE_ROW} align-top`}>
+                <td className={TABLE_CELL}>
+                  <span className={`text-slate-700 ${TABLE_NUM}`}>
+                    {formatDate(item.fault_date)}
+                  </span>
                 </td>
 
-                <td className="px-4 py-2.5">
-                  <p className="text-[13px] font-medium text-gray-900">
+                <td className={TABLE_CELL}>
+                  <p className={TABLE_PRIMARY}>
                     {item.identification_no || `Makine #${item.machine_id}`}
                   </p>
-                  <p className="text-[11px] text-gray-500">
+                  <p className={TABLE_MUTED}>
                     {[item.plate_no, item.car_mark_name, item.car_model_name]
                       .filter(Boolean)
                       .join(' · ') || '—'}
                   </p>
                 </td>
 
-                <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                <td className={`${TABLE_CELL} text-slate-700 ${TABLE_NUM}`}>
                   {item.km_hour || '—'}
                 </td>
 
-                <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                <td className={`${TABLE_CELL} text-slate-600`}>
                   {item.territory_name || '—'}
                 </td>
 
-                <td className="whitespace-nowrap px-4 py-2.5">
-                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
-                    {item.repair_type_name || '—'}
-                  </span>
+                <td className={TABLE_CELL}>
+                  {item.repair_type_name ? (
+                    <span className="inline-flex max-w-full items-center truncate rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-100">
+                      {item.repair_type_name}
+                    </span>
+                  ) : (
+                    <span className="text-slate-300">—</span>
+                  )}
                 </td>
 
-                <td className="px-4 py-2.5 text-[12px] text-gray-700">
+                <td className={`${TABLE_CELL} text-slate-700`}>
                   <p
                     className="max-w-[14rem] truncate"
                     title={item.fault_assignment || ''}
@@ -350,11 +418,11 @@ export default function DailyFaultTable({
                   </p>
                 </td>
 
-                <td className="px-4 py-2.5 text-[12px] text-gray-700">
+                <td className={`${TABLE_CELL} text-slate-700`}>
                   <ChangedPartCell item={item} />
                 </td>
 
-                <td className="px-4 py-2.5">
+                <td className="px-4 py-3">
                   <DocumentCell
                     item={item}
                     busy={documentBusy}
@@ -364,6 +432,8 @@ export default function DailyFaultTable({
                     onDeleteDocument={onDeleteDocument}
                   />
                 </td>
+
+                <TableFillerTd />
               </tr>
             ))}
           </tbody>

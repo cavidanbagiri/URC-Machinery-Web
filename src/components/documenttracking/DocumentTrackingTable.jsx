@@ -2,12 +2,28 @@
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowPathIcon,
+  CalendarDaysIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 
 import { ColumnFilterHeader } from '../ui/ColumnFilter';
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_MUTED,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import { setFilter } from '../../stores/document_tracking_slice';
 import {
   DOCUMENT_DATE_FIELDS,
@@ -16,6 +32,9 @@ import {
   dateToneTitle,
   formatDate,
 } from '../../utils/documentTracking';
+
+//: Başlık hücresi — hizalama ortak tokenla birlikte verilir.
+const HEAD_CLASS = `text-left ${TABLE_HEAD_CELL}`;
 
 const COLUMN_COUNT = 4 + DOCUMENT_DATE_FIELDS.length + 1;
 
@@ -36,20 +55,29 @@ const DOCUMENT_COLUMN_WIDTHS = {
 };
 
 const DATE_INPUT_CLASS =
-  'w-full rounded-md border border-blue-300 bg-white px-1.5 py-1 text-[12px] text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60';
+  'w-full rounded-md border border-blue-300 bg-white px-1.5 py-1 text-[12px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60';
 
 function Skeleton() {
   return (
-    <div className="divide-y divide-gray-100">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex gap-4 px-6 py-3">
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-20 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 flex-1 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-        </div>
-      ))}
+    <div>
+      <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50/90 px-4 py-3">
+        <div className="h-2.5 w-20 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 flex-1 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-20 animate-pulse rounded bg-slate-200/80" />
+      </div>
+      <div className="divide-y divide-slate-100">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4 px-4 py-3">
+            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 flex-1 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -153,27 +181,40 @@ export default function DocumentTrackingTable({
 
   if (loading && items.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         <Skeleton />
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className={TABLE_CARD}>
       {loading && (
         <div className="h-0.5 w-full overflow-hidden bg-blue-100">
           <div className="h-full w-1/3 animate-pulse bg-blue-500" />
         </div>
       )}
 
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex items-center gap-2">
+          <CalendarDaysIcon className="h-4 w-4 text-slate-400" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Evrak Takibi
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 tabular-nums">
+            {items.length}
+          </span>
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <ResizableTable
           resize={resize}
           columnIds={columnIds}
+          filler
           style={{ fontFamily: 'Inter' }}
         >
-          <thead className="bg-gray-100 text-[11px] uppercase text-gray-700">
+          <thead className={TABLE_HEAD}>
             <tr>
               {headerColumns.map((column) => (
                 <ResizableTh
@@ -181,7 +222,7 @@ export default function DocumentTrackingTable({
                   resize={resize}
                   columnId={column.id}
                   label={column.label}
-                  className={`px-3 py-2.5 font-medium ${
+                  className={`${HEAD_CLASS} ${
                     column.align === 'right' ? 'text-right' : 'text-left'
                   }`}
                 >
@@ -198,30 +239,36 @@ export default function DocumentTrackingTable({
                   )}
                 </ResizableTh>
               ))}
+              <TableFillerTh />
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
             {items.length === 0 && (
               <tr>
-                <td colSpan={COLUMN_COUNT} className="px-4 py-12 text-center">
-                  <p className="text-sm font-medium text-gray-900">
-                    Sonuç bulunamadı
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {hasActiveFilters
-                      ? 'Filtreleri değiştirin veya temizleyin'
-                      : 'Takip edilecek makine bulunmuyor'}
-                  </p>
-                  {hasActiveFilters && onResetFilters && (
-                    <button
-                      type="button"
-                      onClick={onResetFilters}
-                      className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      Filtreleri temizle
-                    </button>
-                  )}
+                <td colSpan={COLUMN_COUNT} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <CalendarDaysIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Sonuç bulunamadı
+                    </p>
+                    <p className="mt-1 text-[12px] text-slate-500">
+                      {hasActiveFilters
+                        ? 'Filtreleri değiştirin veya temizleyin'
+                        : 'Takip edilecek makine bulunmuyor'}
+                    </p>
+                    {hasActiveFilters && onResetFilters && (
+                      <button
+                        type="button"
+                        onClick={onResetFilters}
+                        className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Filtreleri temizle
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             )}
@@ -235,36 +282,42 @@ export default function DocumentTrackingTable({
               return (
                 <tr
                   key={item.machine_id}
-                  className={`align-top transition ${
-                    rowEditing ? 'bg-blue-50/60' : 'hover:bg-gray-50'
+                  className={`${TABLE_ROW} align-top ${
+                    rowEditing ? 'bg-blue-50/60' : ''
                   }`}
                 >
-                  <td className="px-3 py-2">
-                    <p className="text-[13px] font-medium text-gray-900">
+                  <td className={TABLE_CELL}>
+                    <p className={`truncate ${TABLE_PRIMARY}`}>
                       {machineLabel(item)}
                     </p>
                     {item.plate_no && (
-                      <p className="text-[11px] text-gray-500">
+                      <p className={`truncate ${TABLE_MUTED}`}>
                         {item.plate_no}
                       </p>
                     )}
                   </td>
 
-                  <td className="px-3 py-2 text-[12px] text-gray-700">
-                    <p className="max-w-[9rem] truncate" title={item.territory_name || ''}>
+                  <td className={TABLE_CELL}>
+                    <p
+                      className="max-w-[9rem] truncate text-slate-600"
+                      title={item.territory_name || ''}
+                    >
                       {item.territory_name || '—'}
                     </p>
                   </td>
 
-                  <td className="px-3 py-2 text-[12px] text-gray-700">
-                    <p className="max-w-[9rem] truncate" title={item.type_name || ''}>
+                  <td className={TABLE_CELL}>
+                    <p
+                      className="max-w-[9rem] truncate text-slate-600"
+                      title={item.type_name || ''}
+                    >
                       {item.type_name || '—'}
                     </p>
                   </td>
 
-                  <td className="px-3 py-2 text-[12px] text-gray-700">
+                  <td className={TABLE_CELL}>
                     <p
-                      className="max-w-[10rem] truncate"
+                      className="max-w-[10rem] truncate text-slate-600"
                       title={markModelLabel(item)}
                     >
                       {markModelLabel(item)}
@@ -272,7 +325,7 @@ export default function DocumentTrackingTable({
                   </td>
 
                   {DOCUMENT_DATE_FIELDS.map((field) => (
-                    <td key={field} className="px-3 py-2">
+                    <td key={field} className={TABLE_CELL}>
                       {rowEditing ? (
                         <input
                           type="date"
@@ -290,14 +343,14 @@ export default function DocumentTrackingTable({
                     </td>
                   ))}
 
-                  <td className="px-3 py-2 text-right">
+                  <td className={`${TABLE_CELL} text-right`}>
                     {rowEditing ? (
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           type="button"
                           onClick={() => onSave(item)}
                           disabled={updating}
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[11px] font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2.5 py-1.5 text-[11px] font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {savingRow && (
                             <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
@@ -308,7 +361,7 @@ export default function DocumentTrackingTable({
                           type="button"
                           onClick={onCancelEdit}
                           disabled={updating}
-                          className="rounded-lg px-2 py-1.5 text-[11px] font-medium text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-md px-2 py-1.5 text-[11px] font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Vazgeç
                         </button>
@@ -323,13 +376,15 @@ export default function DocumentTrackingTable({
                             ? 'Önce açık düzenlemeyi kaydedin veya vazgeçin'
                             : 'Evrak tarihlerini güncelle'
                         }
-                        className="inline-flex items-center gap-1 rounded-lg border border-blue-200 px-2.5 py-1.5 text-[11px] font-medium text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex items-center gap-1 rounded-md border border-blue-200 px-2.5 py-1.5 text-[11px] font-medium text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <PencilSquareIcon className="h-3.5 w-3.5" />
                         Güncelle
                       </button>
                     )}
                   </td>
+
+                  <TableFillerTd />
                 </tr>
               );
             })}

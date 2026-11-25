@@ -51,7 +51,7 @@ const NAV_ITEMS = [
   { to: '/meter_logs', label: 'Güncel KM ve Motor Saatleri', icon: PiSpeedometerLight },
   { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: PiGasPumpLight },
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: PiShoppingCartSimpleLight },
-  { to: '/stock', label: 'Stok', icon: PiWarehouseLight },
+  // { to: '/stock', label: 'Stok', icon: PiWarehouseLight },
   { to: '/rental_machines', label: 'Kiralık Makineler', icon: PiTimerLight },
   { to: '/isg', label: 'ISG', icon: PiHardHatLight },
   // {* Dont need to show daily faults *}

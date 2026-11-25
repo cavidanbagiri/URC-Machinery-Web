@@ -5,11 +5,27 @@ import toast from 'react-hot-toast';
 import {
   ArrowPathIcon,
   CheckCircleIcon,
+  FireIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_MUTED,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import { formatDate, formatNumber } from '../../utils/maintenance';
 import { parseDecimalInput } from '../../utils/numberInput';
 
@@ -28,8 +44,13 @@ const RENTAL_FUEL_COLUMN_WIDTHS = {
 
 const COLUMN_IDS = Object.keys(RENTAL_FUEL_COLUMN_WIDTHS);
 
+//: Başlık hücreleri; hizalama varyantları bu sabitten türetilir.
+const HEAD_CLASS = `text-left ${TABLE_HEAD_CELL}`;
+const HEAD_RIGHT = `text-right ${TABLE_HEAD_CELL}`;
+const HEAD_CENTER = `text-center ${TABLE_HEAD_CELL}`;
+
 const INPUT_CLASS =
-  'w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-50';
+  'w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50';
 
 //: Kiralama durumu rozeti; kod sunucudan seçilen güne göre gelir.
 const STATUS_BADGE = {
@@ -44,7 +65,7 @@ function rentalLabel(rental) {
 
 function StatusBadge({ rental }) {
   const className =
-    STATUS_BADGE[rental.status] || 'bg-gray-50 text-gray-600 ring-gray-200';
+    STATUS_BADGE[rental.status] || 'bg-slate-50 text-slate-600 ring-slate-200';
 
   return (
     <span
@@ -57,16 +78,25 @@ function StatusBadge({ rental }) {
 
 function Skeleton() {
   return (
-    <div className="divide-y divide-gray-100">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="flex gap-4 px-4 py-3">
-          <div className="h-5 w-40 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-28 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 flex-1 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-20 animate-pulse rounded bg-gray-100" />
-        </div>
-      ))}
+    <div>
+      <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50/90 px-4 py-3">
+        <div className="h-2.5 w-32 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-24 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-20 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 flex-1 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+      </div>
+      <div className="divide-y divide-slate-100">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4 px-4 py-3">
+            <div className="h-3 w-40 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-28 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 flex-1 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -118,12 +148,12 @@ function EntryRow({ rental, selectedDate, onSave }) {
   };
 
   return (
-    <tr className="group hover:bg-gray-50/70">
-      <td className="px-3 py-2.5 align-top">
-        <p className="truncate text-sm font-semibold text-gray-900" title={label}>
+    <tr className={`${TABLE_ROW} align-top`}>
+      <td className={TABLE_CELL}>
+        <p className={`truncate ${TABLE_PRIMARY}`} title={label}>
           {label}
         </p>
-        <p className="truncate text-[11px] text-gray-500">
+        <p className={`truncate ${TABLE_MUTED}`}>
           {rental.company_name || '—'}
         </p>
         {rental.day_entry_count > 0 ? (
@@ -139,37 +169,35 @@ function EntryRow({ rental, selectedDate, onSave }) {
         )}
       </td>
 
-      <td className="px-3 py-2.5 align-top">
+      <td className={TABLE_CELL}>
         <p
-          className="truncate text-[12px] text-gray-700"
+          className="truncate text-[12px] text-slate-600"
           title={rental.site_name || ''}
         >
           {rental.site_name || '—'}
         </p>
       </td>
 
-      <td className="px-3 py-2.5 align-top text-[12px] text-gray-700">
-        <p className="whitespace-nowrap">
+      <td className={TABLE_CELL}>
+        <p className="text-[12px] text-slate-600 tabular-nums">
           {formatDate(rental.start_date)} – {formatDate(rental.end_date)}
         </p>
       </td>
 
-      <td className="px-3 py-2.5 align-top">
+      <td className={TABLE_CELL}>
         <StatusBadge rental={rental} />
       </td>
 
-      <td className="px-3 py-2.5 align-top text-right">
+      <td className={`${TABLE_CELL} text-right`}>
         {rental.day_entry_count > 0 ? (
           <>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-[13px] font-semibold text-slate-900 tabular-nums">
               {formatNumber(rental.day_liters)} L
             </p>
-            <p className="text-[11px] text-gray-400">
-              {rental.day_entry_count} kayıt
-            </p>
+            <p className={TABLE_MUTED}>{rental.day_entry_count} kayıt</p>
             {rental.last_given_by && (
               <p
-                className="truncate text-[10px] text-gray-400"
+                className="truncate text-[10px] text-slate-400"
                 title={[rental.last_given_by, rental.last_note]
                   .filter(Boolean)
                   .join(' · ')}
@@ -179,11 +207,11 @@ function EntryRow({ rental, selectedDate, onSave }) {
             )}
           </>
         ) : (
-          <p className="text-sm text-gray-300">—</p>
+          <p className="text-sm text-slate-300">—</p>
         )}
       </td>
 
-      <td className="px-2 py-2.5 align-top">
+      <td className="whitespace-nowrap px-2 py-3">
         <input
           ref={litersRef}
           type="text"
@@ -200,19 +228,19 @@ function EntryRow({ rental, selectedDate, onSave }) {
         />
       </td>
 
-      <td className="px-3 py-2.5 align-top text-right">
-        <p className="text-sm font-semibold text-gray-900">
+      <td className={`${TABLE_CELL} text-right`}>
+        <p className="text-[13px] font-semibold text-slate-900 tabular-nums">
           {formatNumber(rental.total_liters)} L
         </p>
-        <p className="text-[10px] text-gray-400">
+        <p className={`${TABLE_MUTED} tabular-nums`}>
           Bu ay: {formatNumber(rental.monthly_liters)} L
         </p>
-        <p className="text-[10px] text-gray-400">
+        <p className="text-[10px] text-slate-400 tabular-nums">
           {rental.total_entry_count} kayıt
         </p>
       </td>
 
-      <td className="px-2 py-2.5 align-top">
+      <td className="whitespace-nowrap px-2 py-3">
         <button
           type="button"
           onClick={handleSubmit}
@@ -221,7 +249,7 @@ function EntryRow({ rental, selectedDate, onSave }) {
             saved
               ? 'bg-emerald-600 text-white hover:bg-emerald-700'
               : 'bg-blue-600 text-white hover:bg-blue-700'
-          } disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500`}
+          } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
           title="Litre değerini girip kaydedin (Enter)"
         >
           {saving ? (
@@ -239,6 +267,8 @@ function EntryRow({ rental, selectedDate, onSave }) {
           )}
         </button>
       </td>
+
+      <TableFillerTd />
     </tr>
   );
 }
@@ -255,53 +285,49 @@ export default function RentalFuelLogTable({
 
   if (loading && rentals.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         <Skeleton />
       </div>
     );
   }
 
-  if (!loading && rentals.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white px-6 py-14 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-700">
-          Gösterilecek kiralık makine yok
-        </p>
-        <p className="mt-1 text-xs text-gray-500">
-          Kiralık ekipman <strong>Kiralık Makineler</strong> sayfasından eklenir;
-          arama veya tarih seçimini de değiştirebilirsiniz.
-        </p>
-        <Link
-          to="/rental_machines"
-          className="mt-3 inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
-        >
-          Kiralık Makineler
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className={TABLE_CARD}>
       {loading && (
         <div className="h-0.5 w-full overflow-hidden bg-blue-100">
           <div className="h-full w-1/3 animate-pulse bg-blue-500" />
         </div>
       )}
 
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex items-center gap-2">
+          <FireIcon className="h-4 w-4 text-slate-400" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Kiralık Yakıt Girişi
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 tabular-nums">
+            {rentals.length}
+          </span>
+        </div>
+        <span className="text-[11px] text-slate-400">
+          Litre girip Enter ile kaydedin
+        </span>
+      </div>
+
       <div className="max-h-[60vh] overflow-auto">
         <ResizableTable
           resize={resize}
           columnIds={COLUMN_IDS}
+          filler
           style={{ fontFamily: 'Inter' }}
         >
-          <thead className="sticky top-0 z-20 bg-gray-100 text-[11px] uppercase tracking-wide text-gray-600">
+          <thead className={`sticky top-0 z-20 backdrop-blur ${TABLE_HEAD}`}>
             <tr>
               <ResizableTh
                 resize={resize}
                 columnId="equipment"
                 label="Ekipman / Firma"
-                className="px-3 py-2.5 text-left font-semibold"
+                className={HEAD_CLASS}
               >
                 Ekipman / Firma
               </ResizableTh>
@@ -309,7 +335,7 @@ export default function RentalFuelLogTable({
                 resize={resize}
                 columnId="site"
                 label="Şantiye"
-                className="px-3 py-2.5 text-left font-semibold"
+                className={HEAD_CLASS}
               >
                 Şantiye
               </ResizableTh>
@@ -317,7 +343,7 @@ export default function RentalFuelLogTable({
                 resize={resize}
                 columnId="period"
                 label="Tarih Aralığı"
-                className="px-3 py-2.5 text-left font-semibold"
+                className={HEAD_CLASS}
               >
                 Tarih Aralığı
               </ResizableTh>
@@ -325,7 +351,7 @@ export default function RentalFuelLogTable({
                 resize={resize}
                 columnId="status"
                 label="Durum"
-                className="px-3 py-2.5 text-left font-semibold"
+                className={HEAD_CLASS}
               >
                 Durum
               </ResizableTh>
@@ -333,7 +359,7 @@ export default function RentalFuelLogTable({
                 resize={resize}
                 columnId="day_total"
                 label="Günlük Verilen"
-                className="px-3 py-2.5 text-right font-semibold"
+                className={HEAD_RIGHT}
               >
                 Günlük Verilen
               </ResizableTh>
@@ -341,7 +367,7 @@ export default function RentalFuelLogTable({
                 resize={resize}
                 columnId="liters"
                 label="Litre"
-                className="px-2 py-2.5 text-right font-semibold text-blue-700"
+                className={HEAD_RIGHT}
               >
                 Litre
               </ResizableTh>
@@ -349,7 +375,7 @@ export default function RentalFuelLogTable({
                 resize={resize}
                 columnId="total"
                 label="Toplam Verilen"
-                className="px-3 py-2.5 text-right font-semibold text-blue-700"
+                className={HEAD_RIGHT}
               >
                 Toplam Verilen
               </ResizableTh>
@@ -357,14 +383,43 @@ export default function RentalFuelLogTable({
                 resize={resize}
                 columnId="action"
                 label="İşlem"
-                className="px-2 py-2.5 text-center font-semibold"
+                className={HEAD_CENTER}
               >
                 İşlem
               </ResizableTh>
+              <TableFillerTh />
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
+            {rentals.length === 0 && (
+              <tr>
+                <td
+                  colSpan={COLUMN_IDS.length + 1}
+                  className="px-6 py-16 text-center"
+                >
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <FireIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Gösterilecek kiralık makine yok
+                    </p>
+                    <p className="mt-1 max-w-md text-[12px] text-slate-500">
+                      Kiralık ekipman <strong>Kiralık Makineler</strong> sayfasından
+                      eklenir; arama veya tarih seçimini de değiştirebilirsiniz.
+                    </p>
+                    <Link
+                      to="/rental_machines"
+                      className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                    >
+                      Kiralık Makineler
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            )}
+
             {rentals.map((rental) => (
               <EntryRow
                 // Tarih değişince satır yeniden kurulur; yarım kalan girişler
@@ -379,12 +434,12 @@ export default function RentalFuelLogTable({
         </ResizableTable>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 bg-gray-50 px-3 py-2 text-[11px] text-gray-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/60 px-4 py-2 text-[11px] text-slate-500">
         <span>
           Kiralık ekipmanda sayaç olmadığı için ortalama yakıt hesaplanmaz;
           toplam litre tutulur.
         </span>
-        <span className="font-semibold text-gray-800">
+        <span className="font-semibold text-slate-700 tabular-nums">
           {formatDate(selectedDate)} kiralık toplam: {formatNumber(dailyTotal)} L
         </span>
       </div>

@@ -1,5 +1,6 @@
 // src/components/warehouse/StockTable.jsx
 import {
+  ArchiveBoxIcon,
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
   ClipboardDocumentListIcon,
@@ -9,16 +10,32 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 
-import ResizableTable, { ResizableTh } from '../ui/ResizableTable';
+import ResizableTable, {
+  ResizableTh,
+  TableFillerTd,
+  TableFillerTh,
+} from '../ui/ResizableTable';
 import useColumnResize from '../ui/useColumnResize';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+  TABLE_HEAD_CELL,
+  TABLE_MUTED,
+  TABLE_PRIMARY,
+  TABLE_ROW,
+  TABLE_TERTIARY,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 import {
   formatQuantity,
   stockStatusBadgeClass,
   stockStatusLabel,
 } from '../../utils/warehouse';
 
-const HEAD_CLASS =
-  'whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500';
+//: Başlık hücresi — hizalama ortak tokenla birlikte verilir.
+const HEAD_CLASS = `text-left ${TABLE_HEAD_CELL}`;
 
 // Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
 // sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
@@ -32,18 +49,30 @@ const STOCK_COLUMN_WIDTHS = {
 };
 const STOCK_COLUMN_IDS = Object.keys(STOCK_COLUMN_WIDTHS);
 
+//: 6 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 7;
+
 function Skeleton() {
   return (
-    <div className="divide-y divide-gray-100">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex gap-4 px-6 py-3">
-          <div className="h-5 w-48 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-20 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 flex-1 animate-pulse rounded bg-gray-100" />
-          <div className="h-5 w-24 animate-pulse rounded-full bg-gray-100" />
-        </div>
-      ))}
+    <div>
+      <div className="flex items-center gap-4 border-b border-slate-100 bg-slate-50/90 px-4 py-3">
+        <div className="h-2.5 w-20 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-16 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-12 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 flex-1 animate-pulse rounded bg-slate-200/80" />
+        <div className="h-2.5 w-14 animate-pulse rounded bg-slate-200/80" />
+      </div>
+      <div className="divide-y divide-slate-100">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4 px-4 py-3">
+            <div className="h-3 w-48 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 flex-1 animate-pulse rounded bg-slate-100" />
+            <div className="h-5 w-24 animate-pulse rounded-full bg-slate-100" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -66,40 +95,48 @@ export default function StockTable({
 
   if (loading && items.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={TABLE_CARD}>
         <Skeleton />
       </div>
     );
   }
 
-  if (!loading && items.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-900">Sonuç bulunamadı</p>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasActiveFilters
-            ? 'Filtreleri değiştirin veya temizleyin'
-            : 'Henüz stok kartı yok; "Depoya Al" ile gelen taleplerden otomatik oluşur'}
-        </p>
-        {hasActiveFilters && (
+  return (
+    <div className={TABLE_CARD}>
+      {loading && (
+        <div className="h-0.5 w-full overflow-hidden bg-blue-100">
+          <div className="h-full w-1/3 animate-pulse bg-blue-500" />
+        </div>
+      )}
+
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500">
+            <ArchiveBoxIcon className="h-3.5 w-3.5" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Stok Kartları
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
+            {items.length}
+          </span>
+        </div>
+
+        {resize.isCustomized && (
           <button
             type="button"
-            onClick={onResetFilters}
-            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
+            onClick={resize.resetAll}
+            className="shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
           >
-            Filtreleri temizle
+            Sütun genişliklerini sıfırla
           </button>
         )}
       </div>
-    );
-  }
 
-  return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <ResizableTable resize={resize} columnIds={STOCK_COLUMN_IDS}>
-          <thead className="bg-gray-50">
-            <tr>
+        <ResizableTable resize={resize} columnIds={STOCK_COLUMN_IDS} filler>
+          <thead className={TABLE_HEAD}>
+            <tr className="border-b border-slate-200">
               <ResizableTh
                 resize={resize}
                 columnId="material"
@@ -148,10 +185,41 @@ export default function StockTable({
               >
                 İşlemler
               </ResizableTh>
+
+              <TableFillerTh />
             </tr>
           </thead>
 
-          <tbody className="text-sm text-gray-800">
+          <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
+            {!loading && items.length === 0 && (
+              <tr>
+                <td colSpan={COLUMN_COUNT} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <ArchiveBoxIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Sonuç bulunamadı
+                    </p>
+                    <p className="mt-1 text-[12px] text-slate-500">
+                      {hasActiveFilters
+                        ? 'Filtreleri değiştirin veya temizleyin'
+                        : 'Henüz stok kartı yok; "Depoya Al" ile gelen taleplerden otomatik oluşur'}
+                    </p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={onResetFilters}
+                        className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Filtreleri temizle
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
+
             {items.map((item) => {
               const deleting =
                 rowBusy?.scope === 'stock' &&
@@ -159,15 +227,10 @@ export default function StockTable({
                 rowBusy?.action === 'delete';
 
               return (
-                <tr
-                  key={item.id}
-                  className="border-t border-gray-100 align-top hover:bg-gray-50"
-                >
-                  <td className="px-4 py-2.5">
-                    <p className="text-[13px] font-medium text-gray-900">
-                      {item.name}
-                    </p>
-                    <p className="text-[11px] text-gray-500">
+                <tr key={item.id} className={`${TABLE_ROW} align-top`}>
+                  <td className={TABLE_CELL}>
+                    <p className={TABLE_PRIMARY}>{item.name}</p>
+                    <p className={TABLE_MUTED}>
                       {item.part_number
                         ? `Parça No: ${item.part_number}`
                         : 'Parça no yok'}
@@ -175,21 +238,21 @@ export default function StockTable({
                     </p>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className={TABLE_CELL}>
                     <p>{item.territory_name || '—'}</p>
-                    <p className="text-[11px] text-gray-500">
+                    <p className={TABLE_TERTIARY}>
                       {item.location
                         ? `Raf: ${item.location}`
                         : 'Raf belirtilmemiş'}
                     </p>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5">
+                  <td className={TABLE_CELL}>
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-semibold text-gray-900">
+                      <span className="text-[13px] font-semibold tabular-nums text-slate-900">
                         {formatQuantity(item.quantity)}
                       </span>
-                      <span className="text-[11px] text-gray-500">
+                      <span className={TABLE_MUTED}>
                         {item.unit}
                       </span>
                       <span
@@ -202,11 +265,11 @@ export default function StockTable({
                     </div>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-gray-700">
+                  <td className={`${TABLE_CELL} tabular-nums`}>
                     {formatQuantity(item.min_quantity)} {item.unit}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-[12px]">
+                  <td className={TABLE_CELL}>
                     <button
                       type="button"
                       onClick={() => onShowMovements(item)}
@@ -218,14 +281,14 @@ export default function StockTable({
                     </button>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                  <td className={`${TABLE_CELL} text-right`}>
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"
                         onClick={() => onEntry(item)}
                         title="Depoya giriş yap"
                         aria-label={`${item.name} için giriş`}
-                        className="rounded-lg p-1.5 text-emerald-600 transition hover:bg-emerald-50"
+                        className="rounded-md p-1.5 text-emerald-600 transition hover:bg-emerald-50"
                       >
                         <PlusCircleIcon className="h-4 w-4" />
                       </button>
@@ -235,7 +298,7 @@ export default function StockTable({
                         title="Depodan çıkış yap"
                         aria-label={`${item.name} için çıkış`}
                         disabled={Number(item.quantity) <= 0}
-                        className="rounded-lg p-1.5 text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-md p-1.5 text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <MinusCircleIcon className="h-4 w-4" />
                       </button>
@@ -244,7 +307,7 @@ export default function StockTable({
                         onClick={() => onEdit(item)}
                         title="Stok kartını düzenle"
                         aria-label={`${item.name} kartını düzenle`}
-                        className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+                        className="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                       >
                         <PencilSquareIcon className="h-4 w-4" />
                       </button>
@@ -253,7 +316,7 @@ export default function StockTable({
                         onClick={() => onShowMovements(item)}
                         title="Hareketleri görüntüle"
                         aria-label={`${item.name} hareketleri`}
-                        className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+                        className="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                       >
                         <ClipboardDocumentListIcon className="h-4 w-4" />
                       </button>
@@ -263,7 +326,7 @@ export default function StockTable({
                         disabled={deleting}
                         title="Stok kartını sil"
                         aria-label={`${item.name} kartını sil`}
-                        className="rounded-lg p-1.5 text-red-600 transition hover:bg-red-50 disabled:opacity-40"
+                        className="rounded-md p-1.5 text-rose-600 transition hover:bg-rose-50 disabled:opacity-40"
                       >
                         {deleting ? (
                           <ArrowPathIcon className="h-4 w-4 animate-spin" />
@@ -273,6 +336,8 @@ export default function StockTable({
                       </button>
                     </div>
                   </td>
+
+                  <TableFillerTd />
                 </tr>
               );
             })}
