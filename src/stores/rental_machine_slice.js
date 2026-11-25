@@ -19,6 +19,17 @@ export const RENTAL_STATUS_OPTIONS = [
 const initialFilters = {
   search: '',
   status: '',
+  // Excel-style column filters of the table header (lookup ids or free text).
+  machine_type_id: '',
+  car_mark_id: '',
+  car_model_id: '',
+  plate: '',
+  company: '',
+  site: '',
+  start_from: '',
+  start_to: '',
+  end_from: '',
+  end_to: '',
 };
 
 const initialState = {
@@ -27,6 +38,8 @@ const initialState = {
   limit: 50,
   offset: 0,
   filters: { ...initialFilters },
+  //: Per-machine-type counters of the "Makine Tipine Göre İstatistik" panel.
+  typeStats: [],
   loading: false,
   error: null,
   listRequestId: null,
@@ -150,6 +163,7 @@ const rentalMachineSlice = createSlice({
         state.total = action.payload.total;
         state.limit = action.payload.limit;
         state.offset = action.payload.offset;
+        state.typeStats = action.payload.type_stats || [];
       })
       .addCase(fetchRentalMachines.rejected, (state, action) => {
         if (action.meta.requestId !== state.listRequestId) return;

@@ -38,11 +38,27 @@ class PurchaseRequestService {
     return res.data;
   }
 
-  /** "Geldi / gelmedi" of one part row; the whole request comes back. */
-  async updateSparePartItemArrival(requestId, itemId, isArrived) {
+  /**
+   * Kaç adet geldi? ``arrivedQuantity`` sipariş miktarına göre kırpılır ve
+   * "Gelmedi / Kısmi Geldi / Geldi" durumunu belirler; bütün talep döner.
+   * ``isArrived`` eski istemciler için kabul edilir.
+   */
+  async updateSparePartItemArrival(
+    requestId,
+    itemId,
+    { arrivedQuantity, isArrived } = {}
+  ) {
+    const payload = {};
+    if (arrivedQuantity !== undefined && arrivedQuantity !== null) {
+      payload.arrived_quantity = arrivedQuantity;
+    }
+    if (isArrived !== undefined && isArrived !== null) {
+      payload.is_arrived = isArrived;
+    }
+
     const res = await $api.patch(
       `${BASE}/spare-parts/${requestId}/items/${itemId}/arrival`,
-      { is_arrived: isArrived }
+      payload
     );
     return res.data;
   }

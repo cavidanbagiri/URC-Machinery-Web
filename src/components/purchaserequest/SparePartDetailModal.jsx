@@ -13,6 +13,8 @@ import {
   formatQuantity,
   spareArrivalBadgeClass,
   spareArrivalLabel,
+  spareArrivalQuantities,
+  spareArrivalState,
   spareItemMachineLabel,
   spareRequestMachineCount,
   spareStatusBadgeClass,
@@ -198,47 +200,65 @@ export default function SparePartDetailModal({
                     <th className="px-3 py-2 text-left font-medium">Parça No</th>
                     <th className="px-3 py-2 text-left font-medium">Açıklama (TR)</th>
                     <th className="px-3 py-2 text-left font-medium">Açıklama (RU)</th>
-                    <th className="px-3 py-2 text-right font-medium">Miktar</th>
+                    <th className="px-3 py-2 text-right font-medium">Sipariş</th>
+                    <th className="px-3 py-2 text-right font-medium">Gelen</th>
+                    <th className="px-3 py-2 text-right font-medium">Kalan</th>
                     <th className="px-3 py-2 text-left font-medium">Tedarik</th>
                     <th className="px-3 py-2 text-right font-medium">Geliş</th>
                   </tr>
                 </thead>
                 <tbody className="text-gray-800">
-                  {(request.items || []).map((item) => (
-                    <tr key={item.id} className="border-t border-gray-100">
-                      <td className="whitespace-nowrap px-3 py-2 text-[12px] font-medium">
-                        {spareItemMachineLabel(item) || '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-[12px] text-gray-600">
-                        {item.garage_request_no || '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-[12px] text-gray-600">
-                        {item.part_number || '—'}
-                      </td>
-                      <td className="px-3 py-2 text-[12px] text-gray-700">
-                        {item.description_tr || '—'}
-                      </td>
-                      <td className="px-3 py-2 text-[12px] text-gray-700">
-                        {item.description_ru || '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-right text-[12px]">
-                        {formatQuantity(item.quantity)} {item.unit}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-[12px] text-gray-600">
-                        {formatDate(item.supply_date)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-right">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${spareArrivalBadgeClass(
-                            item.is_arrived
-                          )}`}
+                  {(request.items || []).map((item) => {
+                    const { ordered, arrived, remaining } =
+                      spareArrivalQuantities(item);
+                    const state = spareArrivalState(item);
+
+                    return (
+                      <tr key={item.id} className="border-t border-gray-100">
+                        <td className="whitespace-nowrap px-3 py-2 text-[12px] font-medium">
+                          {spareItemMachineLabel(item) || '—'}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-[12px] text-gray-600">
+                          {item.garage_request_no || '—'}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-[12px] text-gray-600">
+                          {item.part_number || '—'}
+                        </td>
+                        <td className="px-3 py-2 text-[12px] text-gray-700">
+                          {item.description_tr || '—'}
+                        </td>
+                        <td className="px-3 py-2 text-[12px] text-gray-700">
+                          {item.description_ru || '—'}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-right text-[12px]">
+                          {formatQuantity(ordered)} {item.unit}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-right text-[12px] tabular-nums">
+                          {formatQuantity(arrived)}
+                        </td>
+                        <td
+                          className={`whitespace-nowrap px-3 py-2 text-right text-[12px] tabular-nums ${
+                            remaining > 0 ? 'text-gray-800' : 'text-emerald-600'
+                          }`}
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                          {spareArrivalLabel(item.is_arrived)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                          {remaining > 0 ? formatQuantity(remaining) : 'tamam'}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-[12px] text-gray-600">
+                          {formatDate(item.supply_date)}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-right">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${spareArrivalBadgeClass(
+                              state
+                            )}`}
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {spareArrivalLabel(state)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

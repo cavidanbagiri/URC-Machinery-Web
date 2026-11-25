@@ -238,8 +238,8 @@ export default function WarehouseStock() {
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
-            Satın almadaki "Geldi" kalemlerini depoya alın, stoğu yönetin ve
-            makineye çıkış yapın.
+            Satın almadaki siparişin tamamı gelen kalemleri depoya alın, stoğu
+            yönetin ve makineye çıkış yapın.
           </p>
         </div>
 

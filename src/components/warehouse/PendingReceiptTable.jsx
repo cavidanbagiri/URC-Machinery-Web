@@ -217,7 +217,7 @@ export default function PendingReceiptTable({
                     <p className="mt-1 text-[12px] text-slate-500">
                       {hasActiveFilters
                         ? 'Arama kriterini değiştirin'
-                        : 'Satın alma talepleri "Geldi" olarak işaretlendiğinde kalemler burada listelenir'}
+                        : 'Bir talep kaleminin siparişi tamamen geldiğinde ("Geldi") kalem burada listelenir'}
                     </p>
                     {hasActiveFilters && (
                       <button

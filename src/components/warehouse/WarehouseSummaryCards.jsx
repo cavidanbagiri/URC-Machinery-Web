@@ -69,7 +69,7 @@ export default function WarehouseSummaryCards({ summary, loading, onOpenReceipts
         tone="bg-indigo-50 text-indigo-600"
         label="Depoya Alınacak"
         value={data.pending_receipts ?? 0}
-        hint="'Geldi' işaretli yedek parça kalemleri"
+        hint="Siparişin tamamı gelen yedek parça kalemleri"
         onClick={onOpenReceipts}
       />
       <div className={`${CARD_CLASS} flex flex-col justify-between gap-2`}>

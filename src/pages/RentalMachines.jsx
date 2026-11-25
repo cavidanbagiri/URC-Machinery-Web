@@ -10,13 +10,14 @@ import {
 } from '@heroicons/react/24/outline';
 
 import {
-  RENTAL_STATUS_OPTIONS,
   deleteRentalMachine,
   fetchRentalMachines,
   resetFilters,
   setFilter,
 } from '../stores/rental_machine_slice';
+import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import RentalMachineTable from '../components/rentalmachine/RentalMachineTable';
+import RentalMachineTypeStats from '../components/rentalmachine/RentalMachineTypeStats';
 import RentalMachinePagination from '../components/rentalmachine/RentalMachinePagination';
 import RentalMachineFormModal from '../components/rentalmachine/RentalMachineFormModal';
 
@@ -26,6 +27,7 @@ export default function RentalMachines() {
     items,
     total,
     filters,
+    typeStats,
     offset,
     limit,
     loading,
@@ -51,6 +53,14 @@ export default function RentalMachines() {
   // First load.
   useEffect(() => {
     dispatch(fetchRentalMachines());
+  }, [dispatch]);
+
+  // Header filters / the form need the fleet lookups (tip, marka, model).
+  // `fetchLookupIfNeeded` caches per key, so this is a no-op afterwards.
+  useEffect(() => {
+    ['type_transport', 'car_mark', 'car_model'].forEach((key) => {
+      dispatch(fetchLookupIfNeeded(key));
+    });
   }, [dispatch]);
 
   // Filter change (debounced).
@@ -156,27 +166,15 @@ export default function RentalMachines() {
             onChange={(event) =>
               dispatch(setFilter({ key: 'search', value: event.target.value }))
             }
-            placeholder="Ekipman, firma veya şantiye ara..."
+            placeholder="Tip, marka, model, plaka, firma veya şantiye ara..."
             className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={filters.status}
-            onChange={(event) =>
-              dispatch(setFilter({ key: 'status', value: event.target.value }))
-            }
-            aria-label="Durum filtresi"
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option value="">Tüm durumlar</option>
-            {RENTAL_STATUS_OPTIONS.map((option) => (
-              <option key={option.code} value={option.code}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          {/* <span className="text-[11px] text-gray-500">
+            Sütun başlığındaki huniye tıklayarak filtreleyin
+          </span> */}
 
           {hasActiveFilters && (
             <button
@@ -196,7 +194,18 @@ export default function RentalMachines() {
         </div>
       )}
 
-      <div className="px-1">
+      <div className="space-y-3 px-1">
+        <RentalMachineTypeStats
+          stats={typeStats}
+          loading={loading}
+          activeTypeId={filters.machine_type_id}
+          onSelectType={(typeId) =>
+            dispatch(
+              setFilter({ key: 'machine_type_id', value: typeId ?? '' })
+            )
+          }
+        />
+
         <RentalMachineTable
           items={items}
           loading={loading}

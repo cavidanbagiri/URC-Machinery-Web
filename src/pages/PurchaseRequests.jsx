@@ -28,7 +28,14 @@ import {
   updateSparePartStatus,
   uploadSparePartDocument,
 } from '../stores/purchase_request_slice';
-import { spareStatusLabel, validateSpareDocument } from '../utils/purchaseRequest';
+import {
+  formatQuantity,
+  spareArrivalLabel,
+  spareArrivalQuantities,
+  spareArrivalState,
+  spareStatusLabel,
+  validateSpareDocument,
+} from '../utils/purchaseRequest';
 import PurchaseRequestService from '../services/PurchaseRequestService';
 import SparePartRequestTable from '../components/purchaserequest/SparePartRequestTable';
 import ServiceRequestTable from '../components/purchaserequest/ServiceRequestTable';
@@ -133,19 +140,24 @@ export default function PurchaseRequests() {
     }
   };
 
-  const handleToggleArrival = async (request, partRow, isArrived) => {
+  const handleSetItemArrival = async (request, partRow, arrivedQuantity) => {
     try {
-      await dispatch(
+      const updated = await dispatch(
         updateSparePartItemArrival({
           requestId: request.id,
           itemId: partRow.id,
-          isArrived,
+          arrivedQuantity,
         })
       ).unwrap();
+
+      const saved =
+        (updated.items || []).find((row) => row.id === partRow.id) || partRow;
+      const { ordered, arrived } = spareArrivalQuantities(saved);
+
       toast.success(
-        `${partRow.part_number || 'Kalem'} "${
-          isArrived ? 'Geldi' : 'Gelmedi'
-        }" olarak işaretlendi`
+        `${partRow.part_number || 'Kalem'} "${spareArrivalLabel(
+          spareArrivalState(saved)
+        )}" (${formatQuantity(arrived)}/${formatQuantity(ordered)})`
       );
     } catch (err) {
       toast.error(String(err || 'Kalem durumu güncellenemedi'));
@@ -365,7 +377,7 @@ export default function PurchaseRequests() {
           onOpenDetail={(request) => setDetailId(request.id)}
           onEdit={openSpareEdit}
           onChangeStatus={handleChangeStatus}
-          onToggleArrival={handleToggleArrival}
+          onSetArrival={handleSetItemArrival}
           onDelete={handleDelete}
           rowBusy={rowBusy}
         />

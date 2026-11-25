@@ -172,12 +172,12 @@ export const updateSparePartStatus = createAsyncThunk(
 
 export const updateSparePartItemArrival = createAsyncThunk(
   'purchaseRequest/updateSparePartItemArrival',
-  async ({ requestId, itemId, isArrived }, { rejectWithValue }) => {
+  async ({ requestId, itemId, arrivedQuantity, isArrived }, { rejectWithValue }) => {
     try {
       return await PurchaseRequestService.updateSparePartItemArrival(
         requestId,
         itemId,
-        isArrived
+        { arrivedQuantity, isArrived }
       );
     } catch (err) {
       return rejectWithValue(errorMessage(err, 'Kalem durumu güncellenemedi'));

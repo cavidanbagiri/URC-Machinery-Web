@@ -3,8 +3,9 @@ import { machineLabel, toNullableText, todayISO } from './repair';
 
 /**
  * The header status says what the request is waiting for and is picked by the
- * user when the request is created. Whether a part actually arrived is tracked
- * per row (``item.is_arrived``) — see `spareArrivalLabel`.
+ * user when the request is created. Whether a part arrived is tracked per row:
+ * ``arrived_quantity`` out of ``quantity`` — ``0`` is "Gelmedi", the whole
+ * ordered quantity is "Geldi" and anything in between is "Kısmi Geldi".
  */
 export const SPARE_STATUSES = [
   'onay_bekliyor',
@@ -44,17 +45,101 @@ export function spareStatusBadgeClass(status) {
   return SPARE_STATUS_BADGES[status] || 'border-gray-200 bg-gray-50 text-gray-600';
 }
 
-/** "Geldi / Gelmedi" of one part row. */
-export const SPARE_ARRIVAL_LABELS = { arrived: 'Geldi', pending: 'Gelmedi' };
+/**
+ * Teslim durumu satır bazında üç değerlidir: kaç adet sipariş edildi
+ * (``quantity``), kaç adet geldi (``arrived_quantity``) ve kalan miktar
+ * (``quantity - arrived_quantity``). "Kısmi Geldi" tam bu aradaki durumdur.
+ */
+export const SPARE_ARRIVAL_STATES = ['pending', 'partial', 'arrived'];
 
-export function spareArrivalLabel(isArrived) {
-  return isArrived ? SPARE_ARRIVAL_LABELS.arrived : SPARE_ARRIVAL_LABELS.pending;
+export const SPARE_ARRIVAL_LABELS = {
+  pending: 'Gelmedi',
+  partial: 'Kısmi Geldi',
+  arrived: 'Geldi',
+};
+
+const SPARE_ARRIVAL_BADGES = {
+  pending: 'border-gray-200 bg-gray-50 text-gray-600',
+  partial: 'border-amber-100 bg-amber-50 text-amber-700',
+  arrived: 'border-emerald-100 bg-emerald-50 text-emerald-700',
+};
+
+/**
+ * Sipariş / gelen / kalan miktarları. Gelen adet siparişi aşamaz; eski
+ * kayıtlarda ``arrived_quantity`` yoksa ``is_arrived`` bayrağına düşülür.
+ */
+export function spareArrivalQuantities(item) {
+  const ordered = Math.max(Number(item?.quantity) || 0, 0);
+  const rawArrived = Number(
+    item?.arrived_quantity ?? (item?.is_arrived ? ordered : 0)
+  );
+  const arrived = Math.min(
+    Math.max(Number.isFinite(rawArrived) ? rawArrived : 0, 0),
+    ordered
+  );
+
+  return { ordered, arrived, remaining: Math.max(ordered - arrived, 0) };
 }
 
-export function spareArrivalBadgeClass(isArrived) {
-  return isArrived
-    ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
-    : 'border-gray-200 bg-gray-50 text-gray-600';
+/** Satırın teslim durumu: ``pending`` / ``partial`` / ``arrived``. */
+export function spareArrivalState(item) {
+  const { ordered, arrived } = spareArrivalQuantities(item);
+
+  if (arrived <= 0) return 'pending';
+  return arrived >= ordered ? 'arrived' : 'partial';
+}
+
+export function spareArrivalLabel(state) {
+  return SPARE_ARRIVAL_LABELS[state] || SPARE_ARRIVAL_LABELS.pending;
+}
+
+export function spareArrivalBadgeClass(state) {
+  return SPARE_ARRIVAL_BADGES[state] || SPARE_ARRIVAL_BADGES.pending;
+}
+
+/**
+ * Durum seçildiğinde yazılacak gelen adet: "Geldi" tüm siparişi, "Gelmedi"
+ * sıfırı yazar. "Kısmi Geldi" mevcut kısmi değeri korur, yoksa 1 ile başlar;
+ * kullanıcı satırdaki "Gelen" alanından düzeltir.
+ */
+export function arrivalQuantityForState(item, state) {
+  const { ordered, arrived } = spareArrivalQuantities(item);
+
+  if (state === 'arrived') return ordered;
+  if (state === 'pending') return 0;
+  if (arrived > 0 && arrived < ordered) return arrived;
+  return Math.min(1, ordered);
+}
+
+/**
+ * Talebin tamamı için miktar özeti (satırın "Parça" hücresi). Farklı birimler
+ * karışmasın diye toplamlar yalnızca tek birim kullanıldığında döner.
+ */
+export function spareRequestArrivalSummary(request) {
+  const summary = {
+    ordered: 0,
+    arrived: 0,
+    remaining: 0,
+    partial: 0,
+    complete: 0,
+    unit: '',
+  };
+  const units = new Set();
+
+  for (const item of request?.items || []) {
+    const { ordered, arrived, remaining } = spareArrivalQuantities(item);
+    summary.ordered += ordered;
+    summary.arrived += arrived;
+    summary.remaining += remaining;
+    units.add(String(item.unit || '').trim());
+
+    const state = spareArrivalState(item);
+    if (state === 'partial') summary.partial += 1;
+    if (state === 'arrived') summary.complete += 1;
+  }
+
+  summary.unit = units.size === 1 ? [...units][0] : '';
+  return summary;
 }
 
 /**

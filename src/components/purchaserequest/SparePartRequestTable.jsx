@@ -34,12 +34,18 @@ import {
 import { formatDate } from '../../utils/repair';
 import { setSpareFilter } from '../../stores/purchase_request_slice';
 import {
+  SPARE_ARRIVAL_STATES,
   SPARE_STATUS_LABELS,
   SPARE_STATUSES,
+  arrivalQuantityForState,
   formatQuantity,
+  parseQuantity,
   spareArrivalBadgeClass,
   spareArrivalLabel,
+  spareArrivalQuantities,
+  spareArrivalState,
   spareItemMachineLabel,
+  spareRequestArrivalSummary,
   spareStatusBadgeClass,
 } from '../../utils/purchaseRequest';
 
@@ -55,7 +61,7 @@ const SPARE_COLUMN_WIDTHS = {
   identification_no: 160,
   territory: 110,
   request_type: 130,
-  part: 110,
+  part: 165,
   request_date: 115,
   status: 160,
   actions: 128,
@@ -119,11 +125,14 @@ function StatusSelect({ item, busy, onChangeStatus }) {
 }
 
 /**
- * The sub-table under an expanded request: every part row with its own
- * "Geldi / Gelmedi" button, so one order can be three arrived out of six.
+ * Talebin alt tablosu: her parça satırı sipariş / gelen / kalan miktarlarını
+ * gösterir ve teslim durumu ("Gelmedi" / "Kısmi Geldi" / "Geldi") buradan
+ * seçilir. "Kısmi Geldi" seçildiğinde gelen adet "Gelen" alanından düzeltilir.
  */
-function ItemRows({ request, busy, onToggleArrival }) {
+function ItemRows({ request, busy, onSetArrival }) {
   const items = request.items || [];
+  // Kaydedilene kadar "Gelen" alanına yazılan değer burada tutulur.
+  const [drafts, setDrafts] = useState({});
 
   if (items.length === 0) {
     return (
@@ -133,14 +142,34 @@ function ItemRows({ request, busy, onToggleArrival }) {
     );
   }
 
+  const summary = spareRequestArrivalSummary(request);
+
+  const commitQuantity = (item, rawValue) => {
+    const parsed = parseQuantity(rawValue);
+    const { ordered, arrived } = spareArrivalQuantities(item);
+    const target = parsed === null ? 0 : Math.min(Math.max(parsed, 0), ordered);
+
+    setDrafts((prev) => {
+      const next = { ...prev };
+      delete next[item.id];
+      return next;
+    });
+
+    // Değişmeyen değer için gereksiz istek atılmaz.
+    if (target === arrived) return;
+    onSetArrival(request, item, target);
+  };
+
   return (
     <div className="border-y border-slate-100 bg-slate-50/60 px-4 py-3">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
           Parça Kalemleri · {request.arrived_count ?? 0}/{items.length} geldi
+          {summary.partial > 0 && ` · ${summary.partial} kısmi`}
         </p>
         <p className="text-[11px] text-slate-400">
-          Gelen kalemi işaretlemek için satırdaki durum düğmesine tıklayın
+          Gelen adedi "Gelen" alanına yazın; durum Gelmedi / Kısmi Geldi /
+          Geldi olarak otomatik hesaplanır
         </p>
       </div>
 
@@ -157,7 +186,9 @@ function ItemRows({ request, busy, onToggleArrival }) {
               <th className="px-3 py-1.5 text-left font-semibold">
                 Açıklama (RU)
               </th>
-              <th className="px-3 py-1.5 text-right font-semibold">Miktar</th>
+              <th className="px-3 py-1.5 text-right font-semibold">Sipariş</th>
+              <th className="px-3 py-1.5 text-right font-semibold">Gelen</th>
+              <th className="px-3 py-1.5 text-right font-semibold">Kalan</th>
               <th className="px-3 py-1.5 text-left font-semibold">Tedarik</th>
               <th className="px-3 py-1.5 text-right font-semibold">Durum</th>
             </tr>
@@ -169,6 +200,11 @@ function ItemRows({ request, busy, onToggleArrival }) {
                 busy?.id === request.id &&
                 busy?.action === 'arrival' &&
                 busy?.itemId === item.id;
+
+              const { ordered, arrived, remaining } =
+                spareArrivalQuantities(item);
+              const state = spareArrivalState(item);
+              const draft = drafts[item.id];
 
               return (
                 <tr
@@ -191,37 +227,86 @@ function ItemRows({ request, busy, onToggleArrival }) {
                     {item.description_ru || '—'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-1.5 text-right tabular-nums text-slate-900">
-                    {formatQuantity(item.quantity)} {item.unit}
+                    {formatQuantity(ordered)} {item.unit}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-1.5 text-right">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      max={ordered}
+                      step="any"
+                      value={draft ?? String(arrived)}
+                      disabled={busyItem}
+                      onChange={(event) =>
+                        setDrafts((prev) => ({
+                          ...prev,
+                          [item.id]: event.target.value,
+                        }))
+                      }
+                      onBlur={(event) => commitQuantity(item, event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          event.currentTarget.blur();
+                        }
+                      }}
+                      title={`${formatQuantity(ordered)} ${item.unit} siparişten kaç adet geldi?`}
+                      aria-label={`${item.part_number || 'Kalem'} gelen adet`}
+                      className="w-16 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-right text-[12px] tabular-nums text-slate-900 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60"
+                    />
+                  </td>
+                  <td
+                    className={`whitespace-nowrap px-3 py-1.5 text-right tabular-nums ${
+                      remaining > 0 ? 'text-slate-900' : 'text-emerald-600'
+                    }`}
+                    title={
+                      remaining > 0
+                        ? `${formatQuantity(remaining)} ${item.unit} kaldı`
+                        : 'Siparişin tamamı geldi'
+                    }
+                  >
+                    {remaining > 0 ? formatQuantity(remaining) : 'tamam'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-1.5 text-slate-600">
                     {item.supply_date ? formatDate(item.supply_date) : '—'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-1.5 text-right">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onToggleArrival(request, item, !item.is_arrived)
-                      }
-                      disabled={busyItem}
-                      title={
-                        item.is_arrived
-                          ? 'Gelmedi olarak işaretle'
-                          : 'Geldi olarak işaretle'
-                      }
-                      aria-label={`${item.part_number || 'Kalem'} ${
-                        item.is_arrived ? 'gelmedi' : 'geldi'
-                      } olarak işaretle`}
-                      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 ${spareArrivalBadgeClass(
-                        item.is_arrived
-                      )}`}
-                    >
+                    <div className="relative inline-flex items-center">
+                      <select
+                        value={state}
+                        aria-busy={busyItem || undefined}
+                        onChange={(event) =>
+                          onSetArrival(
+                            request,
+                            item,
+                            arrivalQuantityForState(item, event.target.value)
+                          )
+                        }
+                        title="Teslim durumunu değiştir"
+                        aria-label={`${item.part_number || 'Kalem'} teslim durumu`}
+                        className={`cursor-pointer appearance-none rounded-full border py-0.5 pl-2.5 pr-6 text-[11px] font-medium transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60 ${spareArrivalBadgeClass(
+                          state
+                        )}`}
+                      >
+                        {SPARE_ARRIVAL_STATES.map((value) => (
+                          <option
+                            key={value}
+                            value={value}
+                            // Tek adetlik siparişte "kısmi" olamaz (1/1 gelir).
+                            disabled={value === 'partial' && ordered <= 1}
+                          >
+                            {spareArrivalLabel(value)}
+                          </option>
+                        ))}
+                      </select>
+
                       {busyItem ? (
-                        <ArrowPathIcon className="h-3 w-3 animate-spin" />
+                        <ArrowPathIcon className="pointer-events-none absolute right-1.5 h-3 w-3 animate-spin" />
                       ) : (
-                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        <ChevronDownIcon className="pointer-events-none absolute right-1.5 h-3 w-3" />
                       )}
-                      {spareArrivalLabel(item.is_arrived)}
-                    </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -266,7 +351,7 @@ export default function SparePartRequestTable({
   onOpenDetail,
   onEdit,
   onChangeStatus,
-  onToggleArrival,
+  onSetArrival,
   onDelete,
   rowBusy,
 }) {
@@ -488,6 +573,7 @@ export default function SparePartRequestTable({
                     rowBusy?.id === item.id &&
                     rowBusy?.action === 'delete';
                   const expanded = expandedIds.includes(item.id);
+                  const arrivalSummary = spareRequestArrivalSummary(item);
 
                   return (
                     <Fragment key={item.id}>
@@ -571,7 +657,24 @@ export default function SparePartRequestTable({
                           <p className={TABLE_PRIMARY}>{item.item_count} kalem</p>
                           <p className={`mt-0.5 ${TABLE_MUTED}`}>
                             {item.arrived_count ?? 0}/{item.item_count} geldi
+                            {arrivalSummary.partial > 0 &&
+                              ` · ${arrivalSummary.partial} kısmi`}
                           </p>
+                          {arrivalSummary.unit &&
+                            arrivalSummary.remaining > 0 && (
+                              <p
+                                className={`mt-0.5 ${TABLE_MUTED}`}
+                                title="Sipariş edilen · gelen · kalan miktar"
+                              >
+                                {`Sipariş ${formatQuantity(
+                                  arrivalSummary.ordered
+                                )} · Gelen ${formatQuantity(
+                                  arrivalSummary.arrived
+                                )} · Kalan ${formatQuantity(
+                                  arrivalSummary.remaining
+                                )} ${arrivalSummary.unit}`}
+                              </p>
+                            )}
                         </td>
 
                         <td
@@ -654,7 +757,7 @@ export default function SparePartRequestTable({
                             <ItemRows
                               request={item}
                               busy={rowBusy}
-                              onToggleArrival={onToggleArrival}
+                              onSetArrival={onSetArrival}
                             />
                           </td>
                         </tr>

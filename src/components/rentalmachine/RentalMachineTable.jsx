@@ -1,4 +1,5 @@
 // src/components/rentalmachine/RentalMachineTable.jsx
+import { useDispatch, useSelector } from 'react-redux';
 import {
   ArrowPathIcon,
   PencilSquareIcon,
@@ -6,6 +7,7 @@ import {
   TruckIcon,
 } from '@heroicons/react/24/outline';
 
+import { ColumnFilterHeader } from '../ui/ColumnFilter';
 import ResizableTable, {
   ResizableTh,
   TableFillerTd,
@@ -23,6 +25,10 @@ import {
   TABLE_TERTIARY,
   TABLE_TOOLBAR,
 } from '../ui/tableStyles';
+import {
+  RENTAL_STATUS_OPTIONS,
+  setFilter,
+} from '../../stores/rental_machine_slice';
 import { formatDate } from '../../utils/repair';
 
 //: Status badge colours; the code comes from the backend (derived from dates).
@@ -35,11 +41,14 @@ const STATUS_BADGE = {
 // Kullanıcı başlıktaki tutamaçtan sürükleyerek değiştirir; seçim tarayıcıda
 // saklanır (useColumnResize).
 const RENTAL_COLUMN_WIDTHS = {
-  equipment: 240,
-  company: 190,
-  site: 170,
-  start_date: 110,
-  end_date: 110,
+  machine_type: 150,
+  car_mark: 120,
+  car_model: 130,
+  plate: 120,
+  company: 180,
+  site: 160,
+  start_date: 120,
+  end_date: 120,
   duration: 90,
   status: 140,
   actions: 90,
@@ -47,22 +56,105 @@ const RENTAL_COLUMN_WIDTHS = {
 
 const COLUMN_IDS = Object.keys(RENTAL_COLUMN_WIDTHS);
 
-//: 8 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
-const COLUMN_COUNT = 9;
+//: 11 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 12;
 
 const EMPTY_TEXT =
-  'Ekipman tanımı, firma veya şantiye ile arama yapabilirsiniz';
+  'Tip, marka, model, plaka, firma veya şantiye ile arama yapabilirsiniz';
 
-const HEADER_COLUMNS = [
-  ['equipment', 'Ekipman Tanımı'],
-  ['company', 'Firma'],
-  ['site', 'Şantiye'],
-  ['start_date', 'Başlangıç'],
-  ['end_date', 'Bitiş'],
-  ['duration', 'Süre'],
-  ['status', 'Durum'],
-  ['actions', 'İşlemler'],
-];
+/**
+ * Sütun tanımları: başlık metni + Excel tarzı başlık filtresi. `filter`
+ * olmayan sütunlar (süre, işlemler) düz başlık olarak çizilir.
+ *
+ * `lookups` redux'taki `{ type_transport: [...], car_mark: [...] }` nesnesidir;
+ * seçenek listeleri `ColumnFilterHeader`'a `[{ id, name }]` olarak geçer.
+ */
+function buildHeaderColumns(lookups) {
+  return [
+    {
+      id: 'machine_type',
+      label: 'Makine Tipi',
+      filter: {
+        kind: 'select',
+        key: 'machine_type_id',
+        options: lookups.type_transport || [],
+      },
+    },
+    {
+      id: 'car_mark',
+      label: 'Marka',
+      filter: {
+        kind: 'select',
+        key: 'car_mark_id',
+        options: lookups.car_mark || [],
+      },
+    },
+    {
+      id: 'car_model',
+      label: 'Model',
+      filter: {
+        kind: 'select',
+        key: 'car_model_id',
+        options: lookups.car_model || [],
+      },
+    },
+    {
+      id: 'plate',
+      label: 'Plaka',
+      filter: {
+        kind: 'text',
+        key: 'plate',
+        placeholder: 'Plaka içerir...',
+        hint: 'Plakada geçen kayıtlar',
+      },
+    },
+    {
+      id: 'company',
+      label: 'Firma',
+      filter: {
+        kind: 'text',
+        key: 'company',
+        placeholder: 'Firma içerir...',
+        hint: 'Firma adında geçen kayıtlar',
+      },
+    },
+    {
+      id: 'site',
+      label: 'Şantiye',
+      filter: {
+        kind: 'text',
+        key: 'site',
+        placeholder: 'Şantiye içerir...',
+        hint: 'Şantiye adında geçen kayıtlar',
+      },
+    },
+    {
+      id: 'start_date',
+      label: 'Başlangıç',
+      filter: { kind: 'dateRange', keys: ['start_from', 'start_to'] },
+    },
+    {
+      id: 'end_date',
+      label: 'Bitiş',
+      filter: { kind: 'dateRange', keys: ['end_from', 'end_to'] },
+    },
+    { id: 'duration', label: 'Süre' },
+    {
+      id: 'status',
+      label: 'Durum',
+      filter: {
+        kind: 'select',
+        key: 'status',
+        options: RENTAL_STATUS_OPTIONS.map((option) => ({
+          value: option.code,
+          label: option.label,
+        })),
+      },
+    },
+    { id: 'actions', label: 'İşlemler', align: 'right' },
+  ];
+}
+
 
 /**
  * "Kalan" alt satırı: bitmiş kiralamada kaç gün önce bittiğini, aktif olanda
@@ -129,7 +221,16 @@ export default function RentalMachineTable({
   onDelete,
   deletingId,
 }) {
+  const dispatch = useDispatch();
+  const filters = useSelector((s) => s.rentalMachine.filters);
+  const lookups = useSelector((s) => s.lookup.data);
   const resize = useColumnResize('rental-machines:list', RENTAL_COLUMN_WIDTHS);
+
+  const headerColumns = buildHeaderColumns(lookups);
+
+  // Başlık filtresi redux'a yazar; sayfanın debounce'lu fetch'i aynen çalışır.
+  const handleFilterChange = (key, value) =>
+    dispatch(setFilter({ key, value }));
 
   if (loading && items.length === 0) {
     return (
@@ -180,15 +281,27 @@ export default function RentalMachineTable({
         >
           <thead className={TABLE_HEAD}>
             <tr className="border-b border-slate-200">
-              {HEADER_COLUMNS.map(([id, label]) => (
+              {headerColumns.map((column) => (
                 <ResizableTh
-                  key={id}
+                  key={column.id}
                   resize={resize}
-                  columnId={id}
-                  label={label}
-                  className={`text-left ${TABLE_HEAD_CELL}`}
+                  columnId={column.id}
+                  label={column.label}
+                  className={`${TABLE_HEAD_CELL} ${
+                    column.align === 'right' ? 'text-right' : 'text-left'
+                  }`}
                 >
-                  {label}
+                  {column.filter ? (
+                    <ColumnFilterHeader
+                      label={column.label}
+                      filter={column.filter}
+                      values={filters}
+                      onChange={handleFilterChange}
+                      align={column.align}
+                    />
+                  ) : (
+                    column.label
+                  )}
                 </ResizableTh>
               ))}
 
@@ -236,17 +349,40 @@ export default function RentalMachineTable({
               return (
                 <tr key={item.id} className={`${TABLE_ROW} align-top`}>
                   <td className={TABLE_CELL}>
+                    {/* Eski kayıtlarda tip/marka/model/plaka boştur; o satırlar
+                        düzenlenene kadar elle yazılmış ekipman adı gösterilir. */}
                     <p
                       className={`truncate ${TABLE_PRIMARY}`}
                       title={item.equipment_name}
                     >
-                      {item.equipment_name}
+                      {item.machine_type_name || item.equipment_name || '—'}
                     </p>
                     {item.created_by_name && (
                       <p className={`truncate ${TABLE_TERTIARY}`}>
                         {item.created_by_name}
                       </p>
                     )}
+                  </td>
+
+                  <td className={TABLE_CELL}>
+                    <p className="truncate" title={item.car_mark_name || ''}>
+                      {item.car_mark_name || '—'}
+                    </p>
+                  </td>
+
+                  <td className={TABLE_CELL}>
+                    <p className="truncate" title={item.car_model_name || ''}>
+                      {item.car_model_name || '—'}
+                    </p>
+                  </td>
+
+                  <td className={TABLE_CELL}>
+                    <p
+                      className="truncate tabular-nums"
+                      title={item.plate_no || ''}
+                    >
+                      {item.plate_no || '—'}
+                    </p>
                   </td>
 
                   <td className={TABLE_CELL}>
