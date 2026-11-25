@@ -26,6 +26,7 @@ import { validateRepairPdf } from '../utils/repair';
 
 import SegmentedTabs from '../components/ui/SegmentedTabs';
 import RepairSummaryCards from '../components/repair/RepairSummaryCards';
+import RepairArchiveTypeStats from '../components/repair/RepairArchiveTypeStats';
 import RepairAdvancedFilters from '../components/repair/RepairAdvancedFilters';
 import RepairTable from '../components/repair/RepairTable';
 import RepairPagination from '../components/repair/RepairPagination';
@@ -167,6 +168,19 @@ export default function Repair() {
 
   const handleResetFilters = () => {
     dispatch(resetFilters());
+  };
+
+  // Arşiv istatistik panelinde bir tamir tipine tıklanınca liste sunucu
+  // tarafında o tipe filtrelenir; aynı tipe tekrar tıklamak filtreyi kaldırır.
+  const handleSelectArchiveType = (repairTypeId) => {
+    dispatch(
+      setFilters({
+        repair_type_id:
+          repairTypeId === null || repairTypeId === undefined
+            ? ''
+            : String(repairTypeId),
+      })
+    );
   };
 
   const openCreate = () => {
@@ -344,14 +358,25 @@ export default function Repair() {
         </div>
       </div>
 
-      <div className="px-1">
-        <RepairSummaryCards
-          summary={summary}
-          loading={summaryLoading}
-          onSelectFilters={handleSelectSummaryFilters}
-          onResetFilters={handleResetFilters}
-        />
-      </div>
+      {archive ? (
+        <div className="px-1 lg:w-2/5">
+          <RepairArchiveTypeStats
+            summary={summary}
+            loading={summaryLoading}
+            activeTypeId={filters.repair_type_id}
+            onSelectType={handleSelectArchiveType}
+          />
+        </div>
+      ) : (
+        <div className="px-1">
+          <RepairSummaryCards
+            summary={summary}
+            loading={summaryLoading}
+            onSelectFilters={handleSelectSummaryFilters}
+            onResetFilters={handleResetFilters}
+          />
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3 px-2">
         <div className="flex flex-wrap items-center gap-2">

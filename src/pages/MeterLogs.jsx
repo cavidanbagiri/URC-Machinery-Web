@@ -3,15 +3,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import {
+  ArchiveBoxIcon,
   ArrowPathIcon,
-  ChevronDownIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
+  TableCellsIcon,
 } from '@heroicons/react/24/outline';
 import { IoSpeedometerOutline } from 'react-icons/io5';
 
 import MeterLogEntryTable from '../components/meterlog/MeterLogEntryTable';
 import MeterLogWeekTable from '../components/meterlog/MeterLogWeekTable';
+import SegmentedTabs from '../components/ui/SegmentedTabs';
+import { TABLE_CARD } from '../components/ui/tableStyles';
 import {
   createMeterLog,
   fetchMeterLogOverview,
@@ -40,7 +43,9 @@ export default function MeterLogs() {
   const [selectedDate, setSelectedDate] = useState(todayISO);
   const [search, setSearch] = useState('');
   const [onlyMissing, setOnlyMissing] = useState(false);
-  const [showWeek, setShowWeek] = useState(true);
+  // Tablolar tek kartta iki sekmede gösterilir: giriş ("Mevcut") ve geçmiş
+  // kayıt matrisi ("Arşiv"). Varsayılan, günlük girişi yapılan sekmedir.
+  const [activeTab, setActiveTab] = useState('current');
 
   useEffect(() => {
     dispatch(fetchMeterLogOverview({ days: 7, end_date: selectedDate }));
@@ -131,8 +136,15 @@ export default function MeterLogs() {
             </h1>
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
-            {overview.machines.length} makine · {formatDate(selectedDate)}: {enteredCount}{' '}
-            kayıt · {missingCount} eksik
+            {activeTab === 'current'
+              ? `${overview.machines.length} makine · ${formatDate(
+                  selectedDate
+                )}: ${enteredCount} kayıt · ${missingCount} eksik`
+              : `${overview.machines.length} makine · son ${
+                  dates.length || overview.days || 7
+                } gün · ${dates[0]?.label ?? formatDate(selectedDate)} – ${formatDate(
+                  selectedDate
+                )}`}
           </p>
         </div>
 
@@ -166,7 +178,8 @@ export default function MeterLogs() {
         <p>
           Kayıtlar kalıcıdır: mevcut bir giriş güncellenmez veya silinmez. Aynı gün
           için yeni giriş yapılırsa son kayıt güncel değer sayılır; önceki girişler
-          geçmişte korunur ve haftalık tabloda <b>+N</b> olarak görünür.
+          geçmişte korunur ve <b>Arşiv</b> sekmesindeki günlük matriste <b>+N</b>{' '}
+          olarak görünür.
         </p>
       </div>
 
@@ -177,15 +190,40 @@ export default function MeterLogs() {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-        <div className="relative">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Makine, plaka, marka, bölge ara..."
-            className="w-72 rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Tablolar tek kartta iki sekmede toplanır; ikisi de aynı arama ve
+              "eksik" filtresini kullanır. */}
+          <SegmentedTabs
+            ariaLabel="Sayaç kayıtları"
+            value={activeTab}
+            onChange={setActiveTab}
+            tabs={[
+              {
+                id: 'current',
+                label: 'Mevcut',
+                count: overview.machines.length,
+                icon: TableCellsIcon,
+              },
+              {
+                id: 'archive',
+                label: 'Arşiv',
+                count: dates.length || overview.days || 7,
+                icon: ArchiveBoxIcon,
+              },
+            ]}
           />
+
+          <div className="relative">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Makine, plaka, marka, bölge ara..."
+              aria-label="Makine ara"
+              className="w-72 rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -201,52 +239,43 @@ export default function MeterLogs() {
 
           <span className="text-xs text-gray-400">
             {machines.length} / {overview.machines.length} makine
+            {activeTab === 'archive' && ` · ${dates.length} gün`}
           </span>
         </div>
       </div>
 
-      <MeterLogEntryTable
-        machines={machines}
-        loading={loading}
-        selectedDate={selectedDate}
-        onSave={handleSave}
-      />
-
-      <div className="pt-2">
-        <div className="mb-2 flex flex-wrap items-end justify-between gap-2 px-1">
-          <div>
-            <h2 className="text-sm font-semibold text-gray-800">
-              Son {overview.days || 7} Günlük Kayıt Matrisi
-            </h2>
-            <p className="text-[11px] text-gray-500">
-              Her hücrede o günün son kaydı yer alır. Hücrenin üzerine gelerek kayıt
-              sayısını ve girişi yapan kullanıcıyı görebilirsiniz.
+      {activeTab === 'current' ? (
+        <MeterLogEntryTable
+          machines={machines}
+          loading={loading}
+          selectedDate={selectedDate}
+          onSave={handleSave}
+        />
+      ) : dates.length ? (
+        <MeterLogWeekTable
+          machines={machines}
+          dates={dates}
+          selectedDate={selectedDate}
+          loading={loading}
+        />
+      ) : (
+        // Tarih penceresi (sunucudan `start_date`) gelmeden kart boş kalmasın.
+        <div className={`${TABLE_CARD} px-6 py-16 text-center`}>
+          <div className="flex flex-col items-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+              <ArchiveBoxIcon className="h-5 w-5" />
+            </span>
+            <p className="mt-3 text-sm font-semibold text-slate-900">
+              {loading ? 'Kayıtlar yükleniyor…' : 'Gösterilecek kayıt yok'}
+            </p>
+            <p className="mt-1 max-w-md text-[12px] text-slate-500">
+              {loading
+                ? 'Seçili güne ait son günlerin matrisi hazırlanıyor.'
+                : 'Arama veya filtre seçimini değiştirmeyi, ya da Yenile ile tekrar denemeyi deneyin.'}
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setShowWeek((value) => !value)}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
-            aria-expanded={showWeek}
-          >
-            {showWeek ? 'Gizle' : 'Göster'}
-            <ChevronDownIcon
-              className={`h-3.5 w-3.5 transition-transform ${
-                showWeek ? '' : '-rotate-90'
-              }`}
-            />
-          </button>
         </div>
-
-        {showWeek && (
-          <MeterLogWeekTable
-            machines={machines}
-            dates={dates}
-            selectedDate={selectedDate}
-          />
-        )}
-      </div>
+      )}
     </div>
   );
 }

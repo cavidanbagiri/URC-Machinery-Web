@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import PublicRoute from '../components/auth/PublicRoute';
+import RouteError from '../components/ui/RouteError';
 
 import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
@@ -27,6 +28,8 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
+    // Sayfa çökerse ham hata yığını yerine anlaşılır bir kart gösterilir.
+    errorElement: <RouteError />,
     children: [
       {
         path: 'auth',

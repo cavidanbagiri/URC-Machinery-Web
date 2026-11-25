@@ -4,9 +4,17 @@
 // gösterilir; aynı gün birden fazla kayıt varsa "+N" rozeti ve tooltip ile
 // kaç kayıt olduğu / kimin girdiği belirtilir.  Kayıtlar silinmediği için eski
 // girişler de burada izlenebilir.
+import { CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
+
 import { formatDateTime, formatNumber } from '../../utils/maintenance';
 import { groupLogsByDate } from '../../utils/meterLog';
-import { TABLE_BODY, TABLE_CARD, TABLE_HEAD, TABLE_ROW } from '../ui/tableStyles';
+import {
+  TABLE_BODY,
+  TABLE_CARD,
+  TABLE_HEAD,
+  TABLE_ROW,
+  TABLE_TOOLBAR,
+} from '../ui/tableStyles';
 
 function machineLabel(machine) {
   return machine.identification_no || machine.plate_no || `#${machine.machine_id}`;
@@ -23,14 +31,41 @@ function cellTitle(date, group) {
   return `${date.label} · ${parts.join(' · ')}`;
 }
 
-export default function MeterLogWeekTable({ machines, dates, selectedDate }) {
-  if (!machines.length || !dates.length) return null;
+export default function MeterLogWeekTable({
+  machines,
+  dates,
+  selectedDate,
+  loading = false,
+}) {
+  // Tarih penceresi henüz sunucudan gelmediyse (ilk yükleme) kart hiç çizilmez.
+  if (!dates.length) return null;
 
   const minWidth = 230 + dates.length * 155;
 
   return (
     <div className={TABLE_CARD}>
-      <div className="max-h-[45vh] overflow-auto">
+      {loading && (
+        <div className="h-0.5 w-full overflow-hidden bg-blue-100">
+          <div className="h-full w-1/3 animate-pulse bg-blue-500" />
+        </div>
+      )}
+
+      <div className={TABLE_TOOLBAR}>
+        <div className="flex items-center gap-2">
+          <CalendarDaysIcon className="h-4 w-4 text-slate-400" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Geçmiş Kayıtlar
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 tabular-nums">
+            {machines.length}
+          </span>
+        </div>
+        <span className="text-[11px] text-slate-400">
+          Son {dates.length} gün · hücreye gelerek kayıt sayısını görün
+        </span>
+      </div>
+
+      <div className="max-h-[60vh] overflow-auto">
         <table
           className="w-full table-fixed border-collapse text-left"
           style={{ minWidth }}
@@ -67,6 +102,27 @@ export default function MeterLogWeekTable({ machines, dates, selectedDate }) {
           </thead>
 
           <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
+            {machines.length === 0 && (
+              <tr>
+                <td
+                  colSpan={dates.length + 1}
+                  className="px-6 py-16 text-center"
+                >
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <ClockIcon className="h-5 w-5" />
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-900">
+                      Gösterilecek kayıt yok
+                    </p>
+                    <p className="mt-1 max-w-md text-[12px] text-slate-500">
+                      Arama veya filtre seçimini değiştirmeyi deneyin.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            )}
+
             {machines.map((machine) => {
               const groups = groupLogsByDate(machine.recent_logs);
               const label = machineLabel(machine);

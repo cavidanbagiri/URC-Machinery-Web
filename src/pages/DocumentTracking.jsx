@@ -21,6 +21,7 @@ import {
 } from '../utils/documentTracking';
 import DocumentTrackingTable from '../components/documenttracking/DocumentTrackingTable';
 import DocumentTrackingPagination from '../components/documenttracking/DocumentTrackingPagination';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
 
 const LOOKUPS_NEEDED = [
   'territory',
@@ -216,25 +217,34 @@ export default function DocumentTracking() {
       )}
 
       <div className="px-1">
-        <DocumentTrackingTable
-          items={items}
-          loading={loading}
-          hasActiveFilters={hasActiveFilters}
-          onResetFilters={handleResetFilters}
-          onBeforeFilterChange={() => setEditingState(null)}
-          editingId={editingId}
-          draft={draft}
-          updating={updating}
-          updatingId={updatingId}
-          onStartEdit={handleStartEdit}
-          onChangeDraft={handleDraftChange}
-          onCancelEdit={handleCancelEdit}
-          onSave={handleSave}
-        />
+        {/* Tablo çökse bile arama/filtre alanları çalışır kalır; "Tekrar dene"
+            tabloyu temiz bir DOM ile yeniden mount eder ve açık düzenlemeyi
+            kapatır (React dışı DOM müdahalelerinde -ör. çeviri eklentileri-
+            kurtarma yolu budur). */}
+        <ErrorBoundary
+          title="Evrak takip tablosu görüntülenemedi"
+          onReset={() => setEditingState(null)}
+        >
+          <DocumentTrackingTable
+            items={items}
+            loading={loading}
+            hasActiveFilters={hasActiveFilters}
+            onResetFilters={handleResetFilters}
+            onBeforeFilterChange={() => setEditingState(null)}
+            editingId={editingId}
+            draft={draft}
+            updating={updating}
+            updatingId={updatingId}
+            onStartEdit={handleStartEdit}
+            onChangeDraft={handleDraftChange}
+            onCancelEdit={handleCancelEdit}
+            onSave={handleSave}
+          />
 
-        <DocumentTrackingPagination
-          onNavigate={() => setEditingState(null)}
-        />
+          <DocumentTrackingPagination
+            onNavigate={() => setEditingState(null)}
+          />
+        </ErrorBoundary>
       </div>
     </div>
   );
