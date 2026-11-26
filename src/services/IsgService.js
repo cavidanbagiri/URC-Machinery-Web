@@ -22,6 +22,12 @@ class IsgService {
     return res.data;
   }
 
+  /** Open/closed counts per project — the dashboard summary table. */
+  async fetchProjectSummary() {
+    const res = await $api.get('/isg/project_summary');
+    return res.data;
+  }
+
   async fetchResponsibles() {
     const res = await $api.get('/isg/responsibles');
     return res.data;

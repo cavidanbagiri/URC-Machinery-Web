@@ -29,6 +29,15 @@ export const EMPTY_ISG_OVERVIEW = {
   sites_closed_total: 0,
 };
 
+export const EMPTY_ISG_PROJECT_SUMMARY = {
+  project_count: 0,
+  total: 0,
+  open_total: 0,
+  closed_total: 0,
+  items: [],
+  severities: [],
+};
+
 const initialState = {
   items: [],
   total: 0,
@@ -42,6 +51,10 @@ const initialState = {
   overview: null,
   overviewLoading: false,
   overviewError: null,
+
+  projectSummary: null,
+  projectSummaryLoading: false,
+  projectSummaryError: null,
 
   responsibles: [],
   responsiblesLoaded: false,
@@ -97,6 +110,19 @@ export const fetchIsgOverview = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(
         errorMessage(err, 'ISG istatistikleri yüklenemedi')
+      );
+    }
+  }
+);
+
+export const fetchIsgProjectSummary = createAsyncThunk(
+  'isg/fetchProjectSummary',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await IsgService.fetchProjectSummary();
+    } catch (err) {
+      return rejectWithValue(
+        errorMessage(err, 'ISG proje özeti yüklenemedi')
       );
     }
   }
@@ -252,6 +278,24 @@ const isgSlice = createSlice({
       .addCase(fetchIsgOverview.rejected, (state, action) => {
         state.overviewLoading = false;
         state.overviewError = action.payload;
+      });
+
+    // ---------- PROJECT SUMMARY ----------
+    builder
+      .addCase(fetchIsgProjectSummary.pending, (state) => {
+        state.projectSummaryLoading = true;
+        state.projectSummaryError = null;
+      })
+      .addCase(fetchIsgProjectSummary.fulfilled, (state, action) => {
+        state.projectSummaryLoading = false;
+        state.projectSummary = {
+          ...EMPTY_ISG_PROJECT_SUMMARY,
+          ...(action.payload || {}),
+        };
+      })
+      .addCase(fetchIsgProjectSummary.rejected, (state, action) => {
+        state.projectSummaryLoading = false;
+        state.projectSummaryError = action.payload;
       });
 
     // ---------- RESPONSIBLES ----------

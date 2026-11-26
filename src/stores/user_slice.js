@@ -21,7 +21,7 @@ const initialState = {
   isSuccess: false,
   message: '',
 
-  // Team directory behind the dashboard avatar stack (read-only).
+  // Team directory behind the dashboard avatar stack and user table (read-only).
   team: [],
   teamTotal: 0,
   teamWithPhoto: 0,
@@ -76,10 +76,14 @@ export const uploadAvatar = createAsyncThunk(
   }
 );
 
-// Team members for the dashboard avatar stack (photo first, self first).
+// Team members for the dashboard avatar stack and the user table. The table
+// needs more rows than the header's six circles, so the client asks for the
+// API ceiling (`MAX_TEAM_LIMIT` in server/schemas/user_schemas.py).
+export const TEAM_DIRECTORY_LIMIT = 24;
+
 export const fetchTeamMembers = createAsyncThunk(
   'auth/fetchTeamMembers',
-  async ({ limit = 8 } = {}, thunkAPI) => {
+  async ({ limit = TEAM_DIRECTORY_LIMIT } = {}, thunkAPI) => {
     try {
       return await userService.fetchTeam({ limit });
     } catch (error) {

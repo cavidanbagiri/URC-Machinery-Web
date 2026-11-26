@@ -86,9 +86,9 @@ export default function StatusChart() {
 
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none">
             <span className="text-lg font-bold tracking-tight text-gray-900">
-              {machineTotal}
+              {machineTotal} 
             </span>
-            <span className="mt-0.5 text-[8px] font-medium uppercase tracking-wide text-gray-400">
+            <span className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">
               makine
             </span>
           </div>
@@ -113,10 +113,10 @@ export default function StatusChart() {
                   className="h-2 w-2 shrink-0 rounded-full"
                   style={{ backgroundColor: item.fill }}
                 />
-                <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-gray-700">
+                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-gray-700">
                   {item.name}
                 </span>
-                <span className="shrink-0 text-[15px] font-semibold tabular-nums text-gray-900">
+                <span className="shrink-0 text-[12px] font-semibold tabular-nums text-gray-900">
                   {item.value}
                 </span>
                 <span className="w-7 shrink-0 text-right text-[14px] tabular-nums text-gray-400">

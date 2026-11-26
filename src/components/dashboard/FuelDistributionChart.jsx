@@ -1,12 +1,12 @@
 // src/components/dashboard/FuelDistributionChart.jsx
 //
-// Son 7 günün **mazot dağılımı**: her gün için üç bar (SRU, DCU, Kiralık).
-// Kaynak: GET /fuel-logs/statistics/daily?days=7
+// Son 10 günün **mazot dağılımı**: her gün için üç bar (SRU, DCU, Kiralık).
+// Kaynak: GET /fuel-logs/statistics/daily?days=10
 //
 // SRU / DCU litreleri ``machine_fuel_logs`` tablosundan makinenin şantiyesine
 // göre, "Kiralık" serisi ise dışarıdan kiralanan ekipmana verilen mazotun ayrı
 // defterinden (``machine_rental_fuel_logs``) gelir. Gün bazında kayıt olmayan
-// günler sıfır olarak döner, böylece bar grupları hep 7 günü gösterir.
+// günler sıfır olarak döner, böylece bar grupları hep 10 günü gösterir.
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Fuel } from 'lucide-react';
@@ -129,7 +129,7 @@ export default function FuelDistributionChart() {
       subtitle={
         data
           ? `Son ${data.days} gün · ${formatNumber(data.total)} L`
-          : 'Son 7 günün mazot dağılımı'
+          : 'Son 10 günün mazot dağılımı'
       }
       icon={Fuel}
       action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/fuel_logs') }}
@@ -138,7 +138,7 @@ export default function FuelDistributionChart() {
       empty={items.length === 0 || !hasFuel}
       emptyIcon={Fuel}
       emptyText="Mazot kaydı yok"
-      emptyHint="Son 7 gün için mazot dağıtımı girildiğinde burada görünür"
+      emptyHint="Son 10 gün için mazot dağıtımı girildiğinde burada görünür"
       bodyClassName="flex flex-col"
     >
       <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 px-1 pb-1">

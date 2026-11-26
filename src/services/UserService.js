@@ -6,7 +6,7 @@ import $api from '../http/api';
  * overlapping avatar stack, so only public profile fields come back.
  */
 class UserService {
-  /** Team members (photo URL, name, position) plus the total user count. */
+  /** Team members (photo URL, name, e-mail, position) plus the total count. */
   async fetchTeam(params = {}) {
     const res = await $api.get('/users/team', { params });
     return res.data;

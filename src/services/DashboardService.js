@@ -14,9 +14,10 @@ class DashboardService {
 
   /**
    * Dashboard'daki **Mazot Dagilimi** grafigi: son `days` gunun SRU / DCU /
-   * kiralik mazot toplamlari (gun basina bir bar grubu).
+   * kiralik mazot toplamlari (gun basina bir bar grubu). Dashboard son 10 gunu
+   * ister; API'nin kendi varsayilani 7'dir.
    */
-  async fetchFuelDistribution(days = 7) {
+  async fetchFuelDistribution(days = 10) {
     const res = await $api.get('/fuel-logs/statistics/daily', {
       params: { days },
     });

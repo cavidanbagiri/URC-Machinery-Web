@@ -27,12 +27,12 @@ const emptyOverview = {
   overdueRepairs: { items: [], total: 0, error: null },
   forum: { items: [], total: 0, error: null },
   lowStock: { items: [], total: 0, error: null },
-  // Mazot dağılımı grafiği (SRU / DCU / kiralık, son 7 gün).
+  // Mazot dağılımı grafiği (SRU / DCU / kiralık, son 10 gün).
   fuel: { data: null, error: null },
 };
 
 // Dashboard'daki mazot grafiğinin penceresi (gün).
-const FUEL_DISTRIBUTION_DAYS = 7;
+const FUEL_DISTRIBUTION_DAYS = 10;
 
 /** İçinde bulunulan ayın ilk günü (`YYYY-MM-01`) — "bu ay arıza" sayacı için. */
 export function monthStartISO(date = new Date()) {
@@ -70,6 +70,9 @@ function settledList(result) {
 const initialState = {
   total: 0,
   byStatus: [],
+  // KPI kartları: kiralık makine toplamı ve şantiye (proje) bazlı filo+kiralık.
+  rentalTotal: 0,
+  byTerritory: [],
   pivot: {
     territories: [],
     rows: [],
@@ -211,8 +214,10 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchStatusStatistics.fulfilled, (state, action) => {
         state.loading = false;
-        state.total = action.payload.total;
-        state.byStatus = action.payload.by_status;
+        state.total = action.payload.total ?? 0;
+        state.byStatus = action.payload.by_status ?? [];
+        state.rentalTotal = action.payload.rental_total ?? 0;
+        state.byTerritory = action.payload.by_territory ?? [];
       })
       .addCase(fetchStatusStatistics.rejected, (state, action) => {
         state.loading = false;
