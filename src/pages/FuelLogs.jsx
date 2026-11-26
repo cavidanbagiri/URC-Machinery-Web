@@ -243,7 +243,7 @@ export default function FuelLogs() {
   );
 
   const handleSaveRental = useCallback(
-    async (rental, liters) => {
+    async (rental, { liters, km, engine_hours }) => {
       if (selectedDate > todayISO()) {
         toast.error('Gelecek bir tarih için kayıt yapılamaz');
         throw new Error('Gelecek tarih');
@@ -255,14 +255,29 @@ export default function FuelLogs() {
             rental_id: rental.rental_id,
             fuel_date: selectedDate,
             liters,
+            // Mazotla aynı gün girilen sayaç okumaları; boş alanlar gönderilmez
+            // ve sunucuda NULL kalır.
+            km: km ?? undefined,
+            engine_hours: engine_hours ?? undefined,
             // Kiralık satırda da "Yakıtı veren" sorulmaz; sunucu oturumdaki
             // kullanıcının adını yazar.
           })
         ).unwrap();
 
         const label = rental.equipment_name || `#${rental.rental_id}`;
+        const meterNotes = [];
+        if (km !== null && km !== undefined) {
+          meterNotes.push(`KM ${formatNumber(km)}`);
+        }
+        if (engine_hours !== null && engine_hours !== undefined) {
+          meterNotes.push(`${formatNumber(engine_hours)} saat`);
+        }
+        const meterText = meterNotes.length
+          ? ` · ${meterNotes.join(' · ')}`
+          : '';
+
         toast.success(
-          `${label} · ${formatDate(selectedDate)}: ${formatNumber(liters)} L eklendi`
+          `${label} · ${formatDate(selectedDate)}: ${formatNumber(liters)} L eklendi${meterText}`
         );
 
         dispatch(fetchFuelLogOverview({ fuel_date: selectedDate }));
@@ -400,11 +415,13 @@ export default function FuelLogs() {
         <p>
           Kayıtlar kalıcıdır: mevcut bir giriş güncellenmez veya silinmez. Aynı
           makineye gün içinde birden fazla yakıt girişi yapılabilir; düzeltme için
-          yeni kayıt ekleyin. Güncel KM / saat bilgisi sayaç kayıtlarından, ortalama
-          yakıt tüketimi ise sayaç farkına göre sunucuda otomatik hesaplanır.
-          Tablonun üstündeki <strong>Kiralık Makineler</strong> sekmesi dışarıdan
-          kiralanan ekipmanın mazotunu ayrı defterde tutar; kiralık ekipmanın filo
-          numarası ve sayacı olmadığı için yalnızca toplam litre izlenir.
+          yeni kayıt ekleyin. Kendi makinelerimizde güncel KM / saat bilgisi sayaç
+          kayıtlarından, ortalama yakıt tüketimi ise sayaç farkına göre sunucuda
+          otomatik hesaplanır. Tablonun üstündeki{' '}
+          <strong>Kiralık Makineler</strong> sekmesi dışarıdan kiralanan ekipmanın
+          mazotunu ayrı defterde tutar; kiralık ekipmanın filo numarası yoktur,
+          mazotla birlikte o günkü KM / motor saati de girilebilir ve son girilen
+          sayaç satırda gösterilir.
         </p>
       </div>
 

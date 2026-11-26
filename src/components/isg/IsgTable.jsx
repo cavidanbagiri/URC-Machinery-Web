@@ -25,7 +25,11 @@ import {
   TABLE_TOOLBAR,
 } from '../ui/tableStyles';
 import { formatDate } from '../../utils/repair';
-import { ISG_STATUS_OPTIONS } from '../../utils/isg';
+import {
+  ISG_SEVERITY_LABELS,
+  ISG_SEVERITY_OPTIONS,
+  ISG_STATUS_OPTIONS,
+} from '../../utils/isg';
 import IsgEvidenceCell from './IsgEvidenceCell';
 
 //: Başlık hücresi — hizalama ortak tokenla birlikte verilir.
@@ -37,19 +41,27 @@ const STATUS_SELECT_CLASS = {
   kapali: 'border-emerald-200 bg-emerald-50 text-emerald-800',
 };
 
+//: "Önem Derecesi" rozet renkleri.
+const SEVERITY_BADGE_CLASS = {
+  kritik: 'border-red-200 bg-red-50 text-red-700',
+  onemli: 'border-amber-200 bg-amber-50 text-amber-800',
+  az_onemli: 'border-sky-200 bg-sky-50 text-sky-700',
+};
+
 const COLUMN_WIDTHS = {
   record_date: 110,
   description: 320,
   territory: 120,
   responsible: 170,
   status: 120,
+  severity: 110,
   evidence: 240,
   actions: 90,
 };
 
 const COLUMN_IDS = Object.keys(COLUMN_WIDTHS);
 
-//: 7 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+//: 8 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
 const COLUMN_COUNT = COLUMN_IDS.length + 1;
 
 const EMPTY_TEXT =
@@ -108,6 +120,21 @@ function StatusSelect({ item, busy, onStatusChange }) {
         </option>
       ))}
     </select>
+  );
+}
+
+/** "Önem Derecesi" rozeti — Kritik / Önemli / Az Önemli. */
+function SeverityBadge({ item }) {
+  const className =
+    SEVERITY_BADGE_CLASS[item.severity] ||
+    'border-slate-200 bg-slate-50 text-slate-600';
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${className}`}
+    >
+      {item.severity_label || ISG_SEVERITY_LABELS[item.severity] || '—'}
+    </span>
   );
 }
 
@@ -175,6 +202,18 @@ export default function IsgTable({
         key: 'status',
         // ColumnFilter reads {value,label}; the store keeps {code,label}.
         options: ISG_STATUS_OPTIONS.map((option) => ({
+          value: option.code,
+          label: option.label,
+        })),
+      },
+    },
+    {
+      id: 'severity',
+      label: 'Önem',
+      filter: {
+        kind: 'select',
+        key: 'severity',
+        options: ISG_SEVERITY_OPTIONS.map((option) => ({
           value: option.code,
           label: option.label,
         })),
@@ -344,6 +383,10 @@ export default function IsgTable({
                       busy={statusBusy}
                       onStatusChange={onStatusChange}
                     />
+                  </td>
+
+                  <td className={TABLE_CELL}>
+                    <SeverityBadge item={item} />
                   </td>
 
                   <td className={TABLE_CELL}>

@@ -9,6 +9,7 @@ import IsgService from '../services/IsgService';
 const initialFilters = {
   search: '',
   status: '',
+  severity: '',
   territory_id: '',
   responsible_name: '',
   date_from: '',

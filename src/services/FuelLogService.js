@@ -26,6 +26,8 @@ class FuelLogService {
   /**
    * Kiralik makineye verilen mazotu ekler. Kiralik ekipmanin filo ID'si
    * olmadigi icin kayit makine yerine kiralama sozlesmesine baglanir.
+   * `km` ve `engine_hours` istege baglidir; mazotla ayni gun alinan sayac
+   * okumasi gonderilir, bos birakilirsa sunucuda NULL kalir.
    */
   async createRentalLog(payload) {
     const res = await $api.post('/fuel-logs/rental/create', payload);

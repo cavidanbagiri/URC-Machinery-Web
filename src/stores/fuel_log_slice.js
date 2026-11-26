@@ -97,6 +97,21 @@ function applySavedRentalEntry(state, entry) {
   rental.last_note = entry.note;
   rental.last_created_at = entry.created_at;
 
+  // Sayaç okumaları isteğe bağlıdır; sadece doldurulan kolon güncellenir,
+  // böylece yalnızca litre girilen kayıt eski KM / saat değerini silmez.
+  const km = entry.km === null || entry.km === undefined ? null : Number(entry.km);
+  const engineHours =
+    entry.engine_hours === null || entry.engine_hours === undefined
+      ? null
+      : Number(entry.engine_hours);
+
+  if (km !== null || engineHours !== null) {
+    if (km !== null) rental.last_km = km;
+    if (engineHours !== null) rental.last_engine_hours = engineHours;
+    // Secili gune ait yeni bir okuma yazildi; en guncel sayac tarihi budur.
+    rental.last_meter_date = entry.fuel_date;
+  }
+
   overview.rental_daily_total = (Number(overview.rental_daily_total) || 0) + liters;
   overview.rental_monthly_total =
     (Number(overview.rental_monthly_total) || 0) + liters;

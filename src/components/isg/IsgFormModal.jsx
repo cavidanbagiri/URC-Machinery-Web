@@ -16,7 +16,12 @@ import {
   updateIsgItem,
 } from '../../stores/isg_slice';
 import { fetchLookupIfNeeded } from '../../stores/lookup_slice';
-import { ISG_STATUS_OPTIONS, todayIso } from '../../utils/isg';
+import {
+  ISG_SEVERITY_DEFAULT,
+  ISG_SEVERITY_OPTIONS,
+  ISG_STATUS_OPTIONS,
+  todayIso,
+} from '../../utils/isg';
 
 //: Mirrors MAX_DESCRIPTION_LENGTH in models/isg_model.py.
 const MAX_DESCRIPTION_LENGTH = 2000;
@@ -28,6 +33,7 @@ function emptyForm() {
     territory_id: '',
     responsible_name: '',
     status: 'acik',
+    severity: ISG_SEVERITY_DEFAULT,
   };
 }
 
@@ -39,6 +45,7 @@ function formFromItem(item) {
     territory_id: item?.territory_id ? String(item.territory_id) : '',
     responsible_name: item?.responsible_name || '',
     status: item?.status || 'acik',
+    severity: item?.severity || ISG_SEVERITY_DEFAULT,
   };
 }
 
@@ -69,6 +76,7 @@ export default function IsgFormModal({ open, item, onClose, onSaved }) {
 
     if (!form.record_date) nextErrors.record_date = 'Tarihi seçin';
     if (!form.description.trim()) nextErrors.description = 'Açıklamayı girin';
+    if (!form.severity) nextErrors.severity = 'Önem derecesini seçin';
     if (!form.territory_id) nextErrors.territory_id = 'Şantiye seçin';
     if (!form.responsible_name) nextErrors.responsible_name = 'Sorumlu seçin';
 
@@ -86,6 +94,7 @@ export default function IsgFormModal({ open, item, onClose, onSaved }) {
       territory_id: Number(form.territory_id),
       responsible_name: form.responsible_name,
       status: form.status,
+      severity: form.severity,
     };
 
     try {
@@ -110,7 +119,7 @@ export default function IsgFormModal({ open, item, onClose, onSaved }) {
       open={open}
       onClose={onClose}
       title={item ? 'ISG Kaydını Düzenle' : 'Yeni Uygunsuzluk'}
-      subtitle="Tarih, açıklama, durum, şantiye ve sorumlu"
+      subtitle="Tarih, açıklama, önem, durum, şantiye ve sorumlu"
       footer={
         <>
           <SecondaryButton onClick={onClose} disabled={saving}>
@@ -148,6 +157,24 @@ export default function IsgFormModal({ open, item, onClose, onSaved }) {
                 className={inputClass}
               >
                 {ISG_STATUS_OPTIONS.map((option) => (
+                  <option key={option.code} value={option.code}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </ModalField>
+
+            <ModalField
+              label="Önem Derecesi *"
+              hint="Kritik / Önemli / Az Önemli"
+              error={errors.severity}
+            >
+              <select
+                value={form.severity}
+                onChange={(e) => handleChange('severity', e.target.value)}
+                className={errors.severity ? errorInputClass : inputClass}
+              >
+                {ISG_SEVERITY_OPTIONS.map((option) => (
                   <option key={option.code} value={option.code}>
                     {option.label}
                   </option>

@@ -14,6 +14,23 @@ export const ISG_STATUS_LABELS = {
   kapali: 'Kapalı',
 };
 
+/**
+ * "Önem Derecesi" codes — the backend check constraint allows exactly these.
+ * ``tone`` is the Tailwind colour family used by the table badge.
+ */
+export const ISG_SEVERITY_OPTIONS = [
+  { code: 'kritik', label: 'Kritik', tone: 'red' },
+  { code: 'onemli', label: 'Önemli', tone: 'amber' },
+  { code: 'az_onemli', label: 'Az Önemli', tone: 'sky' },
+];
+
+export const ISG_SEVERITY_LABELS = Object.fromEntries(
+  ISG_SEVERITY_OPTIONS.map((option) => [option.code, option.label])
+);
+
+/** Mirrors ISG_SEVERITY_DEFAULT in server/models/isg_model.py. */
+export const ISG_SEVERITY_DEFAULT = 'onemli';
+
 const PDF_TYPES = new Set(['application/pdf', 'application/x-pdf']);
 const IMAGE_TYPES = new Set([
   'image/jpeg',

@@ -37,7 +37,10 @@ const RENTAL_FUEL_COLUMN_WIDTHS = {
   period: 150,
   status: 140,
   day_total: 160,
+  meter: 170,
   liters: 110,
+  km: 100,
+  engine_hours: 100,
   total: 150,
   action: 120,
 };
@@ -76,6 +79,57 @@ function StatusBadge({ rental }) {
   );
 }
 
+/**
+ * Seçilen güne kadarki **en yeni** sayaç okuması. KM ve motor saati bağımsız
+ * tutulur: kiralık ekipmanda genelde yalnızca biri vardır, bu yüzden sıfır
+ * olan sayaç yalnızca diğer sayaç da boşsa gösterilir.
+ */
+function MeterCell({ rental }) {
+  const km =
+    rental.last_km === null || rental.last_km === undefined
+      ? null
+      : Number(rental.last_km);
+  const hours =
+    rental.last_engine_hours === null || rental.last_engine_hours === undefined
+      ? null
+      : Number(rental.last_engine_hours);
+
+  if (km === null && hours === null) {
+    return <p className={TABLE_MUTED}>Sayaç kaydı yok</p>;
+  }
+
+  const showKm = km !== null && (km > 0 || hours === null);
+  const showHours = hours !== null && (hours > 0 || km === null);
+
+  return (
+    <>
+      <div className="flex flex-col gap-0.5 text-[12px] text-slate-600 tabular-nums">
+        {showKm && (
+          <span>
+            KM:{' '}
+            <strong className="font-semibold text-slate-900">
+              {formatNumber(km)}
+            </strong>
+          </span>
+        )}
+        {showHours && (
+          <span>
+            Saat:{' '}
+            <strong className="font-semibold text-slate-900">
+              {formatNumber(hours)}
+            </strong>
+          </span>
+        )}
+      </div>
+      {rental.last_meter_date && (
+        <p className="mt-0.5 text-[10px] text-slate-400">
+          {formatDate(rental.last_meter_date)}
+        </p>
+      )}
+    </>
+  );
+}
+
 function Skeleton() {
   return (
     <div>
@@ -104,10 +158,14 @@ function Skeleton() {
 
 function EntryRow({ rental, selectedDate, onSave }) {
   const [liters, setLiters] = useState('');
+  const [km, setKm] = useState('');
+  const [engineHours, setEngineHours] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const litersRef = useRef(null);
+  const kmRef = useRef(null);
+  const engineRef = useRef(null);
 
   const label = rentalLabel(rental);
   const litersValue = parseDecimalInput(liters);
@@ -122,15 +180,39 @@ function EntryRow({ rental, selectedDate, onSave }) {
       return;
     }
 
+    // Sayaç alanları isteğe bağlıdır; boş bırakılabilir ama doldurulduysa
+    // geçerli, negatif olmayan bir sayı olmalıdır.
+    const kmValue = parseDecimalInput(km);
+    if (km.trim() && kmValue === null) {
+      toast.error(`${label}: geçerli bir KM değeri girin`);
+      kmRef.current?.focus();
+      return;
+    }
+
+    const engineValue = parseDecimalInput(engineHours);
+    if (engineHours.trim() && engineValue === null) {
+      toast.error(`${label}: geçerli bir motor saati girin`);
+      engineRef.current?.focus();
+      return;
+    }
+
     setSaving(true);
     setSaved(false);
 
     try {
-      await onSave(rental, litersValue);
+      // Litre ve sayaç aynı satıra yazılır: okuma, mazotun verildiği günle
+      // eşit zamanlıdır.
+      await onSave(rental, {
+        liters: litersValue,
+        km: kmValue,
+        engine_hours: engineValue,
+      });
       setLiters('');
+      setKm('');
+      setEngineHours('');
       setSaved(true);
     } catch {
-      // Hata sayfadaki toast ile gösterilir; girilen değer korunur.
+      // Hata sayfadaki toast ile gösterilir; girilen değerler korunur.
     } finally {
       setSaving(false);
     }
@@ -139,13 +221,34 @@ function EntryRow({ rental, selectedDate, onSave }) {
   const handleKeyDown = (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
+
+    // Alanlar soldan sağa dolar: litre → KM → saat → kaydet.
+    if (event.currentTarget === litersRef.current) {
+      kmRef.current?.focus();
+      return;
+    }
+    if (event.currentTarget === kmRef.current) {
+      engineRef.current?.focus();
+      return;
+    }
     handleSubmit();
   };
 
-  const handleChange = (event) => {
-    setLiters(event.target.value);
+  const handleChange = (setter) => (event) => {
+    setter(event.target.value);
     setSaved(false);
   };
+
+  // Son okuma, giriş alanında soluk ipucu olarak görünür; böylece sayaç
+  // ilerlemesi klavyeden çıkmadan kontrol edilebilir.
+  const kmHint =
+    rental.last_km === null || rental.last_km === undefined
+      ? 'KM'
+      : formatNumber(rental.last_km);
+  const engineHint =
+    rental.last_engine_hours === null || rental.last_engine_hours === undefined
+      ? 'Saat'
+      : formatNumber(rental.last_engine_hours);
 
   return (
     <tr className={`${TABLE_ROW} align-top`}>
@@ -211,6 +314,10 @@ function EntryRow({ rental, selectedDate, onSave }) {
         )}
       </td>
 
+      <td className={TABLE_CELL}>
+        <MeterCell rental={rental} />
+      </td>
+
       <td className="whitespace-nowrap px-2 py-3">
         <input
           ref={litersRef}
@@ -221,10 +328,46 @@ function EntryRow({ rental, selectedDate, onSave }) {
           placeholder="Litre"
           value={liters}
           disabled={saving}
-          onChange={handleChange}
+          onChange={handleChange(setLiters)}
           onKeyDown={handleKeyDown}
           onFocus={(event) => event.target.select()}
           className={`${INPUT_CLASS} text-right`}
+        />
+      </td>
+
+      <td className="whitespace-nowrap px-2 py-3">
+        <input
+          ref={kmRef}
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          aria-label={`${label} KM`}
+          placeholder={kmHint}
+          value={km}
+          disabled={saving}
+          onChange={handleChange(setKm)}
+          onKeyDown={handleKeyDown}
+          onFocus={(event) => event.target.select()}
+          className={`${INPUT_CLASS} text-right`}
+          title="Mazotla birlikte güncel KM (isteğe bağlı)"
+        />
+      </td>
+
+      <td className="whitespace-nowrap px-2 py-3">
+        <input
+          ref={engineRef}
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          aria-label={`${label} motor saati`}
+          placeholder={engineHint}
+          value={engineHours}
+          disabled={saving}
+          onChange={handleChange(setEngineHours)}
+          onKeyDown={handleKeyDown}
+          onFocus={(event) => event.target.select()}
+          className={`${INPUT_CLASS} text-right`}
+          title="Mazotla birlikte güncel motor saati (isteğe bağlı)"
         />
       </td>
 
@@ -250,7 +393,7 @@ function EntryRow({ rental, selectedDate, onSave }) {
               ? 'bg-emerald-600 text-white hover:bg-emerald-700'
               : 'bg-blue-600 text-white hover:bg-blue-700'
           } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
-          title="Litre değerini girip kaydedin (Enter)"
+          title="Litre zorunlu; KM / motor saati isteğe bağlıdır. Enter ile kaydedin"
         >
           {saving ? (
             <>
@@ -310,7 +453,7 @@ export default function RentalFuelLogTable({
           </span>
         </div>
         <span className="text-[11px] text-slate-400">
-          Litre girip Enter ile kaydedin
+          Litre zorunlu · KM / saat isteğe bağlı · Enter kaydeder
         </span>
       </div>
 
@@ -365,11 +508,35 @@ export default function RentalFuelLogTable({
               </ResizableTh>
               <ResizableTh
                 resize={resize}
+                columnId="meter"
+                label="Güncel KM / Saat"
+                className={HEAD_CLASS}
+              >
+                Güncel KM / Saat
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
                 columnId="liters"
                 label="Litre"
                 className={HEAD_RIGHT}
               >
                 Litre
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="km"
+                label="KM"
+                className={HEAD_RIGHT}
+              >
+                KM
+              </ResizableTh>
+              <ResizableTh
+                resize={resize}
+                columnId="engine_hours"
+                label="Saat"
+                className={HEAD_RIGHT}
+              >
+                Saat
               </ResizableTh>
               <ResizableTh
                 resize={resize}
@@ -436,8 +603,9 @@ export default function RentalFuelLogTable({
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/60 px-4 py-2 text-[11px] text-slate-500">
         <span>
-          Kiralık ekipmanda sayaç olmadığı için ortalama yakıt hesaplanmaz;
-          toplam litre tutulur.
+          Litre zorunlu, KM / motor saati isteğe bağlıdır; girilen son sayaç
+          satırda görünür. Kiralık ekipmanda ortalama yakıt hesaplanmaz, toplam
+          litre tutulur.
         </span>
         <span className="font-semibold text-slate-700 tabular-nums">
           {formatDate(selectedDate)} kiralık toplam: {formatNumber(dailyTotal)} L
