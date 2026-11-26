@@ -42,7 +42,7 @@ const RENTAL_FUEL_COLUMN_WIDTHS = {
   km: 100,
   engine_hours: 100,
   total: 150,
-  action: 120,
+  action: 140,
 };
 
 const COLUMN_IDS = Object.keys(RENTAL_FUEL_COLUMN_WIDTHS);
@@ -156,7 +156,7 @@ function Skeleton() {
 }
 
 
-function EntryRow({ rental, selectedDate, onSave }) {
+function EntryRow({ rental, selectedDate, onSave, onEdit }) {
   const [liters, setLiters] = useState('');
   const [km, setKm] = useState('');
   const [engineHours, setEngineHours] = useState('');
@@ -384,31 +384,44 @@ function EntryRow({ rental, selectedDate, onSave }) {
       </td>
 
       <td className="whitespace-nowrap px-2 py-3">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={saving || !canSubmit}
-          className={`flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${
-            saved
-              ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
-          title="Litre zorunlu; KM / motor saati isteğe bağlıdır. Enter ile kaydedin"
-        >
-          {saving ? (
-            <>
-              <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
-              Kaydediliyor
-            </>
-          ) : saved ? (
-            <>
-              <CheckCircleIcon className="h-3.5 w-3.5" />
-              Eklendi
-            </>
-          ) : (
-            'Kaydet'
-          )}
-        </button>
+        <div className="flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={saving || !canSubmit}
+            className={`flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${
+              saved
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
+            title="Litre zorunlu; KM / motor saati isteğe bağlıdır. Enter ile kaydedin"
+          >
+            {saving ? (
+              <>
+                <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
+                Kaydediliyor
+              </>
+            ) : saved ? (
+              <>
+                <CheckCircleIcon className="h-3.5 w-3.5" />
+                Eklendi
+              </>
+            ) : (
+              'Kaydet'
+            )}
+          </button>
+
+          {/* Yanlış güne girilen kiralık mazot satırını düzeltir. */}
+          <button
+            type="button"
+            onClick={() => onEdit(rental)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50"
+            title="Girilmiş kayıtları düzenle (tarih / litre)"
+          >
+            <PencilSquareIcon className="h-3.5 w-3.5" />
+            Düzenle
+          </button>
+        </div>
       </td>
 
       <TableFillerTd />
@@ -421,6 +434,7 @@ export default function RentalFuelLogTable({
   loading,
   selectedDate,
   onSave,
+  onEdit,
   dailyTotal = 0,
 }) {
   // Makine tablosundan ayrı bir anahtar: iki tablonun sütunları bağımsız.
@@ -453,7 +467,8 @@ export default function RentalFuelLogTable({
           </span>
         </div>
         <span className="text-[11px] text-slate-400">
-          Litre zorunlu · KM / saat isteğe bağlı · Enter kaydeder
+          Litre zorunlu · KM / saat isteğe bağlı · Enter kaydeder · Düzenle
+          geçmişi düzeltir
         </span>
       </div>
 
@@ -549,10 +564,10 @@ export default function RentalFuelLogTable({
               <ResizableTh
                 resize={resize}
                 columnId="action"
-                label="İşlem"
+                label="İşlemler"
                 className={HEAD_CENTER}
               >
-                İşlem
+                İşlemler
               </ResizableTh>
               <TableFillerTh />
             </tr>
@@ -595,6 +610,7 @@ export default function RentalFuelLogTable({
                 rental={rental}
                 selectedDate={selectedDate}
                 onSave={onSave}
+                onEdit={onEdit}
               />
             ))}
           </tbody>

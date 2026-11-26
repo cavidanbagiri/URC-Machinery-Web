@@ -27,6 +27,16 @@ const initialState = {
   savingMachineId: null,
   savingRentalId: null,
   mutationError: null,
+  // "İşlemler → Düzenle" penceresi: bir makinenin / kiralamanın son satırları.
+  // Satır listesi sayfadan bağımsız tutulur çünkü pencere kapanınca temizlenir.
+  editing: {
+    kind: null,
+    ownerId: null,
+    entries: [],
+    loading: false,
+    error: null,
+    savingEntryId: null,
+  },
 };
 
 function errorMessage(err, fallback) {
@@ -155,12 +165,72 @@ export const createRentalFuelLog = createAsyncThunk(
   }
 );
 
+/**
+ * Düzenleme penceresinin satır listesi. İki defter (makine / kiralık) aynı
+ * thunk'ı kullanır; `kind` hangi defterin okunduğunu belirler.
+ */
+export const fetchFuelLogEntries = createAsyncThunk(
+  'fuelLog/fetchEntries',
+  async ({ kind, ownerId, end_date, days }, { rejectWithValue }) => {
+    try {
+      const entries =
+        kind === 'rental'
+          ? await FuelLogService.fetchRentalEntries({
+              rental_id: ownerId,
+              end_date,
+              days,
+            })
+          : await FuelLogService.fetchEntries({
+              machine_id: ownerId,
+              end_date,
+              days,
+            });
+
+      return { kind, ownerId, entries };
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Mazot kayıtları getirilemedi'));
+    }
+  }
+);
+
+/**
+ * Kaydedilmiş bir satırı düzeltir. Tarih değişebildiği için günlük / haftalık /
+ * aylık toplamlar yerinde güncellenmez: sayfa, başarılı kayıttan sonra özeti ve
+ * satır listesini sunucudan yeniden ister.
+ */
+export const updateFuelLogEntry = createAsyncThunk(
+  'fuelLog/updateEntry',
+  async ({ kind, entryId, changes }, { rejectWithValue }) => {
+    try {
+      const entry =
+        kind === 'rental'
+          ? await FuelLogService.updateRentalLog(entryId, changes)
+          : await FuelLogService.updateLog(entryId, changes);
+
+      return { kind, entry };
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Mazot kaydı güncellenemedi'));
+    }
+  }
+);
+
 const fuelLogSlice = createSlice({
   name: 'fuelLog',
   initialState,
   reducers: {
     clearMutationError(state) {
       state.mutationError = null;
+    },
+    /** Pencere kapanınca satır listesini ve hatasını temizler. */
+    resetFuelLogEntries(state) {
+      state.editing = {
+        kind: null,
+        ownerId: null,
+        entries: [],
+        loading: false,
+        error: null,
+        savingEntryId: null,
+      };
     },
   },
   extraReducers: (builder) => {
@@ -208,9 +278,50 @@ const fuelLogSlice = createSlice({
         state.savingRentalId = null;
         state.mutationError = action.payload;
       });
+
+    builder
+      .addCase(fetchFuelLogEntries.pending, (state, action) => {
+        state.editing.kind = action.meta.arg.kind;
+        state.editing.ownerId = action.meta.arg.ownerId;
+        state.editing.entries = [];
+        state.editing.loading = true;
+        state.editing.error = null;
+      })
+      .addCase(fetchFuelLogEntries.fulfilled, (state, action) => {
+        const { kind, ownerId, entries } = action.payload;
+
+        // Kullanıcı bu sırada başka bir satırı açtıysa eski cevabı yansıtma.
+        if (state.editing.kind !== kind || state.editing.ownerId !== ownerId) {
+          return;
+        }
+
+        state.editing.loading = false;
+        state.editing.entries = entries;
+      })
+      .addCase(fetchFuelLogEntries.rejected, (state, action) => {
+        state.editing.loading = false;
+        state.editing.error = action.payload;
+      });
+
+    builder
+      .addCase(updateFuelLogEntry.pending, (state, action) => {
+        state.editing.savingEntryId = action.meta.arg.entryId;
+        state.editing.error = null;
+        state.mutationError = null;
+      })
+      .addCase(updateFuelLogEntry.fulfilled, (state) => {
+        state.editing.savingEntryId = null;
+        // Tarih değişmiş olabilir; liste ve özet sayfa tarafından yeniden
+        // istenir, burada yalnızca kaydetme göstergesi kapatılır.
+      })
+      .addCase(updateFuelLogEntry.rejected, (state, action) => {
+        state.editing.savingEntryId = null;
+        state.editing.error = action.payload;
+        state.mutationError = action.payload;
+      });
   },
 });
 
-export const { clearMutationError } = fuelLogSlice.actions;
+export const { clearMutationError, resetFuelLogEntries } = fuelLogSlice.actions;
 
 export default fuelLogSlice.reducer;

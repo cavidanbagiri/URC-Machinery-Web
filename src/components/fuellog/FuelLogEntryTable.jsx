@@ -41,7 +41,7 @@ const FUEL_LOG_COLUMN_WIDTHS = {
   liters: 110,
   meter: 180,
   consumption: 200,
-  action: 120,
+  action: 140,
 };
 
 const COLUMN_IDS = Object.keys(FUEL_LOG_COLUMN_WIDTHS);
@@ -195,7 +195,7 @@ function Skeleton() {
   );
 }
 
-function EntryRow({ machine, selectedDate, onSave }) {
+function EntryRow({ machine, selectedDate, onSave, onEdit }) {
   const [liters, setLiters] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -349,31 +349,45 @@ function EntryRow({ machine, selectedDate, onSave }) {
       </td>
 
       <td className="whitespace-nowrap px-2 py-3">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={saving || !canSubmit}
-          className={`flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${
-            saved
-              ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
-          title="Litre değerini girip kaydedin (Enter)"
-        >
-          {saving ? (
-            <>
-              <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
-              Kaydediliyor
-            </>
-          ) : saved ? (
-            <>
-              <CheckCircleIcon className="h-3.5 w-3.5" />
-              Eklendi
-            </>
-          ) : (
-            'Kaydet'
-          )}
-        </button>
+        <div className="flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={saving || !canSubmit}
+            className={`flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${
+              saved
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
+            title="Litre değerini girip kaydedin (Enter)"
+          >
+            {saving ? (
+              <>
+                <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
+                Kaydediliyor
+              </>
+            ) : saved ? (
+              <>
+                <CheckCircleIcon className="h-3.5 w-3.5" />
+                Eklendi
+              </>
+            ) : (
+              'Kaydet'
+            )}
+          </button>
+
+          {/* Girilmiş kayıtların tarihini / litresini düzeltir: 24'ünün
+              mazotu 25'inde girildiyse satır doğru güne taşınır. */}
+          <button
+            type="button"
+            onClick={() => onEdit(machine)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50"
+            title="Girilmiş kayıtları düzenle (tarih / litre)"
+          >
+            <PencilSquareIcon className="h-3.5 w-3.5" />
+            Düzenle
+          </button>
+        </div>
       </td>
 
       <TableFillerTd />
@@ -386,6 +400,7 @@ export default function FuelLogEntryTable({
   loading,
   selectedDate,
   onSave,
+  onEdit,
 }) {
   const resize = useColumnResize('fuellog:list', FUEL_LOG_COLUMN_WIDTHS);
 
@@ -416,7 +431,7 @@ export default function FuelLogEntryTable({
           </span>
         </div>
         <span className="text-[11px] text-slate-400">
-          Litre girip Enter ile kaydedin
+          Litre girip Enter ile kaydedin · Düzenle ile geçmiş kaydı düzeltin
         </span>
       </div>
 
@@ -504,10 +519,10 @@ export default function FuelLogEntryTable({
               <ResizableTh
                 resize={resize}
                 columnId="action"
-                label="İşlem"
+                label="İşlemler"
                 className={HEAD_CENTER}
               >
-                İşlem
+                İşlemler
               </ResizableTh>
               <TableFillerTh />
             </tr>
@@ -543,6 +558,7 @@ export default function FuelLogEntryTable({
                 machine={machine}
                 selectedDate={selectedDate}
                 onSave={onSave}
+                onEdit={onEdit}
               />
             ))}
           </tbody>

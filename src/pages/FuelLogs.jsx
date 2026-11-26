@@ -15,12 +15,16 @@ import {
 } from '@heroicons/react/24/outline';
 import { FaGasPump } from 'react-icons/fa';
 
+import FuelLogEntriesModal from '../components/fuellog/FuelLogEntriesModal';
 import FuelLogEntryTable from '../components/fuellog/FuelLogEntryTable';
 import RentalFuelLogTable from '../components/fuellog/RentalFuelLogTable';
 import {
   createFuelLog,
   createRentalFuelLog,
+  fetchFuelLogEntries,
   fetchFuelLogOverview,
+  resetFuelLogEntries,
+  updateFuelLogEntry,
 } from '../stores/fuel_log_slice';
 import { formatDate, formatNumber, todayISO } from '../utils/maintenance';
 
@@ -141,7 +145,7 @@ function TabButton({ tab, active, count, onClick }) {
 
 export default function FuelLogs() {
   const dispatch = useDispatch();
-  const { overview, loading, error, mutationError } = useSelector(
+  const { overview, loading, error, mutationError, editing } = useSelector(
     (state) => state.fuelLog
   );
 
@@ -149,6 +153,9 @@ export default function FuelLogs() {
   const [search, setSearch] = useState('');
   // Tablo üstündeki sekmeler: varsayılan kendi makinelerimiz.
   const [activeTab, setActiveTab] = useState('own');
+  // "İşlemler → Düzenle": hangi makinenin / kiralamanın satırları açık.
+  // `{ kind: 'machine' | 'rental', ownerId, label }`
+  const [editTarget, setEditTarget] = useState(null);
 
   useEffect(() => {
     dispatch(fetchFuelLogOverview({ fuel_date: selectedDate }));
@@ -289,6 +296,81 @@ export default function FuelLogs() {
     [dispatch, selectedDate]
   );
 
+  // Düzenleme penceresi açılınca (veya seçilen gün değişince) o makinenin /
+  // kiralamanın son satırları sunucudan istenir.
+  useEffect(() => {
+    if (!editTarget) return;
+
+    dispatch(
+      fetchFuelLogEntries({
+        kind: editTarget.kind,
+        ownerId: editTarget.ownerId,
+        end_date: selectedDate,
+      })
+    );
+  }, [dispatch, editTarget, selectedDate]);
+
+  const openMachineEntries = useCallback((machine) => {
+    setEditTarget({
+      kind: 'machine',
+      ownerId: machine.machine_id,
+      label:
+        machine.identification_no ||
+        machine.plate_no ||
+        `#${machine.machine_id}`,
+    });
+  }, []);
+
+  const openRentalEntries = useCallback((rental) => {
+    setEditTarget({
+      kind: 'rental',
+      ownerId: rental.rental_id,
+      label: rental.equipment_name || `#${rental.rental_id}`,
+    });
+  }, []);
+
+  const closeEntries = useCallback(() => {
+    setEditTarget(null);
+    dispatch(resetFuelLogEntries());
+  }, [dispatch]);
+
+  const handleUpdateEntry = useCallback(
+    async (entry, changes) => {
+      if (!editTarget) return;
+
+      try {
+        await dispatch(
+          updateFuelLogEntry({
+            kind: editTarget.kind,
+            entryId: entry.id,
+            changes,
+          })
+        ).unwrap();
+
+        toast.success(
+          `${editTarget.label} · ${formatDate(
+            changes.fuel_date || entry.fuel_date
+          )}: ${formatNumber(changes.liters ?? entry.liters)} L güncellendi`
+        );
+
+        // Satır listesi (yeni tarih sıralamayı değiştirir) ve özet kartları
+        // sunucudaki gerçek değerlerle tazelenir.
+        dispatch(
+          fetchFuelLogEntries({
+            kind: editTarget.kind,
+            ownerId: editTarget.ownerId,
+            end_date: selectedDate,
+          })
+        );
+        dispatch(fetchFuelLogOverview({ fuel_date: selectedDate }));
+      } catch (err) {
+        toast.error(String(err || 'Mazot kaydı güncellenemedi'));
+        throw err;
+      }
+    },
+    [dispatch, editTarget, selectedDate]
+  );
+
   const monthHint = overview.month_start
     ? `${formatDate(overview.month_start)} – ${formatDate(selectedDate)}`
     : 'Ay başından itibaren';
@@ -410,20 +492,22 @@ export default function FuelLogs() {
         </div>
       </div>
 
-      <div className="mx-1 flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50/70 px-3 py-2 text-xs text-amber-900">
+      {/* <div className="mx-1 flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50/70 px-3 py-2 text-xs text-amber-900">
         <InformationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
-          Kayıtlar kalıcıdır: mevcut bir giriş güncellenmez veya silinmez. Aynı
-          makineye gün içinde birden fazla yakıt girişi yapılabilir; düzeltme için
-          yeni kayıt ekleyin. Kendi makinelerimizde güncel KM / saat bilgisi sayaç
-          kayıtlarından, ortalama yakıt tüketimi ise sayaç farkına göre sunucuda
-          otomatik hesaplanır. Tablonun üstündeki{' '}
-          <strong>Kiralık Makineler</strong> sekmesi dışarıdan kiralanan ekipmanın
-          mazotunu ayrı defterde tutar; kiralık ekipmanın filo numarası yoktur,
-          mazotla birlikte o günkü KM / motor saati de girilebilir ve son girilen
-          sayaç satırda gösterilir.
+          Aynı makineye gün içinde birden fazla yakıt girişi yapılabilir. Yanlış
+          güne (ör. 24'ü yerine 25'ine) yazılan bir kaydı düzeltmek için
+          satırdaki <strong>Düzenle</strong> düğmesini kullanın: kayıt silinmez,
+          tarihi ve litresi yerinde güncellenir; günlük, haftalık ve aylık
+          toplamlar yeni tarihe göre yeniden hesaplanır. Kendi makinelerimizde
+          güncel KM / saat bilgisi sayaç kayıtlarından, ortalama yakıt tüketimi
+          ise sayaç farkına göre sunucuda otomatik hesaplanır. Tablonun
+          üstündeki <strong>Kiralık Makineler</strong> sekmesi dışarıdan
+          kiralanan ekipmanın mazotunu ayrı defterde tutar; kiralık ekipmanın
+          filo numarası yoktur, mazotla birlikte o günkü KM / motor saati de
+          girilebilir ve son girilen sayaç satırda gösterilir.
         </p>
-      </div>
+      </div> */}
 
       {(error || mutationError) && (
         <div className="mx-1 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
@@ -488,6 +572,7 @@ export default function FuelLogs() {
           loading={loading}
           selectedDate={selectedDate}
           onSave={handleSave}
+          onEdit={openMachineEntries}
         />
       ) : (
         <RentalFuelLogTable
@@ -495,9 +580,24 @@ export default function FuelLogs() {
           loading={loading}
           selectedDate={selectedDate}
           onSave={handleSaveRental}
+          onEdit={openRentalEntries}
           dailyTotal={overview.rental_daily_total ?? 0}
         />
       )}
+
+      {/* İşlemler → Düzenle: yanlış güne girilen satırı yerinde düzeltir. */}
+      <FuelLogEntriesModal
+        open={Boolean(editTarget)}
+        onClose={closeEntries}
+        kind={editTarget?.kind ?? 'machine'}
+        label={editTarget?.label}
+        selectedDate={selectedDate}
+        entries={editing.entries}
+        loading={editing.loading}
+        error={editing.error}
+        savingEntryId={editing.savingEntryId}
+        onUpdate={handleUpdateEntry}
+      />
     </div>
   );
 }
