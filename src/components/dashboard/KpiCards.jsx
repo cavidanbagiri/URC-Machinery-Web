@@ -136,7 +136,7 @@ export default function KpiCards() {
         value={rentalTotal}
         hint="Kiralık makine sözleşmeleri"
         icon={KeyRound}
-        onClick={() => navigate('/rental_machines')}
+        onClick={() => navigate('/common_cars?tab=rental')}
       />
 
       {PROJECT_TERRITORIES.map((name) => {

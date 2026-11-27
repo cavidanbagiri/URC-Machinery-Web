@@ -20,7 +20,6 @@ import { PiShoppingCartSimpleLight } from "react-icons/pi";
 import { PiGasPumpLight } from "react-icons/pi";
 import { PiSpeedometerLight } from "react-icons/pi";
 import { PiWarehouseLight } from "react-icons/pi";
-import { PiTimerLight } from "react-icons/pi";
 import { PiClipboardTextLight } from "react-icons/pi";
 import { PiHardHatLight } from "react-icons/pi";
 import { CiSettings } from "react-icons/ci";
@@ -52,7 +51,10 @@ const NAV_ITEMS = [
   { to: '/fuel_logs', label: 'Mazot Dağılımı', icon: PiGasPumpLight },
   { to: '/purchase_requests', label: 'Yedek Parça / Hizmet', icon: PiShoppingCartSimpleLight },
   // { to: '/stock', label: 'Stok', icon: PiWarehouseLight },
-  { to: '/rental_machines', label: 'Kiralık Makineler', icon: PiTimerLight },
+  // Kiralık makineler artık **Tüm Makineler** sayfasının "Kiralık Makineler"
+  // sekmesinde listelendiği için menüde ayrı giriş gösterilmiyor.
+  // `/rental_machines` adresi eski bağlantılar için o sekmeye yönlendirir.
+  // { to: '/rental_machines', label: 'Kiralık Makineler', icon: PiTimerLight },
   { to: '/isg', label: 'ISG', icon: PiHardHatLight },
   // {* Dont need to show daily faults *}
   // { to: '/daily_faults', label: 'Günlük Arıza', icon: HiOutlineClipboardDocumentList },

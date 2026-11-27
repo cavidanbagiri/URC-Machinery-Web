@@ -40,7 +40,7 @@ const METER_LOG_COLUMN_WIDTHS = {
   last_engine_hours: 130,
   new_km: 140,
   new_engine_hours: 150,
-  action: 120,
+  action: 132,
 };
 
 const COLUMN_IDS = Object.keys(METER_LOG_COLUMN_WIDTHS);
@@ -141,7 +141,7 @@ function Skeleton() {
   );
 }
 
-function EntryRow({ machine, selectedDate, onSave }) {
+function EntryRow({ machine, selectedDate, onSave, onEdit }) {
   const [km, setKm] = useState('');
   const [engineHours, setEngineHours] = useState('');
   const [saving, setSaving] = useState(false);
@@ -342,31 +342,46 @@ function EntryRow({ machine, selectedDate, onSave }) {
       </td>
 
       <td className="whitespace-nowrap px-2 py-3">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={saving || !canSubmit}
-          className={`flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${
-            saved
-              ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
-          title="Her iki değeri girip kaydedin (Enter)"
-        >
-          {saving ? (
-            <>
-              <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
-              Kaydediliyor
-            </>
-          ) : saved ? (
-            <>
-              <CheckCircleIcon className="h-3.5 w-3.5" />
-              Kaydedildi
-            </>
-          ) : (
-            'Kaydet'
-          )}
-        </button>
+        <div className="flex flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={saving || !canSubmit}
+            className={`flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${
+              saved
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
+            title="Her iki değeri girip kaydedin (Enter)"
+          >
+            {saving ? (
+              <>
+                <ArrowPathIcon className="h-3.5 w-3.5 animate-spin" />
+                Kaydediliyor
+              </>
+            ) : saved ? (
+              <>
+                <CheckCircleIcon className="h-3.5 w-3.5" />
+                Kaydedildi
+              </>
+            ) : (
+              'Kaydet'
+            )}
+          </button>
+
+          {/* Kaydedilmiş okumayı yerinde düzeltme: yanlış güne / yanlış değere
+              girilen sayaç yeni satır eklemeden düzeltilir. */}
+          <button
+            type="button"
+            onClick={() => onEdit?.(machine)}
+            disabled={saving}
+            className="flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            title="Bu makinenin son 30 günündeki okumaları düzenle"
+          >
+            <PencilSquareIcon className="h-3.5 w-3.5" />
+            Düzenle
+          </button>
+        </div>
       </td>
 
       <TableFillerTd />
@@ -379,6 +394,7 @@ export default function MeterLogEntryTable({
   loading,
   selectedDate,
   onSave,
+  onEdit,
 }) {
   const resize = useColumnResize('meterlog:list', METER_LOG_COLUMN_WIDTHS);
 
@@ -409,7 +425,8 @@ export default function MeterLogEntryTable({
           </span>
         </div>
         <span className="text-[11px] text-slate-400">
-          KM ve motor saati girip Enter ile kaydedin
+          KM ve motor saati girip Enter ile kaydedin · <b>Düzenle</b> son 30 günü
+          açar
         </span>
       </div>
 
@@ -538,6 +555,7 @@ export default function MeterLogEntryTable({
                 machine={machine}
                 selectedDate={selectedDate}
                 onSave={onSave}
+                onEdit={onEdit}
               />
             ))}
           </tbody>

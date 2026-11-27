@@ -588,11 +588,12 @@ export default function RentalFuelLogTable({
                       Gösterilecek kiralık makine yok
                     </p>
                     <p className="mt-1 max-w-md text-[12px] text-slate-500">
-                      Kiralık ekipman <strong>Kiralık Makineler</strong> sayfasından
-                      eklenir; arama veya tarih seçimini de değiştirebilirsiniz.
+                      Kiralık ekipman <strong>Tüm Makineler → Kiralık Makineler</strong>{' '}
+                      sekmesinden eklenir; arama veya tarih seçimini de
+                      değiştirebilirsiniz.
                     </p>
                     <Link
-                      to="/rental_machines"
+                      to="/common_cars?tab=rental"
                       className="mt-3 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition hover:bg-blue-100"
                     >
                       Kiralık Makineler

@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
+import { KeyIcon, TruckIcon } from '@heroicons/react/24/outline';
 
 import { fetchMachines, fetchMachineDetail } from '../stores/machine_slice';
 import { fetchLookupIfNeeded } from '../stores/lookup_slice';
 import { fetchPivotStatistics } from '../stores/dashboard_slice';
+import { fetchRentalMachines } from '../stores/rental_machine_slice';
 
 import FlaticonIcon from '../components/ui/FlaticonIcon';
+import SegmentedTabs from '../components/ui/SegmentedTabs';
 
 import MachineAdvancedFilters from '../components/machines/MachineAdvancedFilters';
 import MachineTable from '../components/machines/MachineTable';
@@ -19,10 +22,12 @@ import MachineDetailModal from '../components/machines/MachineDetailModal';
 import MachineStatusModal from '../components/machines/MachineStatusModal';
 import ExportButton from '../components/machines/ExportButton';
 import ConfirmDialog from '../components/settings/ConfirmDialog'
+import RentalMachinePanel from '../components/rentalmachine/RentalMachinePanel';
 import { updateMachineStatus, setFilter, resetFilters } from '../stores/machine_slice';
 import { deleteMachine } from '../stores/machine_slice';
 import { quickOpenRepair } from '../stores/repair_slice';
 import { isRepairStatusName } from '../utils/machineStatus';
+
 
 
 
@@ -50,6 +55,16 @@ export default function CommonCarsPage() {
     error: dashboardError,
   } = useSelector((s) => s.dashboard);
   const lookups = useSelector((s) => s.lookup.data);
+  const { total: rentalTotal, loading: rentalLoading } = useSelector(
+    (s) => s.rentalMachine
+  );
+
+  // Sayfa içi sekmeler: URC filosu (varsayılan) ve kiralık ekipman aynı
+  // sayfada listelenir. Sekme URL'de tutulur (`?tab=rental`), böylece dashboard
+  // kartı ve mazot defteri doğrudan kiralık listesini açabilir.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusIdFromUrl = searchParams.get('status_id');
+  const isRental = searchParams.get('tab') === 'rental';
 
   // Tekli seçim — seçim, sayfa/filtre bağlamına bağlıdır
   const [selection, setSelection] = useState(null);
@@ -137,6 +152,16 @@ export default function CommonCarsPage() {
   // ---------- HANDLERS ----------
   const clearSelection = () => setSelection(null);
 
+  // Sekme değişimi adrese yazılır; `tab` parametresi kaldırılınca filo listesi
+  // açılır. Seçim (satır vurgusu) sekmeler arasında taşınmaz.
+  const handleTabChange = (value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value === 'rental') next.set('tab', 'rental');
+    else next.delete('tab');
+    setSearchParams(next, { replace: true });
+    clearSelection();
+  };
+
   const handleResetFilters = () => {
     clearSelection();
     dispatch(resetFilters());
@@ -147,6 +172,12 @@ export default function CommonCarsPage() {
   };
 
   const handleRefresh = () => {
+    // Kiralık sekmesinde Yenile kiralama listesini tazeler; filo sekmesinde
+    // makine listesi + kategori istatistikleri yenilenir.
+    if (isRental) {
+      dispatch(fetchRentalMachines());
+      return;
+    }
     dispatch(fetchMachines());
     refreshPivot();
   };
@@ -267,9 +298,6 @@ export default function CommonCarsPage() {
   };
 
 
-  const [searchParams] = useSearchParams();
-  const statusIdFromUrl = searchParams.get('status_id');
-
   // URL-dən status_id gəlibsə → filter tətbiq et
   useEffect(() => {
     if (statusIdFromUrl) {
@@ -296,190 +324,235 @@ export default function CommonCarsPage() {
             Tüm Makineler
           </h1>
         </div>
-        <p className="mt-1.5 text-sm text-gray-500">
-          Toplam: {total} makine
-        </p>
+          <p className="mt-1.5 text-sm text-gray-500">
+            {isRental
+              ? `Toplam: ${rentalTotal} kiralama kaydı · durum tarihlere göre otomatik hesaplanır`
+              : `Toplam: ${total} makine`}
+          </p>
         </div>
 
          <div className='mr-4 flex items-center'>
-          <button
-            type="button"
-            onClick={() => setCategoriesOpen((value) => !value)}
-            aria-expanded={categoriesOpen}
-            aria-controls={
-              categoriesOpen ? 'machine-category-panel' : undefined
-            }
-            aria-label={
-              categoriesOpen
-                ? 'Makine kategorilerini gizle'
-                : 'Makine kategorilerini göster'
-            }
-            className={ACTION_BUTTON_CLASS}
-          >
-            {categoriesOpen ? (
-              <FlaticonIcon name="angle-up" size="md" />
-            ) : (
-              <FlaticonIcon name="angle-down" size="md" />
-            )}
-            {categoriesOpen ? 'Gizle' : 'Göster'}
-          </button>
+          {/* Kategori paneli, Excel çıktısı ve Yeni Makine yalnızca URC
+              filosuna aittir; kiralık sekmesinin kendi araç çubuğu vardır. */}
+          {!isRental && (
+            <button
+              type="button"
+              onClick={() => setCategoriesOpen((value) => !value)}
+              aria-expanded={categoriesOpen}
+              aria-controls={
+                categoriesOpen ? 'machine-category-panel' : undefined
+              }
+              aria-label={
+                categoriesOpen
+                  ? 'Makine kategorilerini gizle'
+                  : 'Makine kategorilerini göster'
+              }
+              className={ACTION_BUTTON_CLASS}
+            >
+              {categoriesOpen ? (
+                <FlaticonIcon name="angle-up" size="md" />
+              ) : (
+                <FlaticonIcon name="angle-down" size="md" />
+              )}
+              {categoriesOpen ? 'Gizle' : 'Göster'}
+            </button>
+          )}
 
           <button
             type="button"
             onClick={handleRefresh}
-            disabled={isRefreshing}
-            aria-busy={isRefreshing}
-            aria-label="Makine listesini ve kategorileri yenile"
+            disabled={isRental ? rentalLoading : isRefreshing}
+            aria-busy={isRental ? rentalLoading : isRefreshing}
+            aria-label={
+              isRental
+                ? 'Kiralık makine listesini yenile'
+                : 'Makine listesini ve kategorileri yenile'
+            }
             title="Yenile"
             className={ACTION_BUTTON_CLASS}
           >
             <FlaticonIcon
               name="refresh"
               size="md"
-              className={isRefreshing ? 'animate-spin' : ''}
+              className={
+                (isRental ? rentalLoading : isRefreshing) ? 'animate-spin' : ''
+              }
             />
             Yenile
           </button>
 
-          <ExportButton />
+          {!isRental && (
+            <>
+              <ExportButton />
 
-          <button
-            type="button"
-            onClick={handleCreate}
-            className={ACTION_BUTTON_CLASS}
-          >
-            <FlaticonIcon name="plus" size="md" />
-            Yeni Makine
-          </button>
+              <button
+                type="button"
+                onClick={handleCreate}
+                className={ACTION_BUTTON_CLASS}
+              >
+                <FlaticonIcon name="plus" size="md" />
+                Yeni Makine
+              </button>
+            </>
+          )}
 
          </div>
       </div>
 
-      {categoriesOpen && (
-        <div className="px-3 pb-3 ">
-          <MachineCategoryCards
-            pivot={pivot}
-            loading={pivotLoading}
-            error={dashboardError}
-            activeTypeId={filters.type_id}
-            onSelectType={handleCategorySelect}
-            onRefresh={refreshPivot}
-          />
-        </div>
-      )}
+      {/* Sekmeler: aynı sayfada URC filosu ve kiralık ekipman listesi.
+          Görünüm Periyodik Bakım / Arızalı Ekipman sekmeleriyle aynıdır.
+          Kiralık sayacı ancak liste bir kez yüklendikten sonra gösterilir;
+          filo sekmesinde fazladan kiralık isteği atılmaz. */}
+      <div className="px-3 pb-2">
+        <SegmentedTabs
+          ariaLabel="Makine listeleri"
+          value={isRental ? 'rental' : 'fleet'}
+          onChange={handleTabChange}
+          tabs={[
+            {
+              id: 'fleet',
+              label: 'URC Makineler',
+              count: total,
+              icon: TruckIcon,
+            },
+            {
+              id: 'rental',
+              label: 'Kiralık Makineler',
+              count: rentalTotal > 0 ? rentalTotal : undefined,
+              icon: KeyIcon,
+            },
+          ]}
+        />
+      </div>
 
-      <div className="flex flex-row justify-between items-center  p-2 ">
+      {isRental && <RentalMachinePanel />}
 
-        <div className=''>
-          {selectedMachine && (
-          <span
-            aria-live="polite"
-            className=" mr-2 text-sm font-medium text-blue-700"
-          >
-            1 makine seçildi
-          </span>
-        )}
-          <p className="text-[11px] text-gray-400">
-            Filtrelemek için sütun başlığına tıklayın
-          </p>
-        </div>
-
-
-        <div className="flex flex-wrap items-center justify-end gap-1 rounded-t-lg   px-3 py-1">
-        
-
-          <button
-            type="button"
-            onClick={() => handleUpdate(selectedMachine)}
-            disabled={!selectedMachine || loading}
-            className={ACTION_BUTTON_CLASS}
-          >
-            <FlaticonIcon name="edit" size="md" />
-            Güncelle
-          </button>
-          <button
-            type="button"
-            onClick={() => handleChangeStatus(selectedMachine)}
-            disabled={!selectedMachine || loading}
-            className={ACTION_BUTTON_CLASS}
-          >
-            <FlaticonIcon name="exchange" size="md" />
-            Durum Değiştir
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDetail(selectedMachine)}
-            disabled={!selectedMachine || loading}
-            className={ACTION_BUTTON_CLASS}
-          >
-            <FlaticonIcon name="eye" size="md" />
-            Detaylar
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDelete(selectedMachine)}
-            disabled={!selectedMachine || loading}
-            className={ACTION_BUTTON_CLASS}
-          >
-            <FlaticonIcon name="trash" size="md" />
-            Sil
-          </button>
-
-          <span className="mx-2 h-5 w-px bg-gray-300" aria-hidden="true" />
-
-          
-
-          <MachineAdvancedFilters />
-
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="cursor-pointer rounded-xs px-3 py-1 text-sm font-thin text-red-600 transition hover:bg-red-50"
-            >
-              Filtreleri temizle ({activeFilterCount})
-            </button>
+      {/* Filo listesi yalnızca "URC Makineler" sekmesinde çizilir. */}
+      {!isRental && (
+        <>
+          {categoriesOpen && (
+            <div className="px-3 pb-3 ">
+              <MachineCategoryCards
+                pivot={pivot}
+                loading={pivotLoading}
+                error={dashboardError}
+                activeTypeId={filters.type_id}
+                onSelectType={handleCategorySelect}
+                onRefresh={refreshPivot}
+              />
+            </div>
           )}
 
-          <span className="mx-2 h-5 w-px bg-gray-300" aria-hidden="true" />
+          <div className="flex flex-row justify-between items-center p-2">
 
-      
-        </div>
+            <div className=''>
+              {selectedMachine && (
+                <span
+                  aria-live="polite"
+                  className="mr-2 text-sm font-medium text-blue-700"
+                >
+                  1 makine seçildi
+                </span>
+              )}
+              <p className="text-[11px] text-gray-400">
+                Filtrelemek için sütun başlığına tıklayın
+              </p>
+            </div>
 
-      </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-1 rounded-t-lg px-3 py-1">
+
+              <button
+                type="button"
+                onClick={() => handleUpdate(selectedMachine)}
+                disabled={!selectedMachine || loading}
+                className={ACTION_BUTTON_CLASS}
+              >
+                <FlaticonIcon name="edit" size="md" />
+                Güncelle
+              </button>
+              <button
+                type="button"
+                onClick={() => handleChangeStatus(selectedMachine)}
+                disabled={!selectedMachine || loading}
+                className={ACTION_BUTTON_CLASS}
+              >
+                <FlaticonIcon name="exchange" size="md" />
+                Durum Değiştir
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDetail(selectedMachine)}
+                disabled={!selectedMachine || loading}
+                className={ACTION_BUTTON_CLASS}
+              >
+                <FlaticonIcon name="eye" size="md" />
+                Detaylar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(selectedMachine)}
+                disabled={!selectedMachine || loading}
+                className={ACTION_BUTTON_CLASS}
+              >
+                <FlaticonIcon name="trash" size="md" />
+                Sil
+              </button>
+
+              <span className="mx-2 h-5 w-px bg-gray-300" aria-hidden="true" />
+
+              <MachineAdvancedFilters />
+
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="cursor-pointer rounded-xs px-3 py-1 text-sm font-thin text-red-600 transition hover:bg-red-50"
+                >
+                  Filtreleri temizle ({activeFilterCount})
+                </button>
+              )}
+
+              <span className="mx-2 h-5 w-px bg-gray-300" aria-hidden="true" />
+
+            </div>
+
+          </div>
 
 
-      {/* Delete Confirm — YENİ */}
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={() => {
-          setDeleteOpen(false);
-          setDeletingMachine(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Makineyi silmek istiyor musunuz?"
-        message={
-          deletingMachine
-            ? `"${deletingMachine.identification_no || `#${deletingMachine.id}`}" silinecek. Bu işlem geri alınamaz.`
-            : ''
-        }
-        loading={deleting}
-      />
+          {/* Delete Confirm — YENİ */}
+          <ConfirmDialog
+            open={deleteOpen}
+            onClose={() => {
+              setDeleteOpen(false);
+              setDeletingMachine(null);
+            }}
+            onConfirm={handleDeleteConfirm}
+            title="Makineyi silmek istiyor musunuz?"
+            message={
+              deletingMachine
+                ? `"${deletingMachine.identification_no || `#${deletingMachine.id}`}" silinecek. Bu işlem geri alınamaz.`
+                : ''
+            }
+            loading={deleting}
+          />
 
-      {/* Cədvəl */}
-      <MachineTable
-        selectedId={selectedId}
-        onSelect={handleSelect}
-        onOpenDetail={handleDetail}
-        onOpenFilters={handleResetFilters}
-        hasActiveFilters={hasActiveFilters}
-        handleDetail={handleDetail}
-      />
+          {/* Cədvəl */}
+          <MachineTable
+            selectedId={selectedId}
+            onSelect={handleSelect}
+            onOpenDetail={handleDetail}
+            onOpenFilters={handleResetFilters}
+            hasActiveFilters={hasActiveFilters}
+            handleDetail={handleDetail}
+          />
 
-      {/* Pagination — tablonun altında */}
-      <div className="border-t border-gray-200">
-        <MachinePagination onNavigate={clearSelection} />
-      </div>
+          {/* Pagination — tablonun altında */}
+          <div className="border-t border-gray-200">
+            <MachinePagination onNavigate={clearSelection} />
+          </div>
+        </>
+      )}
 
       <p className="px-2 pb-2 text-right text-[10px] text-gray-400">
         İkonlar:{' '}

@@ -17,9 +17,34 @@ class MeterLogService {
     return res.data;
   }
 
-  /** Yeni bir KM / motor saati okuması ekler (update/delete yok). */
+  /** Yeni bir KM / motor saati okuması ekler. */
   async createLog(payload) {
     const res = await $api.post('/meter-logs/create', payload);
+    return res.data;
+  }
+
+  /**
+   * Bir makinenin son okumaları (İşlemler → Düzenle penceresi).
+   * @param {Object} params - machine_id, end_date, days
+   */
+  async fetchEntries(params = {}) {
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(
+        ([, value]) => value !== undefined && value !== null && value !== ''
+      )
+    );
+
+    const res = await $api.get('/meter-logs/entries', { params: cleanParams });
+    return res.data;
+  }
+
+  /**
+   * Kaydedilmiş bir okumayı yerinde düzeltir (silme yok).
+   * @param {number} id - okuma id'si
+   * @param {Object} payload - log_date, km, engine_hours (yalnızca değişenler)
+   */
+  async updateLog(id, payload) {
+    const res = await $api.put(`/meter-logs/update/${id}`, payload);
     return res.data;
   }
 }

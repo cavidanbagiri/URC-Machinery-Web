@@ -2,6 +2,17 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import MeterLogService from '../services/MeterLogService';
 
+/** İşlemler → Düzenle penceresinin durumu; kapatınca sıfırlanır. */
+function emptyEditing() {
+  return {
+    machineId: null,
+    entries: [],
+    loading: false,
+    error: null,
+    savingEntryId: null,
+  };
+}
+
 const initialState = {
   overview: {
     start_date: null,
@@ -15,6 +26,7 @@ const initialState = {
   listRequestId: null,
   savingMachineId: null,
   mutationError: null,
+  editing: emptyEditing(),
 };
 
 function errorMessage(err, fallback) {
@@ -94,12 +106,52 @@ export const createMeterLog = createAsyncThunk(
   }
 );
 
+/**
+ * Bir makinenin son okumalarını getirir (İşlemler → Düzenle).
+ * `endDate` sayfadaki seçili gündür; sunucu pencereyi bugünden ileri taşımaz.
+ */
+export const fetchMeterLogEntries = createAsyncThunk(
+  'meterLog/fetchEntries',
+  async ({ machineId, endDate, days }, { rejectWithValue }) => {
+    try {
+      const entries = await MeterLogService.fetchEntries({
+        machine_id: machineId,
+        end_date: endDate,
+        days,
+      });
+      return { machineId, entries };
+    } catch (err) {
+      return rejectWithValue(
+        errorMessage(err, 'KM / motor saati kayıtları yüklenemedi')
+      );
+    }
+  }
+);
+
+/** Kaydedilmiş bir okumayı yerinde düzeltir; yeni satır eklemez. */
+export const updateMeterLogEntry = createAsyncThunk(
+  'meterLog/updateEntry',
+  async ({ entryId, changes }, { rejectWithValue }) => {
+    try {
+      return await MeterLogService.updateLog(entryId, changes);
+    } catch (err) {
+      return rejectWithValue(
+        errorMessage(err, 'KM / motor saati kaydı güncellenemedi')
+      );
+    }
+  }
+);
+
 const meterLogSlice = createSlice({
   name: 'meterLog',
   initialState,
   reducers: {
     clearMutationError(state) {
       state.mutationError = null;
+    },
+    /** Düzenle penceresi kapanınca satırlar ve hata durumu arkada kalmasın. */
+    resetMeterLogEntries(state) {
+      state.editing = emptyEditing();
     },
   },
   extraReducers: (builder) => {
@@ -133,9 +185,51 @@ const meterLogSlice = createSlice({
         state.savingMachineId = null;
         state.mutationError = action.payload;
       });
+
+    builder
+      .addCase(fetchMeterLogEntries.pending, (state, action) => {
+        state.editing.machineId = action.meta.arg.machineId;
+        // Başka makinenin satırları pencere açılırken görünmesin.
+        state.editing.entries = [];
+        state.editing.loading = true;
+        state.editing.error = null;
+        state.editing.savingEntryId = null;
+      })
+      .addCase(fetchMeterLogEntries.fulfilled, (state, action) => {
+        state.editing.loading = false;
+        state.editing.machineId = action.payload.machineId;
+        state.editing.entries = action.payload.entries;
+      })
+      .addCase(fetchMeterLogEntries.rejected, (state, action) => {
+        state.editing.loading = false;
+        state.editing.error = action.payload;
+      });
+
+    builder
+      .addCase(updateMeterLogEntry.pending, (state, action) => {
+        state.editing.savingEntryId = action.meta.arg.entryId;
+        state.editing.error = null;
+        state.mutationError = null;
+      })
+      .addCase(updateMeterLogEntry.fulfilled, (state, action) => {
+        state.editing.savingEntryId = null;
+        // Düzeltilen satır listede yerinde güncellenir. Sayfa ayrıca özeti
+        // sunucudan yeniler: "en yeni okuma" ve fark sütunları değişebilir.
+        const index = state.editing.entries.findIndex(
+          (entry) => entry.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.editing.entries[index] = action.payload;
+        }
+      })
+      .addCase(updateMeterLogEntry.rejected, (state, action) => {
+        state.editing.savingEntryId = null;
+        state.editing.error = action.payload;
+        state.mutationError = action.payload;
+      });
   },
 });
 
-export const { clearMutationError } = meterLogSlice.actions;
+export const { clearMutationError, resetMeterLogEntries } = meterLogSlice.actions;
 
 export default meterLogSlice.reducer;

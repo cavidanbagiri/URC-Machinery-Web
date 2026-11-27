@@ -11,15 +11,24 @@ import {
 } from '@heroicons/react/24/outline';
 import { IoSpeedometerOutline } from 'react-icons/io5';
 
+import MeterLogEntriesModal from '../components/meterlog/MeterLogEntriesModal';
 import MeterLogEntryTable from '../components/meterlog/MeterLogEntryTable';
 import MeterLogWeekTable from '../components/meterlog/MeterLogWeekTable';
 import SegmentedTabs from '../components/ui/SegmentedTabs';
 import { TABLE_CARD } from '../components/ui/tableStyles';
 import {
   createMeterLog,
+  fetchMeterLogEntries,
   fetchMeterLogOverview,
+  resetMeterLogEntries,
+  updateMeterLogEntry,
 } from '../stores/meter_log_slice';
-import { formatDate, formatNumber, todayISO } from '../utils/maintenance';
+import {
+  formatDate,
+  formatNumber,
+  isTrailerMachine,
+  todayISO,
+} from '../utils/maintenance';
 import { buildDateRange, latestEntryForDate } from '../utils/meterLog';
 
 const SEARCH_FIELDS = [
@@ -36,7 +45,7 @@ const SEARCH_FIELDS = [
 
 export default function MeterLogs() {
   const dispatch = useDispatch();
-  const { overview, loading, error, mutationError } = useSelector(
+  const { overview, loading, error, mutationError, editing } = useSelector(
     (state) => state.meterLog
   );
 
@@ -46,6 +55,8 @@ export default function MeterLogs() {
   // Tablolar tek kartta iki sekmede gösterilir: giriş ("Mevcut") ve geçmiş
   // kayıt matrisi ("Arşiv"). Varsayılan, günlük girişi yapılan sekmedir.
   const [activeTab, setActiveTab] = useState('current');
+  // İşlemler → Düzenle penceresinin hedef makinesi (null = kapalı).
+  const [editTarget, setEditTarget] = useState(null);
 
   useEffect(() => {
     dispatch(fetchMeterLogOverview({ days: 7, end_date: selectedDate }));
@@ -60,10 +71,18 @@ export default function MeterLogs() {
     return buildDateRange(overview.start_date, overview.days);
   }, [overview.start_date, overview.days]);
 
+  // Tır dorseleri (Tır Dorse tipi / TD-... kodu) çekilen ekipmandır: kendi KM /
+  // motor saati sayacı olmadığı için bu sayfada listelenmez. Yalnızca bu sayfada
+  // gizlenir; arıza, lastik ve evrak modülleri onları kullanmaya devam eder.
+  const baseMachines = useMemo(
+    () => overview.machines.filter((machine) => !isTrailerMachine(machine)),
+    [overview.machines]
+  );
+
   const term = search.trim().toLocaleLowerCase('tr-TR');
 
   const machines = useMemo(() => {
-    return overview.machines.filter((machine) => {
+    return baseMachines.filter((machine) => {
       if (onlyMissing && latestEntryForDate(machine, selectedDate)) return false;
 
       if (!term) return true;
@@ -73,17 +92,16 @@ export default function MeterLogs() {
         return value && String(value).toLocaleLowerCase('tr-TR').includes(term);
       });
     });
-  }, [overview.machines, onlyMissing, selectedDate, term]);
+  }, [baseMachines, onlyMissing, selectedDate, term]);
 
   const enteredCount = useMemo(
     () =>
-      overview.machines.filter((machine) =>
-        latestEntryForDate(machine, selectedDate)
-      ).length,
-    [overview.machines, selectedDate]
+      baseMachines.filter((machine) => latestEntryForDate(machine, selectedDate))
+        .length,
+    [baseMachines, selectedDate]
   );
 
-  const missingCount = overview.machines.length - enteredCount;
+  const missingCount = baseMachines.length - enteredCount;
 
   const handleSave = useCallback(
     async (machine, km, engineHours) => {
@@ -121,6 +139,64 @@ export default function MeterLogs() {
     [dispatch, selectedDate]
   );
 
+  const openEntries = useCallback(
+    (machine) => {
+      setEditTarget(machine);
+      dispatch(
+        fetchMeterLogEntries({
+          machineId: machine.machine_id,
+          endDate: selectedDate,
+        })
+      );
+    },
+    [dispatch, selectedDate]
+  );
+
+  const closeEntries = useCallback(() => {
+    setEditTarget(null);
+    dispatch(resetMeterLogEntries());
+  }, [dispatch]);
+
+  const handleUpdateEntry = useCallback(
+    async (entry, changes) => {
+      try {
+        await dispatch(
+          updateMeterLogEntry({ entryId: entry.id, changes })
+        ).unwrap();
+
+        const label = editTarget
+          ? editTarget.identification_no ||
+            editTarget.plate_no ||
+            `#${editTarget.machine_id}`
+          : `#${entry.machine_id}`;
+        // Toast düzeltilmiş (yeni) değerleri gösterir; kapatılan alanlar eski
+        // değerini korur.
+        const nextDate = changes.log_date || entry.log_date;
+        const nextKm = changes.km ?? entry.km;
+        const nextHours = changes.engine_hours ?? entry.engine_hours;
+        toast.success(
+          `${label} · ${formatDate(nextDate)}: ${formatNumber(
+            nextKm
+          )} km / ${formatNumber(nextHours)} saat güncellendi`
+        );
+
+        // Matris ve "en yeni okuma" sütunları düzeltilen satırdan hesaplanır;
+        // pencereyi ve sayfayı sunucudan tazele.
+        dispatch(
+          fetchMeterLogEntries({
+            machineId: entry.machine_id,
+            endDate: selectedDate,
+          })
+        );
+        dispatch(fetchMeterLogOverview({ days: 7, end_date: selectedDate }));
+      } catch (err) {
+        toast.error(String(err || 'KM / motor saati kaydı güncellenemedi'));
+        throw err;
+      }
+    },
+    [dispatch, editTarget, selectedDate]
+  );
+
   return (
     <div className="space-y-4 p-3">
       <Toaster position="top-right" />
@@ -137,10 +213,10 @@ export default function MeterLogs() {
           </div>
           <p className="mt-1.5 text-sm text-gray-500">
             {activeTab === 'current'
-              ? `${overview.machines.length} makine · ${formatDate(
+              ? `${baseMachines.length} makine · ${formatDate(
                   selectedDate
                 )}: ${enteredCount} kayıt · ${missingCount} eksik`
-              : `${overview.machines.length} makine · son ${
+              : `${baseMachines.length} makine · son ${
                   dates.length || overview.days || 7
                 } gün · ${dates[0]?.label ?? formatDate(selectedDate)} – ${formatDate(
                   selectedDate
@@ -176,10 +252,13 @@ export default function MeterLogs() {
       <div className="mx-1 flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50/70 px-3 py-2 text-xs text-blue-800">
         <InformationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
-          Kayıtlar kalıcıdır: mevcut bir giriş güncellenmez veya silinmez. Aynı gün
-          için yeni giriş yapılırsa son kayıt güncel değer sayılır; önceki girişler
-          geçmişte korunur ve <b>Arşiv</b> sekmesindeki günlük matriste <b>+N</b>{' '}
-          olarak görünür.
+          Yeni okuma her zaman yeni satır olarak eklenir. Yanlış güne veya yanlış
+          değerle girilen bir okuma silinmez: satırdaki <b>Düzenle</b> ile
+          makinenin son 30 günü açılır ve kayıt yerinde düzeltilir; matris ile{' '}
+          <b>Son KM / Son Motor Saati</b> sütunları yeni değere göre hesaplanır.
+          Aynı gün için birden fazla giriş varsa son kayıt geçerli sayılır ve{' '}
+          <b>Arşiv</b> sekmesinde <b>+N</b> olarak görünür. Tır dorseleri (TD)
+          kendi sayacı olmadığı için listede gösterilmez.
         </p>
       </div>
 
@@ -201,7 +280,7 @@ export default function MeterLogs() {
               {
                 id: 'current',
                 label: 'Mevcut',
-                count: overview.machines.length,
+                count: baseMachines.length,
                 icon: TableCellsIcon,
               },
               {
@@ -238,7 +317,7 @@ export default function MeterLogs() {
           </label>
 
           <span className="text-xs text-gray-400">
-            {machines.length} / {overview.machines.length} makine
+            {machines.length} / {baseMachines.length} makine
             {activeTab === 'archive' && ` · ${dates.length} gün`}
           </span>
         </div>
@@ -250,6 +329,7 @@ export default function MeterLogs() {
           loading={loading}
           selectedDate={selectedDate}
           onSave={handleSave}
+          onEdit={openEntries}
         />
       ) : dates.length ? (
         <MeterLogWeekTable
@@ -276,6 +356,24 @@ export default function MeterLogs() {
           </div>
         </div>
       )}
+
+      <MeterLogEntriesModal
+        open={Boolean(editTarget)}
+        onClose={closeEntries}
+        label={
+          editTarget
+            ? editTarget.identification_no ||
+              editTarget.plate_no ||
+              `#${editTarget.machine_id}`
+            : ''
+        }
+        selectedDate={selectedDate}
+        entries={editing.entries}
+        loading={editing.loading}
+        error={editing.error}
+        savingEntryId={editing.savingEntryId}
+        onUpdate={handleUpdateEntry}
+      />
     </div>
   );
 }

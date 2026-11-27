@@ -111,13 +111,32 @@ export function toNullableText(value) {
 // ---- TIR dorseleri -------------------------------------------------------
 // Dorse (Tır Dorse tipi / TD-... kodlu) bir makine değil, çekilen ekipmandır:
 // kendi motor saati / KM sayacı yoktur. Backend onları Bakım listesinden
-// çıkarır (`repositories/machine_kind_lookup.py`); buradaki yardımcı ise "Tip"
-// filtresinden o tipi gizler ki seçildiğinde boş sonuç çıkmasın.
+// çıkarır (`repositories/machine_kind_lookup.py`); buradaki yardımcılar ise
+// "Tip" filtresinden o tipi ve **Güncel KM ve Motor Saatleri** tablosundan
+// dorse satırlarını gizler.
 export const TRAILER_TYPE_KEYWORD = 'dorse';
+
+//: "TD-101", "TD103", "TD 104" — ama "TDR-5" değil (backend ile aynı kural).
+const TRAILER_IDENTIFICATION_RE = /^TD[- ]?\d/i;
 
 /** Tip adı bir dorse mi ("Tır Dorse", "Dorse", "TIR DORSE"). */
 export function isTrailerTypeName(name) {
   return String(name || '')
     .toLocaleLowerCase('tr')
     .includes(TRAILER_TYPE_KEYWORD);
+}
+
+/** Makine kodu bir dorse kodu mu ("TD-101", "td 102", "TD103"). */
+export function isTrailerIdentificationNo(value) {
+  return TRAILER_IDENTIFICATION_RE.test(String(value || '').trim());
+}
+
+/** Makine satırı bir tır dorsesi mi: tip adı ya da TD kodu yeterlidir. */
+export function isTrailerMachine(machine) {
+  if (!machine) return false;
+
+  return (
+    isTrailerTypeName(machine.type_name) ||
+    isTrailerIdentificationNo(machine.identification_no)
+  );
 }
