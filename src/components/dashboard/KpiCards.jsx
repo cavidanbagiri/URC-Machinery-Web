@@ -107,24 +107,25 @@ export default function KpiCards() {
   return (
     <div style={{ fontFamily: 'Inter' }} className={gridClass}>
       <KpiCard
-        label="Total Makine"
+        label="Toplam Makine"
         value={grandTotal}
-        hint={`${total} URC + ${rentalTotal} kiralık`}
+        hint={`${total} URC + ${rentalTotal} Kiralık`}
         icon={Layers}
       />
 
       <KpiCard
-        label="URC Tüm Makine"
+        label="URC Toplam Makine"
         value={total}
-        hint="Kendi filomuz (hurda hariç)"
+        hint="Kendi Filomuz"
         icon={Car}
         onClick={() => goToMachines()}
       />
 
+      {/* Burdan isimler deyistirildi. Aktif yerine Aktif Makine Sayısı yazıldı */}
       <KpiCard
-        label="Aktif"
+        label="Aktif Makine "
         value={activeCount}
-        hint={`%${activeShare} · URC filosu`}
+        hint={`%${activeShare} · URC`}
         icon={CheckCircle2}
         onClick={() =>
           activeStatus ? goToMachines(activeStatus.id) : goToMachines()
@@ -132,9 +133,9 @@ export default function KpiCards() {
       />
 
       <KpiCard
-        label="Kiralık Toplam"
+        label="Kiralık Toplam Makine"
         value={rentalTotal}
-        hint="Kiralık makine sözleşmeleri"
+        hint="Makine"
         icon={KeyRound}
         onClick={() => navigate('/common_cars?tab=rental')}
       />
@@ -151,7 +152,7 @@ export default function KpiCards() {
             value={territory?.count ?? 0}
             hint={
               territory
-                ? `${territory.fleet_count} URC + ${territory.rental_count} kiralık`
+                ? `${territory.fleet_count} URC + ${territory.rental_count} Kiralık`
                 : 'Kayıt yok'
             }
             icon={MapPin}

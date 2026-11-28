@@ -57,7 +57,7 @@ export default function RepairTypeChart() {
 
   return (
     <SectionCard
-      title="Arıza Tipi Dağılımı"
+      title="Arıza Türleri Dağılımı"
       subtitle={
         data ? `Toplam ${data.total} kayıt · ${data.active} aktif` : 'Arıza tipine göre kayıtlar'
       }

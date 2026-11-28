@@ -21,14 +21,14 @@ const MAX_NAME_LENGTH = 200;
 const MAX_PLATE_LENGTH = 50;
 
 //: The equipment is described with the fleet lookups, so the same vocabulary
-//: can be used for the statistics panel and the header filters.
-const EQUIPMENT_LOOKUPS = ['type_transport', 'car_mark', 'car_model'];
+//: can be used for the statistics panel and the header filters.  The model is
+//: not part of it: the table shows one Marka / Model column fed by the brand.
+const EQUIPMENT_LOOKUPS = ['type_transport', 'car_mark'];
 
 function emptyForm() {
   return {
     machine_type_id: '',
     car_mark_id: '',
-    car_model_id: '',
     plate_no: '',
     company_name: '',
     site_name: '',
@@ -42,7 +42,6 @@ function formFromItem(item) {
     ...emptyForm(),
     machine_type_id: item?.machine_type_id ?? '',
     car_mark_id: item?.car_mark_id ?? '',
-    car_model_id: item?.car_model_id ?? '',
     plate_no: item?.plate_no || '',
     company_name: item?.company_name || '',
     site_name: item?.site_name || '',
@@ -125,7 +124,6 @@ export default function RentalMachineFormModal({
     const payload = {
       machine_type_id: Number(form.machine_type_id),
       car_mark_id: form.car_mark_id ? Number(form.car_mark_id) : null,
-      car_model_id: form.car_model_id ? Number(form.car_model_id) : null,
       plate_no: form.plate_no.trim() || null,
       company_name: form.company_name.trim(),
       site_name: form.site_name.trim(),
@@ -157,7 +155,7 @@ export default function RentalMachineFormModal({
       open={open}
       onClose={onClose}
       title={item ? 'Kiralama Kaydını Düzenle' : 'Yeni Kiralık Makine'}
-      subtitle="Makine tipi, marka, model, plaka, firma, şantiye ve kiralama tarihleri"
+      subtitle="Makine tipi, marka, plaka, firma, şantiye ve kiralama tarihleri"
       footer={
         <>
           <SecondaryButton onClick={onClose} disabled={saving}>
@@ -209,21 +207,6 @@ export default function RentalMachineFormModal({
                 {(lookups.car_mark || []).map((mark) => (
                   <option key={mark.id} value={mark.id}>
                     {mark.name}
-                  </option>
-                ))}
-              </select>
-            </ModalField>
-
-            <ModalField label="Model" hint="Örn. 320D">
-              <select
-                value={form.car_model_id}
-                onChange={(e) => handleChange('car_model_id', e.target.value)}
-                className={inputClass}
-              >
-                <option value="">Seçin</option>
-                {(lookups.car_model || []).map((model) => (
-                  <option key={model.id} value={model.id}>
-                    {model.name}
                   </option>
                 ))}
               </select>

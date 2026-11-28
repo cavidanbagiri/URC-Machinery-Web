@@ -42,8 +42,9 @@ const STATUS_BADGE = {
 // saklanır (useColumnResize).
 const RENTAL_COLUMN_WIDTHS = {
   machine_type: 150,
-  car_mark: 120,
-  car_model: 130,
+  // Marka / Model tek sütunda birleşti (yönetim talebi); filtre marka lookup'ı
+  // üzerinden çalışır, ayrı model sütunu yok.
+  mark_model: 190,
   plate: 120,
   company: 180,
   site: 160,
@@ -56,11 +57,11 @@ const RENTAL_COLUMN_WIDTHS = {
 
 const COLUMN_IDS = Object.keys(RENTAL_COLUMN_WIDTHS);
 
-//: 11 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
-const COLUMN_COUNT = 12;
+//: 10 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 11;
 
 const EMPTY_TEXT =
-  'Tip, marka, model, plaka, firma veya şantiye ile arama yapabilirsiniz';
+  'Tip, marka, plaka, firma veya şantiye ile arama yapabilirsiniz';
 
 /**
  * Sütun tanımları: başlık metni + Excel tarzı başlık filtresi. `filter`
@@ -81,21 +82,12 @@ function buildHeaderColumns(lookups) {
       },
     },
     {
-      id: 'car_mark',
-      label: 'Marka',
+      id: 'mark_model',
+      label: 'Marka / Model',
       filter: {
         kind: 'select',
         key: 'car_mark_id',
         options: lookups.car_mark || [],
-      },
-    },
-    {
-      id: 'car_model',
-      label: 'Model',
-      filter: {
-        kind: 'select',
-        key: 'car_model_id',
-        options: lookups.car_model || [],
       },
     },
     {
@@ -349,7 +341,7 @@ export default function RentalMachineTable({
               return (
                 <tr key={item.id} className={`${TABLE_ROW} align-top`}>
                   <td className={TABLE_CELL}>
-                    {/* Eski kayıtlarda tip/marka/model/plaka boştur; o satırlar
+                    {/* Eski kayıtlarda tip/marka/plaka boştur; o satırlar
                         düzenlenene kadar elle yazılmış ekipman adı gösterilir. */}
                     <p
                       className={`truncate ${TABLE_PRIMARY}`}
@@ -365,14 +357,13 @@ export default function RentalMachineTable({
                   </td>
 
                   <td className={TABLE_CELL}>
-                    <p className="truncate" title={item.car_mark_name || ''}>
-                      {item.car_mark_name || '—'}
-                    </p>
-                  </td>
-
-                  <td className={TABLE_CELL}>
-                    <p className="truncate" title={item.car_model_name || ''}>
-                      {item.car_model_name || '—'}
+                    {/* Marka / Model: model artık ayrı tutulmadığı için marka
+                        lookup'ı yazılır, eski kayıtlarda ekipman adı gösterilir. */}
+                    <p
+                      className="truncate"
+                      title={item.car_mark_name || item.equipment_name || ''}
+                    >
+                      {item.car_mark_name || item.equipment_name || '—'}
                     </p>
                   </td>
 

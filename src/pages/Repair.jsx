@@ -22,11 +22,12 @@ import {
   setFilters,
   uploadRepairDocument,
 } from '../stores/repair_slice';
-import { validateRepairPdf } from '../utils/repair';
+import { validateRepairPdf, canEditArchiveNotes } from '../utils/repair';
 
 import SegmentedTabs from '../components/ui/SegmentedTabs';
 import RepairSummaryCards from '../components/repair/RepairSummaryCards';
 import RepairArchiveTypeStats from '../components/repair/RepairArchiveTypeStats';
+import RepairArchiveTopMachines from '../components/repair/RepairArchiveTopMachines';
 import RepairAdvancedFilters from '../components/repair/RepairAdvancedFilters';
 import RepairTable from '../components/repair/RepairTable';
 import RepairPagination from '../components/repair/RepairPagination';
@@ -35,6 +36,7 @@ import RepairCloseModal from '../components/repair/RepairCloseModal';
 import RepairCancelModal from '../components/repair/RepairCancelModal';
 import RepairReopenModal from '../components/repair/RepairReopenModal';
 import RepairNoteModal from '../components/repair/RepairNoteModal';
+import RepairArchiveNoteModal from '../components/repair/RepairArchiveNoteModal';
 import RepairDocumentsModal from '../components/repair/RepairDocumentsModal';
 import RepairHistoryDrawer from '../components/repair/RepairHistoryDrawer';
 
@@ -82,6 +84,14 @@ export default function Repair() {
   const [historyRecord, setHistoryRecord] = useState(null);
 
   const [documentsRecord, setDocumentsRecord] = useState(null);
+
+  const [archiveNoteOpen, setArchiveNoteOpen] = useState(false);
+  const [archiveNoteRecord, setArchiveNoteRecord] = useState(null);
+
+  // Arşivdeki yanlış notları yalnızca fyildiz@ustay.com (status 2) düzeltebilir.
+  // Aynı kural sunucuda da uygulanır: PUT /repair/{id}/archive_note → 403.
+  const currentUser = useSelector((s) => s.auth.user);
+  const archiveNoteEditable = canEditArchiveNotes(currentUser);
 
   const activeFilterCount = Object.values(filters).filter((value) => {
     if (typeof value === 'boolean') return value;
@@ -217,6 +227,12 @@ export default function Repair() {
     nextModalKey();
     setNoteRecord(record);
     setNoteOpen(true);
+  };
+
+  const openArchiveNote = (record) => {
+    nextModalKey();
+    setArchiveNoteRecord(record);
+    setArchiveNoteOpen(true);
   };
 
   const openHistory = (record) => {
@@ -359,13 +375,14 @@ export default function Repair() {
       </div>
 
       {archive ? (
-        <div className="px-1 lg:w-2/5">
+        <div className="grid grid-cols-1 gap-3 px-1 lg:grid-cols-2">
           <RepairArchiveTypeStats
             summary={summary}
             loading={summaryLoading}
             activeTypeId={filters.repair_type_id}
             onSelectType={handleSelectArchiveType}
           />
+          <RepairArchiveTopMachines summary={summary} loading={summaryLoading} />
         </div>
       ) : (
         <div className="px-1">
@@ -437,6 +454,8 @@ export default function Repair() {
           onNote={openNote}
           onHistory={openHistory}
           onDocuments={setDocumentsRecord}
+          canEditArchiveNote={archiveNoteEditable}
+          onEditArchiveNote={openArchiveNote}
         />
 
         <RepairPagination />
@@ -479,6 +498,14 @@ export default function Repair() {
         open={noteOpen}
         onClose={() => setNoteOpen(false)}
         record={noteRecord}
+        onSaved={handleSaved}
+      />
+
+      <RepairArchiveNoteModal
+        key={`repair-archive-note-${modalNonce}`}
+        open={archiveNoteOpen}
+        onClose={() => setArchiveNoteOpen(false)}
+        record={archiveNoteRecord}
         onSaved={handleSaved}
       />
 

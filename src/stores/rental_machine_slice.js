@@ -20,9 +20,9 @@ const initialFilters = {
   search: '',
   status: '',
   // Excel-style column filters of the table header (lookup ids or free text).
+  // The merged Marka / Model column filters by the brand only.
   machine_type_id: '',
   car_mark_id: '',
-  car_model_id: '',
   plate: '',
   company: '',
   site: '',

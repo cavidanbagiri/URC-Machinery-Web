@@ -422,15 +422,11 @@ export default function SparePartRequestTable({
     headerColumns.map((column) => column.id)
   );
 
-  // Excel tarzı genişlik ayarı: başlığın sağ kenarındaki tutamaçtan sürüklenir,
-  // genişlikler tarayıcıda saklanır.
   const resize = useColumnResize('purchase-requests:spare-parts', SPARE_COLUMN_WIDTHS);
   const visibleColumnIds = headerColumns
     .filter((column) => visibility.isVisible(column.id))
     .map((column) => column.id);
 
-  // Gizlenen sütunun `th` ve `td` hücresi aynı sınıfla kaldırılır.
-  // `overflow-hidden`: daraltılan sütunda taşan içerik komşu sütuna taşmasın.
   const columnClass = (id, className = '') =>
     `${className} overflow-hidden ${
       visibility.isVisible(id) ? '' : 'hidden'

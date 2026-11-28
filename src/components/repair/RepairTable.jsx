@@ -35,14 +35,15 @@ import {
 } from '../../stores/repair_slice';
 import { durationLabel, formatDate, remainingLabel } from '../../utils/repair';
 
-//: 9 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
-const COLUMN_COUNT = 10;
+//: 10 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 11;
 
 // Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
 // sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
 const REPAIR_COLUMN_WIDTHS = {
   status: 130,
   machine: 230,
+  machine_type: 150,
   repair_type: 150,
   garage_service: 160,
   fault_location: 170,
@@ -143,6 +144,8 @@ export default function RepairTable({
   onCancel,
   onReopen,
   onDocuments,
+  canEditArchiveNote,
+  onEditArchiveNote,
 }) {
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.repair.filters);
@@ -251,6 +254,15 @@ export default function RepairTable({
             placeholder: 'Plaka No',
           },
         ],
+      },
+    },
+    {
+      id: 'machine_type',
+      label: 'Ekipman Tipi',
+      filter: {
+        kind: 'select',
+        key: 'type_id',
+        options: lookups.type_transport || [],
       },
     },
     {
@@ -442,6 +454,14 @@ export default function RepairTable({
                   </td>
 
                   <td className={TABLE_CELL}>
+                    {item.type_name ||
+                      lookups.type_transport?.find(
+                        (type) => type.id === item.type_id
+                      )?.name ||
+                      '—'}
+                  </td>
+
+                  <td className={TABLE_CELL}>
                     {item.repair_type_name || '—'}
                   </td>
 
@@ -554,6 +574,16 @@ export default function RepairTable({
                             <XCircleIcon className="h-4 w-4" />
                           </ActionButton> 
                         </>
+                      )}
+
+                      {!isActive && canEditArchiveNote && (
+                        <ActionButton
+                          title="Arşiv notunu düzenle"
+                          onClick={() => onEditArchiveNote?.(item)}
+                          tone="gray"
+                        >
+                          <PencilSquareIcon className="h-4 w-4" />
+                        </ActionButton>
                       )}
 
                       {!isActive && (

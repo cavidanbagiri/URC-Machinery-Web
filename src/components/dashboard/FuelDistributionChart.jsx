@@ -120,16 +120,16 @@ export default function FuelDistributionChart() {
     fullLabel: fullLabel(item.fuel_date),
   }));
 
-  // Pencere içinde hiç mazot yoksa grafik yerine boş durum gösterilir.
   const hasFuel = items.some((item) => (item.total_liters || 0) > 0);
 
   return (
+
     <SectionCard
-      title="Mazot Dağılımı"
+      title="Yakıt Tüketimi Dağılımı"
       subtitle={
         data
-          ? `Son ${data.days} gün · ${formatNumber(data.total)} L`
-          : 'Son 10 günün mazot dağılımı'
+          ? `Son ${data.days} Gün Toplamı · ${formatNumber(data.total)} L`
+          : 'Son 10 Günün Yakıt Tüketimi Dağılımı'
       }
       icon={Fuel}
       action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/fuel_logs') }}

@@ -100,7 +100,8 @@ export default function DashboardPage() {
           <FuelDistributionChart />
         </div>
         <div className="h-[360px] w-full xl:h-full xl:min-w-0 xl:flex-1">
-          <TeamDirectoryCard />
+          {/* <TeamDirectoryCard /> */}
+          <StatusChart />
         </div>
       </div>
 
@@ -110,7 +111,7 @@ export default function DashboardPage() {
           <RepairTypeChart />
         </div>
         <div className="h-[360px] w-full xl:h-full xl:min-w-0 xl:flex-1 xl:basis-0">
-          <StatusChart />
+          {/* <StatusChart /> */}
         </div>
         <div className="h-[360px] w-full xl:h-full xl:min-w-0 xl:flex-1 xl:basis-0">
           <MaintenanceStatusChart />

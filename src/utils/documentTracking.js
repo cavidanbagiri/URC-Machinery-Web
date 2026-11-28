@@ -6,6 +6,7 @@
 // kaldığı için mevcut "Lizing" tarihleri güncellemede silinmez.
 export const DOCUMENT_DATE_FIELDS = [
   'compulsory_traffic_insurance_date',
+  'kasko_date',
   'inspection_end_date',
   'passenger_transport_license_date',
   'partial_technical_inspection_date',
@@ -25,6 +26,7 @@ export const DOCUMENT_TABLE_DATE_FIELDS = DOCUMENT_DATE_FIELDS.filter(
 
 export const DOCUMENT_DATE_LABELS = {
   compulsory_traffic_insurance_date: 'Zorunlu Trafik Sigortası / ОСАГО',
+  kasko_date: 'Kasko / КАСКО',
   inspection_end_date: 'Muayene / Тех.осмотр',
   passenger_transport_license_date: 'Yolcu Taşıma Lisansı / Лицензия',
   partial_technical_inspection_date: 'Kısmi Teknik Muayene / ЧТО',

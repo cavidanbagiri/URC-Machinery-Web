@@ -84,6 +84,11 @@ class RepairService {
     return res.data;
   }
 
+  async updateArchiveNote(repairId, payload) {
+    const res = await $api.put(`/repair/${repairId}/archive_note`, payload);
+    return res.data;
+  }
+
   async uploadDocument(repairId, file) {
     const form = new FormData();
     form.append('file', file);

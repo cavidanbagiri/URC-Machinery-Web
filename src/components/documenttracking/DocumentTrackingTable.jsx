@@ -46,6 +46,7 @@ const DOCUMENT_COLUMN_WIDTHS = {
   type: 135,
   mark_model: 175,
   compulsory_traffic_insurance_date: 130,
+  kasko_date: 120,
   inspection_end_date: 145,
   passenger_transport_license_date: 140,
   partial_technical_inspection_date: 145,

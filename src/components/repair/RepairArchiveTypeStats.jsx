@@ -103,11 +103,11 @@ export default function RepairArchiveTypeStats({
           </span>
           <div className="min-w-0">
             <h2 className="text-sm font-semibold text-gray-900">
-              Tamir Tipine Göre İstatistik
+              Tamir Türüne Göre İstatistik
             </h2>
             <p className="text-[11px] text-gray-500">
-              Arşivdeki tamamlanan ve iptal edilen kayıtların tamir tipi
-              dağılımı · tüm arşiv
+              Arşivdeki Tamamlanan ve İptal Edilen Kayıtların Tamir Tipi
+              Dağılımı · Tüm Arşiv
             </p>
           </div>
         </div>
@@ -217,7 +217,7 @@ export default function RepairArchiveTypeStats({
 
       {rows.length > 0 && (
         <p className="mt-2 text-[11px] text-gray-400">
-          Bir tamir tipine tıklayarak arşiv listesini filtreleyin
+          Bir Tamir Tipine Tıklayarak Arşiv Listesini Filtreleyin
           {activeTypeId ? ', tekrar tıklayarak filtreyi kaldırın' : ''}.
         </p>
       )}

@@ -34,68 +34,29 @@ function SummaryCard({
   value,
   hint,
   icon: Icon,
-  tone,
   onClick,
   valueClassName = 'text-2xl font-semibold leading-tight',
 }) {
-  const tones = {
-    gray: {
-      wrap: 'border-gray-200 bg-white hover:border-gray-300',
-      icon: 'bg-gray-100 text-gray-600',
-      value: 'text-gray-900',
-    },
-    blue: {
-      wrap: 'border-blue-100 bg-blue-50/50 hover:border-blue-200',
-      icon: 'bg-blue-100 text-blue-700',
-      value: 'text-blue-700',
-    },
-    sky: {
-      wrap: 'border-sky-100 bg-sky-50/60 hover:border-sky-200',
-      icon: 'bg-sky-100 text-sky-700',
-      value: 'text-sky-700',
-    },
-    indigo: {
-      wrap: 'border-indigo-100 bg-indigo-50/60 hover:border-indigo-200',
-      icon: 'bg-indigo-100 text-indigo-700',
-      value: 'text-indigo-700',
-    },
-    red: {
-      wrap: 'border-red-100 bg-red-50/60 hover:border-red-200',
-      icon: 'bg-red-100 text-red-700',
-      value: 'text-red-700',
-    },
-    amber: {
-      wrap: 'border-amber-100 bg-amber-50/60 hover:border-amber-200',
-      icon: 'bg-amber-100 text-amber-700',
-      value: 'text-amber-700',
-    },
-    green: {
-      wrap: 'border-emerald-100 bg-emerald-50/60 hover:border-emerald-200',
-      icon: 'bg-emerald-100 text-emerald-700',
-      value: 'text-emerald-700',
-    },
-  };
-  const c = tones[tone] || tones.gray;
+  // Kartlar bilinçli olarak siyah-beyazdır: renkli arka planlar yerine beyaz
+  // yüzey + gri kenarlık kullanılır, değerler koyu gri yazılır.
   const Element = onClick ? 'button' : 'div';
 
   return (
     <Element
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition ${c.wrap} ${
-        onClick ? 'cursor-pointer' : ''
+      className={`flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-left transition ${
+        onClick ? 'cursor-pointer hover:border-gray-400 hover:bg-gray-50' : ''
       }`}
     >
-      <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${c.icon}`}
-      >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-700">
         <Icon className="h-5 w-5" strokeWidth={2.1} />
       </span>
       <span className="min-w-0">
         <span className="block text-[11px] font-medium uppercase tracking-wide text-gray-500">
           {label}
         </span>
-        <span className={`block ${valueClassName} ${c.value}`}>
+        <span className={`block text-gray-900 ${valueClassName}`}>
           {value}
         </span>
         {hint && <span className="block text-[11px] text-gray-500">{hint}</span>}
@@ -133,9 +94,8 @@ export default function RepairSummaryCards({
       <SummaryCard
         label="Arızalı Ekipman"
         value={data.total}
-        hint={`${data.cancelled} iptal edildi`}
+        hint=""
         icon={ClipboardList}
-        tone="gray"
         onClick={onResetFilters}
       />
       <SummaryCard
@@ -147,11 +107,10 @@ export default function RepairSummaryCards({
         }
         hint={
           data.total_machines > 0
-            ? `${data.active_machines} / ${data.total_machines} ekipman aktif`
+            ? `${data.active_machines} / ${data.total_machines} Aktif Ekipman Oranı`
             : 'Makine verisi alınamadı'
         }
         icon={Gauge}
-        tone="blue"
         onClick={() => onSelectFilters?.({ status: 'tamirde' })}
       />
       <SummaryCard
@@ -163,7 +122,7 @@ export default function RepairSummaryCards({
                 <span
                   key={service.garage_service_id ?? 'unassigned'}
                   title={`${service.name}: ${service.active_count} tamirde`}
-                  className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[11px] font-semibold text-sky-800"
+                  className="rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[11px] font-semibold text-gray-700"
                 >
                   {service.name} · {service.active_count}
                 </span>
@@ -173,26 +132,23 @@ export default function RepairSummaryCards({
             '—'
           )
         }
-        hint="Tamirdeki ekipmanın garaj/servis dağılımı"
+        hint="Tamirdeki Ekipmanın Garaj/Servis Dağılımı"
         icon={Warehouse}
-        tone="sky"
         valueClassName="text-[13px] font-semibold leading-snug"
         onClick={() => onSelectFilters?.({ status: 'tamirde' })}
       />
       <SummaryCard
         label="Toplam Tamir"
         value={data.completed}
-        hint="Şimdiye kadar tamamlanan"
+        hint="Şimdiye Kadar Tamamlanan"
         icon={CheckCircle2}
-        tone="green"
         onClick={() => onSelectFilters?.({ status: 'tamamlandi' })}
       />
       <SummaryCard
         label="Günlük Tamir"
         value={data.completed_today}
-        hint={`${data.opened_today} bugün açılan kayıt`}
+        hint={`${data.opened_today} Gün İçinde Tamamlanan Arıza`}
         icon={CalendarDays}
-        tone="amber"
       />
       <SummaryCard
         label="Ortalama Arızada Kalma"
@@ -202,9 +158,8 @@ export default function RepairSummaryCards({
             ? `${data.average_repair_days} gün`
             : '—'
         }
-        hint="Tamamlanan kayıtların ortalaması"
+        hint="Tamamlanan Kayıtların Ortalaması"
         icon={Timer}
-        tone="indigo"
       />
     </div>
   );

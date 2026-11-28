@@ -97,3 +97,22 @@ export function machineLabel(machine) {
     `Makine #${machine.machine_id || machine.id}`
   );
 }
+
+/**
+ * Arşivdeki yanlış girilmiş notları yalnızca tek bir hesap düzeltebilir.
+ * Sunucu tarafındaki kural: `server/dependencies/permissions.py` →
+ * `require_archive_note_permission` (e-posta + Manager / status_id = 2).
+ * Frontend yalnızca düğmeyi gösterip gizler; asıl kontrol API'dedir.
+ */
+export const ARCHIVE_NOTE_EDITOR_EMAIL = 'fyildiz@ustay.com';
+export const ARCHIVE_NOTE_EDITOR_STATUS_ID = 2;
+
+export function canEditArchiveNotes(user) {
+  if (!user) return false;
+
+  const email = String(user.email || '').trim().toLowerCase();
+  return (
+    email === ARCHIVE_NOTE_EDITOR_EMAIL &&
+    Number(user.status_id) === ARCHIVE_NOTE_EDITOR_STATUS_ID
+  );
+}

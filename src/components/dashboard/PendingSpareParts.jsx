@@ -32,7 +32,7 @@ export default function PendingSpareParts() {
 
   return (
     <SectionCard
-      title="Bekleyen Yedek Parça"
+      title="Bekleyen Yedek Parça Talepleri"
       subtitle={`${total} talep teslim bekliyor`}
       icon={ShoppingCart}
       action={{

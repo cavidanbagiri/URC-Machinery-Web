@@ -237,6 +237,19 @@ export const addRepairNote = createAsyncThunk(
   }
 );
 
+// Arşivde yanlış girilmiş notu düzeltir. API yalnızca yetkili hesabı kabul
+// eder (fyildiz@ustay.com + status 2); diğer kullanıcılar 403 alır.
+export const updateRepairArchiveNote = createAsyncThunk(
+  'repair/updateArchiveNote',
+  async ({ repairId, payload }, { rejectWithValue }) => {
+    try {
+      return await RepairService.updateArchiveNote(repairId, payload);
+    } catch (err) {
+      return rejectWithValue(errorMessage(err, 'Arşiv notu güncellenemedi'));
+    }
+  }
+);
+
 export const uploadRepairDocument = createAsyncThunk(
   'repair/uploadDocument',
   async ({ repairId, file }, { rejectWithValue }) => {
@@ -419,6 +432,7 @@ const repairSlice = createSlice({
       cancelRepair,
       reopenRepair,
       addRepairNote,
+      updateRepairArchiveNote,
     ];
 
     mutationThunks.forEach((thunk) => {

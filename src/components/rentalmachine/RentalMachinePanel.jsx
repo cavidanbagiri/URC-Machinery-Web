@@ -59,11 +59,11 @@ export default function RentalMachinePanel() {
     dispatch(fetchRentalMachines());
   }, [dispatch]);
 
-  // Başlık filtreleri ve form, filo sözlüklerine ihtiyaç duyar (tip, marka,
-  // model). `fetchLookupIfNeeded` anahtar başına önbelleklediği için sonraki
-  // çağrılar boşa gitmez.
+  // Başlık filtreleri ve form, filo sözlüklerine ihtiyaç duyar (tip, marka).
+  // `fetchLookupIfNeeded` anahtar başına önbelleklediği için sonraki çağrılar
+  // boşa gitmez.
   useEffect(() => {
-    ['type_transport', 'car_mark', 'car_model'].forEach((key) => {
+    ['type_transport', 'car_mark'].forEach((key) => {
       dispatch(fetchLookupIfNeeded(key));
     });
   }, [dispatch]);
@@ -124,7 +124,7 @@ export default function RentalMachinePanel() {
             onChange={(event) =>
               dispatch(setFilter({ key: 'search', value: event.target.value }))
             }
-            placeholder="Tip, marka, model, plaka, firma veya şantiye ara..."
+            placeholder="Tip, marka, plaka, firma veya şantiye ara..."
             className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
         </div>

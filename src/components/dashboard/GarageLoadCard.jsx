@@ -51,7 +51,7 @@ export default function GarageLoadCard() {
         <div className="mx-2 mb-2 rounded-lg bg-indigo-50/70 px-3 py-2">
           <div className="flex items-baseline justify-between gap-2">
             <span className="text-[11px] font-medium uppercase tracking-wide text-indigo-700">
-              Ort. arızada kalma
+              Ort. arızada kalma Süresi
             </span>
             <span className="text-lg font-semibold leading-tight text-indigo-900">
               {averageLabel}

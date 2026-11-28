@@ -23,8 +23,8 @@ import MachineSkeleton from './MachineSkeleton';
 import StatusBadge from './StatusBadge';
 import { setFilter } from '../../stores/machine_slice';
 
-//: 11 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
-const COLUMN_COUNT = 12;
+//: 12 görünür sütun + kalan alanı emen dolgu sütunu (boş durum satırı için).
+const COLUMN_COUNT = 13;
 
 // Sütunların başlangıç genişlikleri (px). Kullanıcı başlıktaki tutamaçtan
 // sürükleyerek değiştirir; seçim tarayıcıda saklanır (useColumnResize).
@@ -34,6 +34,7 @@ const MACHINE_COLUMN_WIDTHS = {
   status: 130,
   identification_no: 160,
   plate_no: 150,
+  type: 150,
   territory: 130,
   car_mark: 140,
   car_model: 160,
@@ -130,6 +131,15 @@ export default function MachineTable({
       id: 'plate_no',
       label: 'Plaka No',
       filter: { kind: 'text', key: 'plate_no', placeholder: '90 AB 123' },
+    },
+    {
+      id: 'type',
+      label: 'Ekipman Tipi',
+      filter: {
+        kind: 'select',
+        key: 'type_id',
+        options: lookups.type_transport,
+      },
     },
     {
       id: 'territory',
@@ -354,6 +364,12 @@ export default function MachineTable({
                   >
                     <span className="cursor-pointer hover:underline">
                       {machine.plate_no || '—'}
+                    </span>
+                  </td>
+
+                  <td {...detailCell}>
+                    <span className="cursor-pointer hover:underline">
+                      {lookupName('type_transport', machine.type_id)}
                     </span>
                   </td>
 

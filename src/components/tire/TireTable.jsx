@@ -213,6 +213,7 @@ function Skeleton() {
 const TIRE_COLUMN_WIDTHS = {
   change_date: 120,
   machine: 210,
+  machine_type: 150,
   position: 150,
   serial_no: 160,
   brand_model: 180,
@@ -271,6 +272,7 @@ export default function TireTable({
         placeholder: 'Kimlik no / plaka / seri no',
       },
     },
+    { id: 'machine_type', label: 'Ekipman Tipi' },
     {
       id: 'position',
       label: 'Lastik Konumu',
@@ -374,7 +376,7 @@ export default function TireTable({
           <tbody className={`divide-y divide-slate-100 ${TABLE_BODY}`}>
             {items.length === 0 && (
               <tr>
-                <td colSpan={12} className="px-6 py-16 text-center">
+                <td colSpan={13} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center">
                     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
                       <TruckIcon className="h-5 w-5" />
@@ -420,6 +422,10 @@ export default function TireTable({
                       .filter(Boolean)
                       .join(' · ') || '—'}
                   </p>
+                </td>
+
+                <td className={TABLE_CELL}>
+                  {item.type_name || '—'}
                 </td>
 
                 <td className={TABLE_CELL}>

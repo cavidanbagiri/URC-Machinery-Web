@@ -28,7 +28,7 @@ export default function RecentDailyFaults() {
 
   return (
     <SectionCard
-      title="Son Günlük Arızalar"
+      title="Tamiri Yapılan Son Arızalar"
       subtitle="En yeni kayıtlar"
       icon={CalendarDays}
       action={{ label: 'Ayrıntıları gör', onClick: () => navigate('/daily_faults') }}
